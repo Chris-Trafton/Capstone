@@ -1,7 +1,12 @@
 // Zelda.java Copyright (C) 2020 Ben Sanders
 //import java.lang.invoke.DelegatingMethodHandle$Holder;
 import java.awt.*;
+import java.awt.event.*;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Point2D;
+import java.awt.image.AffineTransformOp;
 import java.util.Date;
+import java.util.Random;
 import java.util.Vector;
 
 import javax.swing.*;
@@ -12,9 +17,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
@@ -23,8 +25,44 @@ import javax.swing.table.TableCellRenderer;
 
 public class Main {
     // global variables for the game
+    private static MouseTrackerPanel board;
+    private static BufferedImage tile;
+    private static BufferedImage tile_small;
+    private static BufferedImage flat_tile;
+    private static BufferedImage flat_tile_small;
+    private static BufferedImage forest_tile;
+    private static BufferedImage forest_tile_small;
+    private static BufferedImage mount_tile;
+    private static BufferedImage mount_tile_small;
+    private static BufferedImage desert_tile;
+    private static BufferedImage desert_tile_small;
+    private static BufferedImage player_flat_tile;
+    private static BufferedImage enemy_flat_tile;
+    private static BufferedImage player_flat_tile_small;
+    private static BufferedImage enemy_flat_tile_small;
+    private static BufferedImage player_forest_tile;
+    private static BufferedImage enemy_forest_tile;
+    private static BufferedImage player_forest_tile_small;
+    private static BufferedImage enemy_forest_tile_small;
+    private static BufferedImage player_mount_tile;
+    private static BufferedImage enemy_mount_tile;
+    private static BufferedImage player_mount_tile_small;
+    private static BufferedImage enemy_mount_tile_small;
+    private static BufferedImage player_desert_tile;
+    private static BufferedImage enemy_desert_tile;
+    private static BufferedImage player_desert_tile_small;
+    private static BufferedImage enemy_desert_tile_small;
+    private static Vector<Tile> tiles;
+    private static double pi;
+    private static double twoPi;
+    private static double tileFixX;
+    private static double tileFixY;
+    private enum biome {Flatland,Forest,Mountain,Desert};
+    private static Vector<Integer> biomeCounts;
+    private static int numTiles;
     private static Boolean endgame;
     private static BufferedImage background;
+    private static boolean background_drawn;
     private static BufferedImage scrollBackground;
     private static Boolean upPressed;
     private static Boolean downPressed;
@@ -55,18 +93,111 @@ public class Main {
 //        setup();
 //    }
 
+    public static class MouseTrackerPanel extends JPanel {
+
+        private double mouseX = 0;
+        private double mouseY = 0;
+        private Point lastPosition;
+        private double deltaX = 0;
+        private double deltaY = 0;
+
+        public MouseTrackerPanel() {
+            // Add the MouseMotionListener to track mouse movement
+            addMouseMotionListener(new MouseMotionListener() {
+                @Override
+                public void mouseMoved(MouseEvent e) {
+                    // Update the coordinates whenever the mouse moves
+                    mouseX = e.getX();
+                    mouseY = e.getY();
+                }
+
+                @Override
+                public void mouseDragged(MouseEvent e) {
+                    if (lastPosition != null) {
+                        deltaX = e.getX() - lastPosition.getX();
+                        deltaY = e.getY() - lastPosition.getY();
+                        if (deltaX != 0 || deltaY != 0) {
+                            for (int i = 0; i < tiles.size(); i++) {
+                                if (deltaX <= 0 && deltaY <= 0) {
+                                    tiles.get(i).move(Math.max(deltaX,-5),Math.max(deltaY,-5));
+                                } else if (deltaX <= 0 && deltaY >= 0) {
+                                    tiles.get(i).move(Math.max(deltaX,-5),Math.min(deltaY,5));
+                                } else if (deltaX >= 0 && deltaY <= 0) {
+                                    tiles.get(i).move(Math.min(deltaX,5),Math.max(deltaY,-5));
+                                } else {
+                                    tiles.get(i).move(Math.min(deltaX,5),Math.min(deltaY,5));
+                                }
+                            }
+                        }
+                        backgroundDraw();
+                        lastPosition = e.getPoint();
+                    }
+                }
+            });
+            addMouseListener(new MouseAdapter() {
+                @Override
+                public void mousePressed(MouseEvent e) {
+                    lastPosition = e.getPoint();
+                }
+
+                @Override
+                public void mouseReleased(MouseEvent e) {
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException ie) {}
+                    lastPosition = null;
+                    deltaX = 0;
+                    deltaY = 0;
+                }
+            });
+        }
+
+        public double getMouseX() {return mouseX;}
+        public double getMouseY() {return mouseY;}
+
+    }
+
+
     public static void setup() {
         appFrame = new JFrame("Capstone");
+        pi = 3.14159265358979;
+        twoPi = 2.0 * 3.14159265358979;
         XOFFSET = 0;
-        YOFFSET = 55; //30
+        YOFFSET = 30; //30
         WINWIDTH = 1920; //338
         WINHEIGHT = 1080; //271
         endgame = false;
         audiolifetime = 78000L; // 78 seconds for KI.WAV, was new Long(78000)
 
         try {
-            background = ImageIO.read(new File("images\\game-map.png"));
+            background = ImageIO.read(new File("images\\ocean.png"));
             scrollBackground = ImageIO.read(new File("images\\file.png"));
+            tile = ImageIO.read(new File("images\\tile.png"));
+            tile_small = ImageIO.read(new File("images\\tile_small.png"));
+            flat_tile = ImageIO.read(new File("images\\flatland_tile.png"));
+            flat_tile_small = ImageIO.read(new File("images\\flatland_tile_small.png"));
+            forest_tile = ImageIO.read(new File("images\\forest_tile.png"));
+            forest_tile_small = ImageIO.read(new File("images\\forest_tile_small.png"));
+            mount_tile = ImageIO.read(new File("images\\mountain_tile.png"));
+            mount_tile_small = ImageIO.read(new File("images\\mountain_tile_small.png"));
+            desert_tile = ImageIO.read(new File("images\\desert_tile.png"));
+            desert_tile_small = ImageIO.read(new File("images\\desert_tile_small.png"));
+            player_flat_tile = ImageIO.read(new File("images\\player_flat_tile.png"));
+            enemy_flat_tile = ImageIO.read(new File("images\\enemy_flat_tile.png"));
+            player_flat_tile_small = ImageIO.read(new File("images\\player_flat_tile_small.png"));
+            enemy_flat_tile_small = ImageIO.read(new File("images\\enemy_flat_tile_small.png"));
+            player_forest_tile = ImageIO.read(new File("images\\player_forest_tile.png"));
+            enemy_forest_tile = ImageIO.read(new File("images\\enemy_forest_tile.png"));
+            player_forest_tile_small = ImageIO.read(new File("images\\player_forest_tile_small.png"));
+            enemy_forest_tile_small = ImageIO.read(new File("images\\enemy_forest_tile_small.png"));
+            player_mount_tile = ImageIO.read(new File("images\\player_mount_tile.png"));
+            enemy_mount_tile = ImageIO.read(new File("images\\enemy_mount_tile.png"));
+            player_mount_tile_small = ImageIO.read(new File("images\\player_mount_tile_small.png"));
+            enemy_mount_tile_small = ImageIO.read(new File("images\\enemy_mount_tile_small.png"));
+            player_desert_tile = ImageIO.read(new File("images\\player_desert_tile.png"));
+            enemy_desert_tile = ImageIO.read(new File("images\\enemy_desert_tile.png"));
+            player_desert_tile_small = ImageIO.read(new File("images\\player_desert_tile_small.png"));
+            enemy_desert_tile_small = ImageIO.read(new File("images\\enemy_desert_tile_small.png"));
         } catch (IOException ioe) { }
     }
 
@@ -113,11 +244,14 @@ public class Main {
         public void run() {
 //            backgroundDraw();
             while (endgame == false) {
-                backgroundDraw();
-
+                tileDraw();
                 try {
                     Thread.sleep(32);
-                } catch (InterruptedException e) { }
+                } catch (InterruptedException e) {
+                    if (!background_drawn) {
+                        backgroundDraw();
+                    }
+                }
             }
         }
     }
@@ -126,7 +260,8 @@ public class Main {
     private static void backgroundDraw() {
         Graphics g = appFrame.getGraphics();
         Graphics2D g2D = (Graphics2D) g;
-        g2D.drawImage(background, XOFFSET, YOFFSET, null);
+        g2D.drawImage(background, XOFFSET, YOFFSET + 25, null);
+        background_drawn = true;
         if (Stark.isActive()) {
             metalLabel.setText("    Metal: " + Stark.getResource("metal"));
             woodLabel.setText("    Wood: " + Stark.getResource("wood"));
@@ -147,6 +282,38 @@ public class Main {
             educationLabel.setText("    Education: " + Targaryen.getResource("education"));
         }
     }
+
+    private static void tileDraw() {
+        Graphics g = appFrame.getGraphics();
+        Graphics2D g2d = (Graphics2D) g;
+        for (int i = 0; i < tiles.size(); i++) {
+            Tile current = tiles.get(i);
+            if (current.mouseHover) {
+                System.out.println((current.x + current.getWidth() / 2) + " " + (current.y - current.getHeight() / 2) + "\n" + board.mouseX + " " + board.mouseY);
+                if (current.myBiome == biome.Flatland) {
+                    g2d.drawImage(rotateImageObject(current).filter(flat_tile, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                } else if (current.myBiome == biome.Forest) {
+                    g2d.drawImage(rotateImageObject(current).filter(forest_tile, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                } else if (current.myBiome == biome.Mountain) {
+                    g2d.drawImage(rotateImageObject(current).filter(mount_tile, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                } else if (current.myBiome == biome.Desert) {
+                    g2d.drawImage(rotateImageObject(current).filter(desert_tile, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                }
+                System.out.println(current.toString());
+            } else {
+                if (current.myBiome == biome.Flatland) {
+                    g2d.drawImage(rotateImageObject(current).filter(flat_tile_small, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                } else if (current.myBiome == biome.Forest) {
+                    g2d.drawImage(rotateImageObject(current).filter(forest_tile_small, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                } else if (current.myBiome == biome.Mountain) {
+                    g2d.drawImage(rotateImageObject(current).filter(mount_tile_small, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                } else if (current.myBiome == biome.Desert) {
+                    g2d.drawImage(rotateImageObject(current).filter(desert_tile_small, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                }
+            }
+        }
+    }
+
 
 //    private static class EnemyMover implements Runnable {
 //        private double bluepigvelocitystep;
@@ -482,11 +649,26 @@ public class Main {
         startButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                board.revalidate();
+                board.repaint();
                 endgame = true;
+                tileFixX = 0;
+                tileFixY = 0;
+                biomeCounts = new Vector<>();
+                numTiles = 100;
+                biomeCounts.add(0);
+                biomeCounts.add(0);
+                biomeCounts.add(0);
+                biomeCounts.add(0);
+                tiles = new Vector<Tile>();
+                tiles = CreateBoard(numTiles);
+                tileFixX = 0;
+                tileFixY = 0;
                 upPressed = false;
                 downPressed = false;
                 leftPressed = false;
                 rightPressed = false;
+                background_drawn = false;
                 lastAudioStart = System.currentTimeMillis();
 //                    playAudio(backgroundState);
                 currentNation = (String) nationComboBox.getSelectedItem();
@@ -520,9 +702,13 @@ public class Main {
                 }
                 endgame = false;
                 Thread t1 = new Thread(new Animate());
+                Thread t2 = new Thread(new TileMover());
+                Thread t3 = new Thread(new MouseOverChecker());
 //                    Thread t4 = new Thread(new AudioLooper());
 //                    Thread t5 = new Thread(new EnemyMover());
                 t1.start();
+                t2.start();
+                t3.start();
 //                    t4.start();
 //                    t5.start();
                 frame.setVisible(false);
@@ -557,6 +743,82 @@ public class Main {
         frame.setVisible(true);
     }
 
+    private static Vector<Tile> CreateBoard(int numTiles) {
+        Vector<Tile> tiles = new Vector<>();
+        Random rand = new Random(System.currentTimeMillis());
+        int loc;
+        int fails = 0;
+        tiles.addElement(new Tile(WINWIDTH/2,WINHEIGHT/2,tile_small.getWidth(),tile_small.getHeight(),0));
+        for (int i = 0; i < numTiles-1; i++) {
+            ImageObject current = tiles.get(i);
+            Point2D.Double checkPoint;
+            boolean createTile = true;
+            loc = rand.nextInt(6);
+            if (fails > 6) {
+                current = tiles.get(rand.nextInt(tiles.size()-1));
+            }
+            if (loc == 0) {
+                checkPoint = new Point2D.Double(current.getX(),(current.getY() - current.getHeight() - 2));
+            } else if (loc == 1) {
+                checkPoint = new Point2D.Double((current.getX() + (current.getWidth()*0.75) + Math.sqrt(2)),(current.getY() - (current.getHeight() * 0.5) - Math.sqrt(2)));
+            } else if (loc == 2) {
+                checkPoint = new Point2D.Double((current.getX() + (current.getWidth() * 0.75) + Math.sqrt(2)),(current.getY() + (current.getHeight() * 0.5) + Math.sqrt(2)));
+            } else if (loc == 3) {
+                checkPoint = new Point2D.Double(current.getX(),(current.getY() + current.getHeight() + 2));
+            } else if (loc == 4) {
+                checkPoint = new Point2D.Double((current.getX() - (current.getWidth() * 0.75) - Math.sqrt(2)),(current.getY() + (current.getHeight() * 0.5) + Math.sqrt(2)));
+            } else if (loc == 5) {
+                checkPoint = new Point2D.Double((current.getX() - (current.getWidth() * 0.75) - Math.sqrt(2)),(current.getY() - (current.getHeight() * 0.5) - Math.sqrt(2)));
+            } else {
+                checkPoint = new Point2D.Double();
+            }
+            for (int j = 0; j < tiles.size(); j++) {
+                if (checkPoint.getX() < 0 || checkPoint.getX() + tile_small.getWidth() > WINWIDTH || checkPoint.getY() > WINHEIGHT || checkPoint.getY() - tile_small.getHeight() < 40 || isInside(checkPoint.getX() + (tile_small.getWidth() * 0.5),checkPoint.getY() - (tile_small.getHeight() * 0.5),tiles.get(j).getX(),tiles.get(j).getY(),tiles.get(j).getX()+tile_small.getWidth(),tiles.get(j).getY()-tile_small.getHeight())) {
+                    createTile = false;
+                    i--;
+                    fails++;
+                    break;
+                }
+            }
+            if (createTile) {
+                tiles.addElement(new Tile(checkPoint.getX(),checkPoint.getY(),tile_small.getWidth(),tile_small.getHeight(),0));
+                fails = 0;
+            }
+        }
+        for (int i = 0; i < tiles.size(); i++) {
+            tiles.get(i).findNeighbors(tiles);
+            tiles.get(i).generateBiome();
+            tiles.get(i).isWaterSide();
+            tiles.get(i).setResourceRates();
+        }
+        return tiles;
+    }
+
+    private static class TileMover implements Runnable {
+        public void run() {
+            int off_tile = -1;
+            while (!endgame) {
+                for (int i = 0; i < tiles.size(); i++) {
+                    tiles.get(i).screenContain();
+                    if (off_tile == -1 && (tileFixX != 0 || tileFixY != 0)) {
+                        off_tile = i;
+                    }
+                }
+                if (off_tile != -1) {
+                    for (int i = 0; i < off_tile; i++) {
+                        tiles.get(i).screenContain();
+                    }
+                    off_tile = -1;
+                    tileFixY = 0;
+                    tileFixX = 0;
+                }
+            }
+        }
+    }
+
+
+
+
     public static void OpenLoadMenu() {
         JFrame frame = new JFrame("Load Menu");
         frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
@@ -586,6 +848,7 @@ public class Main {
                     downPressed = false;
                     leftPressed = false;
                     rightPressed = false;
+                    background_drawn = false;
                     lastAudioStart = System.currentTimeMillis();
 //                    playAudio(backgroundState);
                     currentNation = (String) nationComboBox.getSelectedItem();
@@ -1595,204 +1858,358 @@ public class Main {
         }
     }
 
-    private static class ImageObject {
-        // vars of ImageObject
-        private double x;
-        private double y;
-        private double lastposx;
-        private double lastposy;
-        private double xwidth;
-        private double yheight;
-        private double angle; // in Radians
-        private double internalangle; // in Radians
-        private Vector<Double> coords;
-        private Vector<Double> triangles;
-        private double comX;
-        private double comY;
+    private static class MouseOverChecker implements Runnable {
+        public void run() {
+            while (!endgame) {
+                try {
+                    Thread.sleep(32);
+                    for (int i = 0; i < tiles.size(); i++) {
+                        if (MouseOver(tiles.get(i))) {
+                            tiles.get(i).mouseHover = true;
+                            System.out.println(tiles.get(i).toString());
 
-        private int maxFrames;
-        private int currentFrame;
-
-        private int life;
-        private int maxLife;
-        private int dropLife;
-
-        private Boolean bounce;
-
-        public ImageObject() {
-            maxFrames = 1;
-            currentFrame = 0;
-            bounce = false;
-            life = 1;
-            maxLife = 1;
-            dropLife = 0;
+                        } else if (tiles.get(i).mouseHover){
+                            backgroundDraw();
+                            tiles.get(i).mouseHover = false;
+                        }
+                    }
+                } catch (java.lang.InterruptedException jlaioobe) {}
+            }
         }
+    }
 
-        // pgs 139-146
+    private static Boolean isInside(double p1x, double p1y, double p2x1, double p2y1, double p2x2, double p2y2) {
+        Boolean ret = false;
+        if (p1x > p2x1 && p1x < p2x2) {
+            if (p1y > p2y1 && p1y < p2y2) {
+                ret = true;
+            }
+            if (p1y > p2y2 && p1y < p2y1) {
+                ret = true;
+            }
+        }
+        if (p1x > p2x2 && p1x < p2x1) {
+            if (p1y > p2y1 && p1y < p2y2) {
+                ret = true;
+            }
+            if (p1y > p2y2 && p1y < p2y1) {
+                ret = true;
+            }
+        }
+        return ret;
+    }
+
+    private static Boolean MouseOver(ImageObject p2) {
+        Boolean ret = false;
+        double p1x = board.getMouseX();
+        double p1y = board.getMouseY();
+        double p2x1 = p2.getX();
+        double p2x2 = p2.getX() + p2.getWidth();
+        double p2y1 = p2.getY();
+        double p2y2 = p2.getY() - p2.getHeight();
+        ret = isInside(p1x,p1y,p2x1,p2y1,p2x2,p2y2);
+        return ret;
+    }
+
+    private static AffineTransformOp rotateImageObject(ImageObject obj) {
+        AffineTransform at = AffineTransform.getRotateInstance(-obj.getAngle(), obj.getWidth()/2.0, obj.getHeight()/2.0);
+        AffineTransformOp atop = new AffineTransformOp(at, AffineTransformOp.TYPE_BILINEAR);
+        return atop;
+    }
+
+    private static class ImageObject {
+        protected double x;
+        protected double y;
+        protected double xwidth;
+        protected double yheight;
+        protected double angle;
+        protected double internalangle;
+        protected Vector<Double> coords;
+        protected Vector<Double> triangles;
+        protected double comX;
+        protected double comY;
+        protected boolean mouseHover;
+        public ImageObject() {}
         public ImageObject(double xinput, double yinput, double xwidthinput, double yheightinput, double angleinput) {
-            this();
             x = xinput;
             y = yinput;
-            lastposx = x;
-            lastposy = y;
             xwidth = xwidthinput;
             yheight = yheightinput;
             angle = angleinput;
             internalangle = 0.0;
             coords = new Vector<Double>();
+            mouseHover = false;
         }
-
-        public double getX() { return x; }
-        public double getY() { return y; }
-        public double getlastposx() { return lastposx; }
-        public double getlastposy() { return lastposy; }
-        public void setlastposx (double input) { lastposx = input; }
-        public void setlastposy (double input) { lastposy = input; }
-        public double getWidth() { return xwidth; }
-        public double getHeight() { return yheight; }
-        public double getAngle() { return angle; }
-        public double getInternalAngle() { return internalangle; }
-        public void setAngle(double angleinput) { angle = angleinput; }
-        public void setInternalAngle(double internalangleinput) { internalangle = internalangleinput; }
-        public Vector<Double> getCoords() { return coords; }
+        public double getX() {
+            return x;
+        }
+        public double getY() {
+            return y;
+        }
+        public double getWidth() {
+            return xwidth;
+        }
+        public double getHeight() {
+            return yheight;
+        }
+        public double getAngle() {
+            return angle;
+        }
+        public double getInternalangle() {
+            return internalangle;
+        }
+        public void setAngle(double angleinput){
+            angle = angleinput;
+        }
+        public void setInternalangle(double internalangleinput) {
+            internalangle = internalangleinput;
+        }
+        public Vector<Double> getCoords() {
+            return coords;
+        }
         public void setCoords(Vector<Double> coordsinput) {
-            coords = coordsinput;
+            coords =coordsinput;
             generateTriangles();
-            // printTriangles();
+            //printTriangles();
         }
-        public int getMaxFrames() { return maxFrames; }
-        public void setMaxFrames(int input) { maxFrames = input; }
-        public int getCurrentFrame() { return currentFrame; }
-        public void setCurrentFrame(int input) { currentFrame = input; }
-        public Boolean getBounce() { return bounce; }
-        public void setBounce(Boolean input) { bounce = input; }
-        public int getLife() { return life; }
-        public void setLife(int input) { life = input; }
-        public int getMaxLife() { return maxLife; }
-        public void setMaxLife(int input) { maxLife = input; }
-        public int getDropLife() { return dropLife; }
-        public void setDropLife(int input) { dropLife = input; }
-
-        public void updateBounce() {
-            if (getBounce()) {
-                moveto(getlastposx(), getlastposy());
-            } else {
-                setlastposx(getX());
-                setlastposy(getY());
-            }
-            setBounce(false);
-        }
-
-        public void updateCurrentFrame() {
-            currentFrame = (currentFrame + 1) % maxFrames;
-        }
-
         public void generateTriangles() {
             triangles = new Vector<Double>();
-            // format: (0, 1), (2, 3), (4, 5) is the (x, y) coords of a triangle
-
-            // get center point of all coordinates
             comX = getComX();
             comY = getComY();
-
             for (int i = 0; i < coords.size(); i = i + 2) {
                 triangles.addElement(coords.elementAt(i));
-                triangles.addElement(coords.elementAt(i + 1));
-
+                triangles.addElement(coords.elementAt(i+1));
                 triangles.addElement(coords.elementAt((i+2) % coords.size()));
                 triangles.addElement(coords.elementAt((i+3) % coords.size()));
-
                 triangles.addElement(comX);
                 triangles.addElement(comY);
             }
         }
-
-        public void printTriangles() {
+        public void printTrianlges() {
             for (int i = 0; i < triangles.size(); i = i + 6) {
-                System.out.println("p0x: " + triangles.elementAt(i) + ", p0y: " + triangles.elementAt(i+1));
-                System.out.println("p1x: " + triangles.elementAt(i+2) + ", p1y: " + triangles.elementAt(i+3)
-                        + triangles.elementAt(i+3));
-                System.out.println("p2x: " + triangles.elementAt(i+4) + ", p2y: " + triangles.elementAt(i+5));
+                System.out.print("p0x: " + triangles.elementAt(i) + ", p0y: " + triangles.elementAt(i+1));
+                System.out.print(" p1x: " + triangles.elementAt(i+2) + ", p1y: " + triangles.elementAt(i+3));
+                System.out.print(" p2x: " + triangles.elementAt(i+4) + ", p2y: " + triangles.elementAt(i+5));
             }
         }
-
         public double getComX() {
             double ret = 0;
             if (coords.size() > 0) {
-                for (int i = 0; i < coords.size(); i = i + 2) {
+                for (int i = 0;  i < coords.size(); i = i+2) {
                     ret = ret + coords.elementAt(i);
                 }
                 ret = ret / (coords.size() / 2.0);
             }
             return ret;
         }
-
         public double getComY() {
             double ret = 0;
             if (coords.size() > 0) {
-                for (int i = 1; i < coords.size(); i = i + 2) {
+                for (int i = 1; i < coords.size(); i = i+2) {
                     ret = ret + coords.elementAt(i);
                 }
                 ret = ret / (coords.size() / 2.0);
             }
             return ret;
         }
-
         public void move(double xinput, double yinput) {
             x = x + xinput;
             y = y + yinput;
         }
-
         public void moveto(double xinput, double yinput) {
             x = xinput;
             y = yinput;
         }
-
-        public int screenWrap(double leftEdge, double rightEdge, double topEdge, double bottomEdge) {
-            int ret = 0;
-            if (x > rightEdge) {
-                moveto(leftEdge, getY());
-                ret = 1;
+        public void rotate(double angleinput) {
+            angle = angle + angleinput;
+            while (angle > twoPi) {
+                angle = angle - twoPi;
             }
-            if (x < leftEdge) {
-                moveto(rightEdge, getY());
-                ret = 2;
+            while (angle < 0) {
+                angle = angle + twoPi;
             }
-            if (y > bottomEdge) {
-                moveto(getX(), topEdge);
-                ret = 3;
-            }
-            if (y < topEdge) {
-                moveto(getX(), bottomEdge);
-                ret = 4;
-            }
-
-            return ret;
         }
-
-//        public void rotate(double angleinput) {
-//            angle = angle + angleinput;
-//            while (angle > twoPi) {
-//                angle = angle - twoPi;
-//            }
-//
-//            while (angle < 0) {
-//                angle = angle + twoPi;
-//            }
-//        }
-//
-//        public void spin(double internalangleinput) {
-//            internalangle = internalangle + internalangleinput;
-//            while (internalangle > twoPi) {
-//                internalangle = internalangle - twoPi;
-//            }
-//
-//            while (internalangle < 0) {
-//                internalangle = internalangle + twoPi;
-//            }
-//        }
-
+        public String toString() {
+            return "[" + x + "," + y + "]" + "  [" + xwidth + "," + yheight + "]";
+        }
+        public void screenContain() {
+            if (x + xwidth > WINWIDTH) {
+                tileFixX = -((x+xwidth)-WINHEIGHT);
+            }
+            if (x < 0) {
+                tileFixX = -x;
+            }
+            if (y > WINHEIGHT) {
+                tileFixY = -(y-WINHEIGHT);
+            }
+            if (y - yheight < YOFFSET) {
+                tileFixY = (YOFFSET-(y-yheight));
+            }
+            if (tileFixX != 0 || tileFixY != 0) {
+                move(tileFixX,tileFixY);
+            }
+        }
     }
+
+
+    public static class Tile extends ImageObject {
+        private Vector<Tile> neighbors;
+        private Vector<Integer> resourceRates;
+        private Vector<Integer> buildings;
+        private biome myBiome;
+        private boolean waterSide;
+        public Tile(double xinput, double yinput, double width, double height, double angle) {
+            super(xinput,yinput,width,height,angle);
+            neighbors = new Vector<>();
+            resourceRates = new Vector<>();
+            buildings = new Vector<>();
+            buildings.add(0);
+            buildings.add(0);
+            buildings.add(0);
+            buildings.add(0);
+            buildings.add(0);
+        }
+        public String toString() {
+            return "Labor: " + resourceRates.get(0) + " Wood: " + resourceRates.get(1) + " Metal: " + resourceRates.get(2) + " Food: " + resourceRates.get(3) + " Research: " + resourceRates.get(4);
+        }
+        public biome getBiome() {
+            return myBiome;
+        }
+        public void isWaterSide() { waterSide = (neighbors.size() < 6); }
+        public void setResourceRates() {
+            resourceRates.clear();
+            int labor, wood, metal, food, research;
+            Random rand = new Random(System.currentTimeMillis() + (int)x + (int)y);
+            if (myBiome == biome.Flatland) {
+                labor = rand.nextInt(20) + 20;
+                wood = rand.nextInt(5) + 5;
+                metal = rand.nextInt(5);
+                food = rand.nextInt(10) + 25;
+                research = rand.nextInt(5);
+            } else if (myBiome == biome.Forest) {
+                labor = rand.nextInt(5);
+                wood = rand.nextInt(20) + 30;
+                metal = rand.nextInt(5);
+                food = rand.nextInt(10) + 10;
+                research = rand.nextInt(5) + 10;
+            } else if (myBiome == biome.Mountain) {
+                labor = rand.nextInt(5);
+                wood = rand.nextInt(10);
+                metal = rand.nextInt(20) + 40;
+                food = rand.nextInt(5) + 5;
+                research = rand.nextInt(5) + 5;
+            } else {
+                labor = rand.nextInt(10) + 20;
+                wood = rand.nextInt(5) + 5;
+                metal = rand.nextInt(5);
+                food = rand.nextInt(5);
+                research = rand.nextInt(10) + 25;
+            }
+            if (waterSide) {
+                labor += rand.nextInt(10);
+                food += rand.nextInt(10);
+            }
+            labor += 5 * buildings.get(0);
+            wood += 5 * buildings.get(1);
+            metal += 5 * buildings.get(2);
+            food += 5 * buildings.get(3);
+            research += 5 * buildings.get(4);
+            resourceRates.add(labor);
+            resourceRates.add(wood);
+            resourceRates.add(metal);
+            resourceRates.add(food);
+            resourceRates.add(research);
+        }
+        public void generateBiome() {
+            Vector<Integer> neighborBiomes = countNeighborBiomes();
+            int flat_count = neighborBiomes.get(0) * 12;
+            if (biomeCounts.get(0) > numTiles / 3) {
+                flat_count = -25;
+            }
+            int forest_count = neighborBiomes.get(1) * 12;
+            if (biomeCounts.get(1) > numTiles / 3) {
+                forest_count = -25;
+            }
+            int mountain_count = neighborBiomes.get(2) * 12;
+            if (biomeCounts.get(2) > numTiles / 3) {
+                mountain_count = -25;
+            }
+            int desert_count = neighborBiomes.get(3) * 12;
+            if (biomeCounts.get(3) > numTiles / 3) {
+                desert_count = -25;
+            }
+            int total = 100 + flat_count + forest_count + mountain_count + desert_count;
+            Random rand = new Random(System.currentTimeMillis());
+            int selector = rand.nextInt(total) + 1;
+            if (selector <= 25 + flat_count) {
+                myBiome = biome.Flatland;
+                biomeCounts.set(0,biomeCounts.get(0)+1);
+            } else if (selector <= 50 + flat_count + forest_count) {
+                myBiome = biome.Forest;
+                biomeCounts.set(1,biomeCounts.get(1)+1);
+            } else if (selector <= 75 + flat_count + forest_count + mountain_count) {
+                myBiome = biome.Mountain;
+                biomeCounts.set(2,biomeCounts.get(2)+1);
+            } else if (selector <= 100 + flat_count + forest_count + mountain_count + desert_count) {
+                myBiome = biome.Desert;
+                biomeCounts.set(3,biomeCounts.get(3)+1);
+            } else {
+                throw new IllegalArgumentException();
+            }
+        }
+        private Vector<Integer> countNeighborBiomes() {
+            Vector<Integer> biomeCount = new Vector<>();
+            biomeCount.add(0);
+            biomeCount.add(0);
+            biomeCount.add(0);
+            biomeCount.add(0);
+            for (int i = 0; i < neighbors.size(); i++) {
+                biome neighborBiome = neighbors.get(i).getBiome();
+                if (neighborBiome == biome.Flatland) {
+                    biomeCount.set(0,biomeCount.get(0)+1);
+                } else if (neighborBiome == biome.Forest) {
+                    biomeCount.set(1,biomeCount.get(1)+1);
+                } else if (neighborBiome == biome.Mountain) {
+                    biomeCount.set(2,biomeCount.get(2)+1);
+                } else if (neighborBiome == biome.Desert) {
+                    biomeCount.set(3,biomeCount.get(3)+1);
+                }
+            }
+            return biomeCount;
+        }
+        public void findNeighbors(Vector<Tile> tiles) {
+            Point2D.Double up = new Point2D.Double(x + (xwidth * 0.5),y - (yheight * 1.5));
+            Point2D.Double upRight = new Point2D.Double(x + (xwidth * 1.25),y - yheight);
+            Point2D.Double downRight = new Point2D.Double(x + (xwidth * 1.25),y);
+            Point2D.Double down = new Point2D.Double(x + (xwidth * 0.5),y + (yheight * 0.5));
+            Point2D.Double downLeft = new Point2D.Double(x- (xwidth * 0.25),y);
+            Point2D.Double upLeft = new Point2D.Double(x - (xwidth * 0.25),y - yheight);
+            for (int i = 0; i < tiles.size(); i++) {
+                Tile current = tiles.get(i);
+                if (!(current.getX() == x && current.getY() == y)) {
+                    if(isInside(up.getX(),up.getY(),current.getX(),current.getY(),current.getX() + current.getWidth(),current.getY() - current.getHeight())) {
+                        neighbors.add(current);
+                    }
+                    if(isInside(upRight.getX(),upRight.getY(),current.getX(),current.getY(),current.getX() + current.getWidth(),current.getY() - current.getHeight())) {
+                        neighbors.add(current);
+                    }
+                    if(isInside(downRight.getX(),downRight.getY(),current.getX(),current.getY(),current.getX() + current.getWidth(),current.getY() - current.getHeight())) {
+                        neighbors.add(current);
+                    }
+                    if(isInside(downLeft.getX(),downLeft.getY(),current.getX(),current.getY(),current.getX() + current.getWidth(),current.getY() - current.getHeight())) {
+                        neighbors.add(current);
+                    }
+                    if(isInside(down.getX(),down.getY(),current.getX(),current.getY(),current.getX() + current.getWidth(),current.getY() - current.getHeight())) {
+                        neighbors.add(current);
+                    }
+                    if(isInside(upLeft.getX(),upLeft.getY(),current.getX(),current.getY(),current.getX() + current.getWidth(),current.getY() - current.getHeight())) {
+                        neighbors.add(current);
+                    }
+                }
+            }
+        }
+    }
+
 
     private static void bindKey(JPanel myPanel, String input) {
         myPanel.getInputMap(IFW).put(KeyStroke.getKeyStroke("pressed " + input), input + " pressed");
@@ -1805,7 +2222,7 @@ public class Main {
     public static void main(String[] args) {
         setup();
         appFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        appFrame.setSize(WINWIDTH + 1, WINHEIGHT + 60);
+        appFrame.setSize(WINWIDTH, WINHEIGHT);
 
         JMenuBar jMenuBar = new JMenuBar();
         appFrame.setJMenuBar(jMenuBar);
@@ -1848,9 +2265,9 @@ public class Main {
 //        bindKey(myPanel, "DOWN");
 //        bindKey(myPanel, "LEFT");
 //        bindKey(myPanel, "RIGHT");
-        JPanel myPanel = new JPanel();
+        board = new MouseTrackerPanel();
 
-        appFrame.getContentPane().add(myPanel, "North");
+        appFrame.getContentPane().add(board);
         appFrame.setVisible(true);
 
         openStartScreen();

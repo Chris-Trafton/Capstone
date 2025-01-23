@@ -5,6 +5,8 @@ import java.awt.event.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.image.AffineTransformOp;
+import java.awt.Dimension;
+import java.awt.Toolkit;
 import java.util.Date;
 import java.util.Random;
 import java.util.Vector;
@@ -162,10 +164,11 @@ public class Main {
         appFrame = new JFrame("Capstone");
         pi = 3.14159265358979;
         twoPi = 2.0 * 3.14159265358979;
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         XOFFSET = 0;
         YOFFSET = 30; //30
-        WINWIDTH = 1920; //338
-        WINHEIGHT = 1080; //271
+        WINWIDTH = (int)screenSize.getWidth(); //338
+        WINHEIGHT = (int)screenSize.getHeight() - 40; //271
         endgame = false;
         audiolifetime = 78000L; // 78 seconds for KI.WAV, was new Long(78000)
 
@@ -2033,17 +2036,17 @@ public class Main {
             return "[" + x + "," + y + "]" + "  [" + xwidth + "," + yheight + "]";
         }
         public void screenContain() {
-            if (x + xwidth > WINWIDTH) {
-                tileFixX = -((x+xwidth)-WINHEIGHT);
+            if (x + xwidth > appFrame.getWidth()) {
+                tileFixX = -((x+xwidth)-appFrame.getWidth());
             }
             if (x < 0) {
                 tileFixX = -x;
             }
-            if (y > WINHEIGHT) {
-                tileFixY = -(y-WINHEIGHT);
+            if (y > appFrame.getHeight() - YOFFSET - 25) {
+                tileFixY = -(y- appFrame.getHeight()+YOFFSET+25);
             }
-            if (y - yheight < YOFFSET) {
-                tileFixY = (YOFFSET-(y-yheight));
+            if (y - yheight < 0) {
+                tileFixY = -(y-yheight);
             }
             if (tileFixX != 0 || tileFixY != 0) {
                 move(tileFixX,tileFixY);

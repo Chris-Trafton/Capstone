@@ -917,14 +917,62 @@ public class Main {
             }
             JLabel nationLand = new JLabel("Total Land: ");
 
+            DefaultTableModel dm = new DefaultTableModel();
+            if (Stark.isActive()) {
+                dm.setDataVector(new Object[][]{{"Swordmen", Stark.getMilitary("swordmen"), "True", "Mine", Stark.getBuilding("mine"), Stark.getResearch("mine")},
+                                {"Shieldmen", Stark.getMilitary("shieldmen"), "True", "Forge", Stark.getBuilding("forge"), Stark.getResearch("forge")},
+                                {"Spearmen", Stark.getMilitary("spearmen"), Stark.getResearch("spearmen"), "Lumber Mill", Stark.getBuilding("lumberMill"), Stark.getResearch("lumberMill")},
+                                {"Mounted Cavalry", Stark.getMilitary("mountedCalvalry"), Stark.getResearch("mountedCalvalry"), "Deforestation", Stark.getBuilding("deforestation"), Stark.getResearch("deforestation")},
+                                {"Archer", Stark.getMilitary("archer"), "True", "Farm", Stark.getBuilding("farm"), Stark.getResearch("farm")},
+                                {"Scout Raven", Stark.getMilitary("scoutRaven"), "True", "Plantation", Stark.getBuilding("plantation"), Stark.getResearch("plantation")},
+                                {"Transport Ship", Stark.getMilitary("transportShip"), "True", "School", Stark.getBuilding("school"), Stark.getResearch("school")},
+                                {"War Ship", Stark.getMilitary("warShip"), Stark.getResearch("warShip"), "College", Stark.getBuilding("college"), Stark.getResearch("college")},
+                                {"Wyvern", Stark.getMilitary("wyvern"), Stark.getResearch("wyvern"), "", "", ""},
+                                {"Dreadnought", Stark.getMilitary("dreadnought"), Stark.getResearch("dreadnought"), "", "", ""},
+                                {"Dragon", Stark.getMilitary("dragon"), Stark.getResearch("dragon"), "", "", ""}},
+                        new Object[]{"Unit", "Owned", "Unit Researched", "Building", "Owned", "Building Research"});
+            } else if (Lannister.isActive()) {
+                dm.setDataVector(new Object[][]{{"Swordmen", Lannister.getMilitary("swordmen"), "True", "Mine", Lannister.getBuilding("mine"), Lannister.getResearch("mine")},
+                                {"Shieldmen", Lannister.getMilitary("shieldmen"), "True", "Forge", Lannister.getBuilding("forge"), Lannister.getResearch("forge")},
+                                {"Spearmen", Lannister.getMilitary("spearmen"), Lannister.getResearch("spearmen"), "Lumber Mill", Lannister.getBuilding("lumberMill"), Lannister.getResearch("lumberMill")},
+                                {"Mounted Cavalry", Lannister.getMilitary("mountedCalvalry"), Lannister.getResearch("mountedCalvalry"), "Deforestation", Lannister.getBuilding("deforestation"), Lannister.getResearch("deforestation")},
+                                {"Archer", Lannister.getMilitary("archer"), "True", "Farm", Lannister.getBuilding("farm"), Lannister.getResearch("farm")},
+                                {"Scout Raven", Lannister.getMilitary("scoutRaven"), "True", "Plantation", Lannister.getBuilding("plantation"), Lannister.getResearch("plantation")},
+                                {"Transport Ship", Lannister.getMilitary("transportShip"), "True", "School", Lannister.getBuilding("school"), Lannister.getResearch("school")},
+                                {"War Ship", Lannister.getMilitary("warShip"), Lannister.getResearch("warShip"), "College", Lannister.getBuilding("college"), Lannister.getResearch("college")},
+                                {"Wyvern", Lannister.getMilitary("wyvern"), Lannister.getResearch("wyvern"), "", "", ""},
+                                {"Dreadnought", Lannister.getMilitary("dreadnought"), Lannister.getResearch("dreadnought"), "", "", ""},
+                                {"Dragon", Lannister.getMilitary("dragon"), Lannister.getResearch("dragon"), "", "", ""}},
+                        new Object[]{"Unit", "Owned", "Unit Researched", "Building", "Owned", "Building Research"});
+            } else if (Targaryen.isActive()) {
+                dm.setDataVector(new Object[][]{{"Swordmen", Targaryen.getMilitary("swordmen"), "True", "Mine", Targaryen.getBuilding("mine"), Targaryen.getResearch("mine")},
+                                {"Shieldmen", Targaryen.getMilitary("shieldmen"), "True", "Forge", Targaryen.getBuilding("forge"), Targaryen.getResearch("forge")},
+                                {"Spearmen", Targaryen.getMilitary("spearmen"), Targaryen.getResearch("spearmen"), "Lumber Mill", Targaryen.getBuilding("lumberMill"), Targaryen.getResearch("lumberMill")},
+                                {"Mounted Cavalry", Targaryen.getMilitary("mountedCalvalry"), Targaryen.getResearch("mountedCalvalry"), "Deforestation", Targaryen.getBuilding("deforestation"), Targaryen.getResearch("deforestation")},
+                                {"Archer", Targaryen.getMilitary("archer"), "True", "Farm", Targaryen.getBuilding("farm"), Targaryen.getResearch("farm")},
+                                {"Scout Raven", Targaryen.getMilitary("scoutRaven"), "True", "Plantation", Targaryen.getBuilding("plantation"), Targaryen.getResearch("plantation")},
+                                {"Transport Ship", Targaryen.getMilitary("transportShip"), "True", "School", Targaryen.getBuilding("school"), Targaryen.getResearch("school")},
+                                {"War Ship", Targaryen.getMilitary("warShip"), Targaryen.getResearch("warShip"), "College", Targaryen.getBuilding("college"), Targaryen.getResearch("college")},
+                                {"Wyvern", Targaryen.getMilitary("wyvern"), Targaryen.getResearch("wyvern"), "", "", ""},
+                                {"Dreadnought", Targaryen.getMilitary("dreadnought"), Targaryen.getResearch("dreadnought"), "", "", ""},
+                                {"Dragon", Targaryen.getMilitary("dragon"), Targaryen.getResearch("dragon"), "", "", ""}},
+                        new Object[]{"Unit", "Owned", "Unit Researched", "Building", "Owned", "Building Research"});
+            }
+
+            JTable militaryTable = new JTable(dm);
+            JScrollPane scroll = new JScrollPane(militaryTable);
+            militaryTable.setPreferredScrollableViewportSize(militaryTable.getPreferredSize());
+
             JPanel jPanel = new JPanel();
             jPanel.setLayout(new BoxLayout(jPanel, BoxLayout.Y_AXIS));
             jPanel.add(nationName);
             jPanel.add(nationTeam);
             jPanel.add(nationMilitary);
             jPanel.add(nationLand);
+            jPanel.add(scroll);
+
             frame.add(jPanel);
-            frame.setSize(1000, 200);
+            frame.setSize(1000, 300);
             frame.setVisible(true);
         }
     }
@@ -971,16 +1019,16 @@ public class Main {
 
             DefaultTableModel dm = new DefaultTableModel();
             dm.setDataVector(new Object[][]{{"Swordmen", "Foot soldiers armed with swords.", "M:10  F:10  L:10", "Buy Swordmen"},
-                    {"Shieldmen", "Foot soldiers armed with shields.", "M:10  F:10  L:20", "Buy Shieldmen"},
-                    {"Spearmen", "Foot soldiers armed with spears.", "M:20  F:10  L:10", "Buy Spearmen"},
-                    {"Mounted Cavalry", "Soldiers mounted on horseback.", "M:20  F:10  L:20", "Buy Mounted Calvalry"},
-                    {"Archer", "Foot soldiers armed with bows and arrows.", "M:10  F:10  L:10", "Buy Archer"},
-                    {"Scout Raven", "Air unit used for zone reconnaissance.", "F:10  L:10", "Buy Scout Raven"},
-                    {"Transport Ship", "Ship used for transporting ground units across water.", "M:10  W:20  F:10  L:10", "Buy Transport Ship"},
-                    {"War Ship", "Ship used for battle and naval combat.", "M:20  W:30  F:10  L:10", "Buy War Ship"},
-                    {"Wyvern", "Air unit used for attack ground units.", "F:50  L:25", "Buy Wyvern"},
-                    {"Dreadnought", "Large Ship which excels in naval combat.", "M:10  W:100  F:10  L:50", "Buy Dreadnought"},
-                    {"Dragon", "Ground and air unit which excels in ground combat.", "F:100  L:100", "Buy Dragon"}},
+                            {"Shieldmen", "Foot soldiers armed with shields.", "M:10  F:10  L:20", "Buy Shieldmen"},
+                            {"Spearmen", "Foot soldiers armed with spears.", "M:20  F:10  L:10", "Buy Spearmen"},
+                            {"Mounted Cavalry", "Soldiers mounted on horseback.", "M:20  F:10  L:20", "Buy Mounted Calvalry"},
+                            {"Archer", "Foot soldiers armed with bows and arrows.", "M:10  F:10  L:10", "Buy Archer"},
+                            {"Scout Raven", "Air unit used for zone reconnaissance.", "F:10  L:10", "Buy Scout Raven"},
+                            {"Transport Ship", "Ship used for transporting ground units across water.", "M:10  W:20  F:10  L:10", "Buy Transport Ship"},
+                            {"War Ship", "Ship used for battle and naval combat.", "M:20  W:30  F:10  L:10", "Buy War Ship"},
+                            {"Wyvern", "Air unit used for attack ground units.", "F:50  L:25", "Buy Wyvern"},
+                            {"Dreadnought", "Large Ship which excels in naval combat.", "M:10  W:100  F:10  L:50", "Buy Dreadnought"},
+                            {"Dragon", "Ground and air unit which excels in ground combat.", "F:100  L:100", "Buy Dragon"}},
                     new Object[]{"Name", "Description", "Price", ""});
 
             JTable table = new JTable(dm);
@@ -1009,13 +1057,13 @@ public class Main {
 
             DefaultTableModel dm = new DefaultTableModel();
             dm.setDataVector(new Object[][]{{"Mine", "Mine to boost metal production.", "M:10  W:50  F:20  L:20", "Buy Mine"},
-                    {"Forge", "Forge to greatly boost metal production.", "M:50  W:40  F:20  L:40", "Buy Forge"},
-                    {"Lumber Mill", "Mill to boost wood production.", "M:50  W:10  F:20  L:20", "Buy Lumber Mill"},
-                    {"Deforestation", "Deforestation to greatly boost wood production.", "M:20  W:40  F:50  L:40", "Buy Deforestation"},
-                    {"Farm", "Farm to boost food production.", "M:20  W:40  F:20  L:20", "Buy Farm"},
-                    {"Plantation", "Plantation to greatly boost food production.", "M:40  W:50  F:20  L:40", "Buy Plantation"},
-                    {"School", "School to boost education production.", "M:40  W:20  F:20  L:20", "Buy School"},
-                    {"College", "College to greatly boost education production.", "M:40  W:40  F:30  L:40", "Buy College"}},
+                            {"Forge", "Forge to greatly boost metal production.", "M:50  W:40  F:20  L:40", "Buy Forge"},
+                            {"Lumber Mill", "Mill to boost wood production.", "M:50  W:10  F:20  L:20", "Buy Lumber Mill"},
+                            {"Deforestation", "Deforestation to greatly boost wood production.", "M:20  W:40  F:50  L:40", "Buy Deforestation"},
+                            {"Farm", "Farm to boost food production.", "M:20  W:40  F:20  L:20", "Buy Farm"},
+                            {"Plantation", "Plantation to greatly boost food production.", "M:40  W:50  F:20  L:40", "Buy Plantation"},
+                            {"School", "School to boost education production.", "M:40  W:20  F:20  L:20", "Buy School"},
+                            {"College", "College to greatly boost education production.", "M:40  W:40  F:30  L:40", "Buy College"}},
                     new Object[]{"Name", "Description", "Price", ""});
 
             JTable table = new JTable(dm);
@@ -1043,19 +1091,19 @@ public class Main {
 
             DefaultTableModel dm = new DefaultTableModel();
             dm.setDataVector(new Object[][]{{"Build Mines", "Unlocks construction of Mines.", "E:50  L:10", "Buy Build Mines"},
-                    {"Build Forges", "Unlocks construction of Forges.", "E:75  L:25", "Buy Build Forges"},
-                    {"Build Lumber Mills", "Unlocks construction of Lumber Mills.", "E:50  L:10", "Buy Build Lumber Mills"},
-                    {"Build Deforestation", "Unlocks construction of Deforestation.", "E:75  L:25", "Buy Build Deforestation"},
-                    {"Build Farms", "Unlocks construction of Farms.", "E:50  L:10", "Buy Build Farms"},
-                    {"Build Plantations", "Unlocks construction of Plantations.", "E:75  L:25", "Buy Build Plantations"},
-                    {"Build Schools", "Unlocks construction of Schools.", "E:50  L:10", "Buy Build Schools"},
-                    {"Build Colleges", "Unlocks construction of Colleges.", "E:75  L:25", "Buy Build Colleges"},
-                    {"Train Spearmen", "Unlocks training of Spearmen.", "E:50  L:10", "Buy Train Spearmen"},
-                    {"Train Mounted Cavalry", "Unlocks training of Mounted Calvalry.", "E:50  L:10", "Buy Train Mounted Cavalry"},
-                    {"Build War Ships", "Unlocks construction of War Ships.", "E:50  L:10", "Buy Build War Ships"},
-                    {"Tame Wyverns", "Unlocks taming of Wyverns.", "E:50  L:10", "Buy Tame Wyverns"},
-                    {"Build Dreadnoughts", "Unlocks construction of Dreadnoughts.", "E:100  L:50", "Buy Build Dreadnoughts"},
-                    {"Tame Dragons", "Unlocks taming of Dragons.", "E:100  L:50", "Buy Tame Dragons"}},
+                            {"Build Forges", "Unlocks construction of Forges.", "E:75  L:25", "Buy Build Forges"},
+                            {"Build Lumber Mills", "Unlocks construction of Lumber Mills.", "E:50  L:10", "Buy Build Lumber Mills"},
+                            {"Build Deforestation", "Unlocks construction of Deforestation.", "E:75  L:25", "Buy Build Deforestation"},
+                            {"Build Farms", "Unlocks construction of Farms.", "E:50  L:10", "Buy Build Farms"},
+                            {"Build Plantations", "Unlocks construction of Plantations.", "E:75  L:25", "Buy Build Plantations"},
+                            {"Build Schools", "Unlocks construction of Schools.", "E:50  L:10", "Buy Build Schools"},
+                            {"Build Colleges", "Unlocks construction of Colleges.", "E:75  L:25", "Buy Build Colleges"},
+                            {"Train Spearmen", "Unlocks training of Spearmen.", "E:50  L:10", "Buy Train Spearmen"},
+                            {"Train Mounted Cavalry", "Unlocks training of Mounted Calvalry.", "E:50  L:10", "Buy Train Mounted Cavalry"},
+                            {"Build War Ships", "Unlocks construction of War Ships.", "E:50  L:10", "Buy Build War Ships"},
+                            {"Tame Wyverns", "Unlocks taming of Wyverns.", "E:50  L:10", "Buy Tame Wyverns"},
+                            {"Build Dreadnoughts", "Unlocks construction of Dreadnoughts.", "E:100  L:50", "Buy Build Dreadnoughts"},
+                            {"Tame Dragons", "Unlocks taming of Dragons.", "E:100  L:50", "Buy Tame Dragons"}},
                     new Object[]{"Name", "Description", "Price", ""});
 
             JTable table = new JTable(dm);
@@ -1094,7 +1142,7 @@ public class Main {
                                 {"Wyvern", Stark.wyvern, "H:5", "G:5-10", "A:5-10", "S:3-8"},
                                 {"Dreadnought", Stark.dreadnought, "H:50", "G:10-15", "A:10-15", "S:15-20"},
                                 {"Dragon", Stark.dragon, "H:50", "G:15-20", "A:10-20", "S:5-10"}},
-                                new Object[]{"Unit", "Quantity", "Health", "Ground", "Air", "Sea"});
+                        new Object[]{"Unit", "Quantity", "Health", "Ground", "Air", "Sea"});
             } else if (Lannister.isActive()) {
                 dm.setDataVector(new Object[][]{{"Swordmen", Lannister.swordmen, "H:5", "G:5-10", "A:0", "S:0"},
                                 {"Shieldmen", Lannister.shieldmen, "H:10", "G:3-8", "A:0", "S:0"},
@@ -1107,7 +1155,7 @@ public class Main {
                                 {"Wyvern", Lannister.wyvern, "H:5", "G:5-10", "A:5-10", "S:3-8"},
                                 {"Dreadnought", Lannister.dreadnought, "H:50", "G:10-15", "A:10-15", "S:15-20"},
                                 {"Dragon", Lannister.dragon, "H:50", "G:15-20", "A:10-20", "S:5-10"}},
-                                new Object[]{"Unit", "Quantity", "Health", "Ground", "Air", "Sea"});
+                        new Object[]{"Unit", "Quantity", "Health", "Ground", "Air", "Sea"});
             } else if (Targaryen.isActive()) {
                 dm.setDataVector(new Object[][]{{"Swordmen", Targaryen.swordmen, "H:5", "G:5-10", "A:0", "S:0"},
                                 {"Shieldmen", Targaryen.shieldmen, "H:10", "G:3-8", "A:0", "S:0"},
@@ -1120,7 +1168,7 @@ public class Main {
                                 {"Wyvern", Targaryen.wyvern, "H:5", "G:5-10", "A:5-10", "S:3-8"},
                                 {"Dreadnought", Targaryen.dreadnought, "H:50", "G:10-15", "A:10-15", "S:15-20"},
                                 {"Dragon", Targaryen.dragon, "H:50", "G:15-20", "A:10-20", "S:5-10"}},
-                                new Object[]{"Unit", "Quantity", "Health", "Ground", "Air", "Sea"});
+                        new Object[]{"Unit", "Quantity", "Health", "Ground", "Air", "Sea"});
             }
 
             JTable table = new JTable(dm);
@@ -1547,78 +1595,314 @@ public class Main {
         @Override
         public Object getCellEditorValue() {
             if (isPushed) {
-                JOptionPane.showMessageDialog(button, label + " complete");
                 if (Stark.isActive()) {
                     if (label == "Buy Swordmen") {
                         Stark.setMilitary("swordmen", 1);
+                        JOptionPane.showMessageDialog(button, "Swordmen Trained");
                     } else if (label == "Buy Shieldmen") {
                         Stark.setMilitary("shieldmen", 1);
-                    } else if (label == "Buy Spearmen") {
+                        JOptionPane.showMessageDialog(button, "Shieldmen Trained");
+                    } else if (label == "Buy Spearmen" && Stark.getResearch("spearmen")) {
                         Stark.setMilitary("spearmen", 1);
-                    } else if (label == "Buy Mounted Calvalry") {
+                        JOptionPane.showMessageDialog(button, "Spearmen Trained");
+                    } else if (label == "Buy Mounted Calvalry" && Stark.getResearch("mountedCalvalry")) {
                         Stark.setMilitary("mountedCavalry", 1);
+                        JOptionPane.showMessageDialog(button, "Mounted Calvalry Trained");
                     } else if (label == "Buy Archer") {
                         Stark.setMilitary("archer", 1);
+                        JOptionPane.showMessageDialog(button, "Archer Trained");
                     } else if (label == "Buy Scout Raven") {
                         Stark.setMilitary("scoutRaven", 1);
+                        JOptionPane.showMessageDialog(button, "Scout Raven Trained");
                     } else if (label == "Buy Transport Ship") {
                         Stark.setMilitary("transportShip", 1);
-                    } else if (label == "Buy War Ship") {
+                        JOptionPane.showMessageDialog(button, "Transport Ship Built");
+                    } else if (label == "Buy War Ship" && Stark.getResearch("warShip")) {
                         Stark.setMilitary("warShip", 1);
-                    } else if (label == "Buy Wyvern") {
+                        JOptionPane.showMessageDialog(button, "War Ship Built");
+                    } else if (label == "Buy Wyvern" && Stark.getResearch("wyvern")) {
                         Stark.setMilitary("wyvern", 1);
-                    } else if (label == "Buy Dreadnought") {
+                        JOptionPane.showMessageDialog(button, "Wyvern Trained");
+                    } else if (label == "Buy Dreadnought" && Stark.getResearch("dreadnought")) {
                         Stark.setMilitary("dreadnought", 1);
-                    } else if (label == "Buy Dragon") {
+                        JOptionPane.showMessageDialog(button, "Dreadnought Built");
+                    } else if (label == "Buy Dragon" && Stark.getResearch("dragon")) {
                         Stark.setMilitary("dragon", 1);
+                        JOptionPane.showMessageDialog(button, "Dragon Trained");
+                    } else if (label == "Buy Mine" && Stark.getResearch("mine")) {
+                        Stark.setBuilding("mine", 1);
+                        JOptionPane.showMessageDialog(button, "Mine Built");
+                    } else if (label == "Buy Forge" && Stark.getResearch("forge")) {
+                        Stark.setBuilding("forge", 1);
+                        JOptionPane.showMessageDialog(button, "Forge Built");
+                    } else if (label == "Buy Lumber Mill" && Stark.getResearch("lumberMill")) {
+                        Stark.setBuilding("lumberMill", 1);
+                        JOptionPane.showMessageDialog(button, "Lumber Mill Built");
+                    } else if (label == "Buy Deforestation" && Stark.getResearch("deforestation")) {
+                        Stark.setBuilding("deforestation", 1);
+                        JOptionPane.showMessageDialog(button, "Deforestation Built");
+                    } else if (label == "Buy Farm" && Stark.getResearch("farm")) {
+                        Stark.setBuilding("farm", 1);
+                        JOptionPane.showMessageDialog(button, "Farm Built");
+                    } else if (label == "Buy Plantation" && Stark.getResearch("plantation")) {
+                        Stark.setBuilding("plantation", 1);
+                        JOptionPane.showMessageDialog(button, "Plantation Built");
+                    } else if (label == "Buy School" && Stark.getResearch("school")) {
+                        Stark.setBuilding("school", 1);
+                        JOptionPane.showMessageDialog(button, "School Built");
+                    } else if (label == "Buy College" && Stark.getResearch("college")) {
+                        Stark.setBuilding("college", 1);
+                        JOptionPane.showMessageDialog(button, "College Built");
+                    } else if (label == "Buy Build Mines") {
+                        Stark.setResearch("mine", true);
+                        JOptionPane.showMessageDialog(button, "Mines Researched");
+                    } else if (label == "Buy Build Forges") {
+                        Stark.setResearch("forge", true);
+                        JOptionPane.showMessageDialog(button, "Forges Researched");
+                    } else if (label == "Buy Build Lumber Mills") {
+                        Stark.setResearch("lumberMill", true);
+                        JOptionPane.showMessageDialog(button, "Lumber Mills Researched");
+                    } else if (label == "Buy Build Deforestation") {
+                        Stark.setResearch("deforestation", true);
+                        JOptionPane.showMessageDialog(button, "Deforestation Researched");
+                    } else if (label == "Buy Build Farms") {
+                        Stark.setResearch("farm", true);
+                        JOptionPane.showMessageDialog(button, "Farms Researched");
+                    } else if (label == "Buy Build Plantations") {
+                        Stark.setResearch("plantation", true);
+                        JOptionPane.showMessageDialog(button, "Plantations Researched");
+                    } else if (label == "Buy Build Schools") {
+                        Stark.setResearch("school", true);
+                        JOptionPane.showMessageDialog(button, "Schools Researched");
+                    } else if (label == "Buy Build Colleges") {
+                        Stark.setResearch("college", true);
+                        JOptionPane.showMessageDialog(button, "Colleges Researched");
+                    } else if (label == "Buy Train Spearmen") {
+                        Stark.setResearch("spearmen", true);
+                        JOptionPane.showMessageDialog(button, "Spearmen Researched");
+                    } else if (label == "Buy Train Mounted Calvalry") {
+                        Stark.setResearch("mountedCalvalry", true);
+                        JOptionPane.showMessageDialog(button, "Mounted Calvalry Researched");
+                    } else if (label == "Buy Build War Ships") {
+                        Stark.setResearch("warShip", true);
+                        JOptionPane.showMessageDialog(button, "War Ships Researched");
+                    } else if (label == "Buy Tame Wyverns") {
+                        Stark.setResearch("wyvern", true);
+                        JOptionPane.showMessageDialog(button, "Wyverns Researched");
+                    } else if (label == "Buy Build Dreadnoughts") {
+                        Stark.setResearch("dreadnought", true);
+                        JOptionPane.showMessageDialog(button, "Dreadnoughts Researched");
+                    } else if (label == "Buy Tame Dragons") {
+                        Stark.setResearch("dragon", true);
+                        JOptionPane.showMessageDialog(button, "Dragons Researched");
+                    } else {
+                        JOptionPane.showMessageDialog(button, "Need Research");
                     }
                 } else if (Lannister.isActive()) {
                     if (label == "Buy Swordmen") {
                         Lannister.setMilitary("swordmen", 1);
+                        JOptionPane.showMessageDialog(button, "Swordmen Trained");
                     } else if (label == "Buy Shieldmen") {
                         Lannister.setMilitary("shieldmen", 1);
-                    } else if (label == "Buy Spearmen") {
+                        JOptionPane.showMessageDialog(button, "Shieldmen Trained");
+                    } else if (label == "Buy Spearmen" && Lannister.getResearch("spearmen")) {
                         Lannister.setMilitary("spearmen", 1);
-                    } else if (label == "Buy Mounted Calvalry") {
+                        JOptionPane.showMessageDialog(button, "Spearmen Trained");
+                    } else if (label == "Buy Mounted Calvalry" && Lannister.getResearch("mountedCalvalry")) {
                         Lannister.setMilitary("mountedCavalry", 1);
+                        JOptionPane.showMessageDialog(button, "Mounted Calvalry Trained");
                     } else if (label == "Buy Archer") {
                         Lannister.setMilitary("archer", 1);
+                        JOptionPane.showMessageDialog(button, "Archer Trained");
                     } else if (label == "Buy Scout Raven") {
                         Lannister.setMilitary("scoutRaven", 1);
+                        JOptionPane.showMessageDialog(button, "Scout Raven Trained");
                     } else if (label == "Buy Transport Ship") {
                         Lannister.setMilitary("transportShip", 1);
-                    } else if (label == "Buy War Ship") {
+                        JOptionPane.showMessageDialog(button, "Transport Ship Built");
+                    } else if (label == "Buy War Ship" && Lannister.getResearch("warShip")) {
                         Lannister.setMilitary("warShip", 1);
-                    } else if (label == "Buy Wyvern") {
+                        JOptionPane.showMessageDialog(button, "War Ship Built");
+                    } else if (label == "Buy Wyvern" && Lannister.getResearch("wyvern")) {
                         Lannister.setMilitary("wyvern", 1);
-                    } else if (label == "Buy Dreadnought") {
+                        JOptionPane.showMessageDialog(button, "Wyvern Trained");
+                    } else if (label == "Buy Dreadnought" && Lannister.getResearch("dreadnought")) {
                         Lannister.setMilitary("dreadnought", 1);
-                    } else if (label == "Buy Dragon") {
+                        JOptionPane.showMessageDialog(button, "Dreadnought Built");
+                    } else if (label == "Buy Dragon" && Lannister.getResearch("dragon")) {
                         Lannister.setMilitary("dragon", 1);
+                        JOptionPane.showMessageDialog(button, "Dragon Trained");
+                    } else if (label == "Buy Mine" && Lannister.getResearch("mine")) {
+                        Lannister.setBuilding("mine", 1);
+                        JOptionPane.showMessageDialog(button, "Mine Built");
+                    } else if (label == "Buy Forge" && Lannister.getResearch("forge")) {
+                        Lannister.setBuilding("forge", 1);
+                        JOptionPane.showMessageDialog(button, "Forge Built");
+                    } else if (label == "Buy Lumber Mill" && Lannister.getResearch("lumberMill")) {
+                        Lannister.setBuilding("lumberMill", 1);
+                        JOptionPane.showMessageDialog(button, "Lumber Mill Built");
+                    } else if (label == "Buy Deforestation" && Lannister.getResearch("deforestation")) {
+                        Lannister.setBuilding("deforestation", 1);
+                        JOptionPane.showMessageDialog(button, "Deforestation Built");
+                    } else if (label == "Buy Farm" && Lannister.getResearch("farm")) {
+                        Lannister.setBuilding("farm", 1);
+                        JOptionPane.showMessageDialog(button, "Farm Built");
+                    } else if (label == "Buy Plantation" && Lannister.getResearch("plantation")) {
+                        Lannister.setBuilding("plantation", 1);
+                        JOptionPane.showMessageDialog(button, "Plantation Built");
+                    } else if (label == "Buy School" && Lannister.getResearch("school")) {
+                        Lannister.setBuilding("school", 1);
+                        JOptionPane.showMessageDialog(button, "School Built");
+                    } else if (label == "Buy College" && Lannister.getResearch("college")) {
+                        Lannister.setBuilding("college", 1);
+                        JOptionPane.showMessageDialog(button, "College Built");
+                    } else if (label == "Buy Build Mines") {
+                        Lannister.setResearch("mine", true);
+                        JOptionPane.showMessageDialog(button, "Mines Researched");
+                    } else if (label == "Buy Build Forges") {
+                        Lannister.setResearch("forge", true);
+                        JOptionPane.showMessageDialog(button, "Forges Researched");
+                    } else if (label == "Buy Build Lumber Mills") {
+                        Lannister.setResearch("lumberMill", true);
+                        JOptionPane.showMessageDialog(button, "Lumber Mills Researched");
+                    } else if (label == "Buy Build Deforestation") {
+                        Lannister.setResearch("deforestation", true);
+                        JOptionPane.showMessageDialog(button, "Deforestation Researched");
+                    } else if (label == "Buy Build Farms") {
+                        Lannister.setResearch("farm", true);
+                        JOptionPane.showMessageDialog(button, "Farms Researched");
+                    } else if (label == "Buy Build Plantations") {
+                        Lannister.setResearch("plantation", true);
+                        JOptionPane.showMessageDialog(button, "Plantations Researched");
+                    } else if (label == "Buy Build Schools") {
+                        Lannister.setResearch("school", true);
+                        JOptionPane.showMessageDialog(button, "Schools Researched");
+                    } else if (label == "Buy Build Colleges") {
+                        Lannister.setResearch("college", true);
+                        JOptionPane.showMessageDialog(button, "Colleges Researched");
+                    } else if (label == "Buy Train Spearmen") {
+                        Lannister.setResearch("spearmen", true);
+                        JOptionPane.showMessageDialog(button, "Spearmen Researched");
+                    } else if (label == "Buy Train Mounted Calvalry") {
+                        Lannister.setResearch("mountedCalvalry", true);
+                        JOptionPane.showMessageDialog(button, "Mounted Calvalry Researched");
+                    } else if (label == "Buy Build War Ships") {
+                        Lannister.setResearch("warShip", true);
+                        JOptionPane.showMessageDialog(button, "War Ships Researched");
+                    } else if (label == "Buy Tame Wyverns") {
+                        Lannister.setResearch("wyvern", true);
+                        JOptionPane.showMessageDialog(button, "Wyverns Researched");
+                    } else if (label == "Buy Build Dreadnoughts") {
+                        Lannister.setResearch("dreadnought", true);
+                        JOptionPane.showMessageDialog(button, "Dreadnoughts Researched");
+                    } else if (label == "Buy Tame Dragons") {
+                        Lannister.setResearch("dragon", true);
+                        JOptionPane.showMessageDialog(button, "Dragons Researched");
+                    } else {
+                        JOptionPane.showMessageDialog(button, "Need Research");
                     }
                 } else if (Targaryen.isActive()) {
                     if (label == "Buy Swordmen") {
                         Targaryen.setMilitary("swordmen", 1);
+                        JOptionPane.showMessageDialog(button, " Swordmen Trained");
                     } else if (label == "Buy Shieldmen") {
                         Targaryen.setMilitary("shieldmen", 1);
-                    } else if (label == "Buy Spearmen") {
+                        JOptionPane.showMessageDialog(button, "Shieldmen Trained");
+                    } else if (label == "Buy Spearmen" && Targaryen.getResearch("spearmen")) {
                         Targaryen.setMilitary("spearmen", 1);
-                    } else if (label == "Buy Mounted Calvalry") {
+                        JOptionPane.showMessageDialog(button, "Spearmen Trained");
+                    } else if (label == "Buy Mounted Calvalry" && Targaryen.getResearch("mountedCalvalry")) {
                         Targaryen.setMilitary("mountedCavalry", 1);
+                        JOptionPane.showMessageDialog(button, "Mounted Calvalry Trained");
                     } else if (label == "Buy Archer") {
                         Targaryen.setMilitary("archer", 1);
+                        JOptionPane.showMessageDialog(button, "Archer Trained");
                     } else if (label == "Buy Scout Raven") {
                         Targaryen.setMilitary("scoutRaven", 1);
+                        JOptionPane.showMessageDialog(button, "Scout Raven Trained");
                     } else if (label == "Buy Transport Ship") {
                         Targaryen.setMilitary("transportShip", 1);
-                    } else if (label == "Buy War Ship") {
+                        JOptionPane.showMessageDialog(button, "Transport Ship Built");
+                    } else if (label == "Buy War Ship" && Targaryen.getResearch("warShip")) {
                         Targaryen.setMilitary("warShip", 1);
-                    } else if (label == "Buy Wyvern") {
+                        JOptionPane.showMessageDialog(button, "War Ship Built");
+                    } else if (label == "Buy Wyvern" && Targaryen.getResearch("wyvern")) {
                         Targaryen.setMilitary("wyvern", 1);
-                    } else if (label == "Buy Dreadnought") {
+                        JOptionPane.showMessageDialog(button, "Wyvern Trained");
+                    } else if (label == "Buy Dreadnought" && Targaryen.getResearch("dreadnought")) {
                         Targaryen.setMilitary("dreadnought", 1);
-                    } else if (label == "Buy Dragon") {
+                        JOptionPane.showMessageDialog(button, "Dreadnought Built");
+                    } else if (label == "Buy Dragon" && Targaryen.getResearch("dragon")) {
                         Targaryen.setMilitary("dragon", 1);
+                        JOptionPane.showMessageDialog(button, "Dragon Trained");
+                    } else if (label == "Buy Mine" && Targaryen.getResearch("mine")) {
+                        Targaryen.setBuilding("mine", 1);
+                        JOptionPane.showMessageDialog(button, "Mine Built");
+                    } else if (label == "Buy Forge" && Targaryen.getResearch("forge")) {
+                        Targaryen.setBuilding("forge", 1);
+                        JOptionPane.showMessageDialog(button, "Forge Built");
+                    } else if (label == "Buy Lumber Mill" && Targaryen.getResearch("lumberMill")) {
+                        Targaryen.setBuilding("lumberMill", 1);
+                        JOptionPane.showMessageDialog(button, "Lumber Mill Built");
+                    } else if (label == "Buy Deforestation" && Targaryen.getResearch("deforestation")) {
+                        Targaryen.setBuilding("deforestation", 1);
+                        JOptionPane.showMessageDialog(button, "Deforestation Built");
+                    } else if (label == "Buy Farm" && Targaryen.getResearch("farm")) {
+                        Targaryen.setBuilding("farm", 1);
+                        JOptionPane.showMessageDialog(button, "Farm Built");
+                    } else if (label == "Buy Plantation" && Targaryen.getResearch("plantation")) {
+                        Targaryen.setBuilding("plantation", 1);
+                        JOptionPane.showMessageDialog(button, "Plantation Built");
+                    } else if (label == "Buy School" && Targaryen.getResearch("school")) {
+                        Targaryen.setBuilding("school", 1);
+                        JOptionPane.showMessageDialog(button, "School Built");
+                    } else if (label == "Buy College" && Targaryen.getResearch("college")) {
+                        Targaryen.setBuilding("college", 1);
+                        JOptionPane.showMessageDialog(button, "College Built");
+                    } else if (label == "Buy Build Mines") {
+                        Targaryen.setResearch("mine", true);
+                        JOptionPane.showMessageDialog(button, "Mines Researched");
+                    } else if (label == "Buy Build Forges") {
+                        Targaryen.setResearch("forge", true);
+                        JOptionPane.showMessageDialog(button, "Forges Researched");
+                    } else if (label == "Buy Build Lumber Mills") {
+                        Targaryen.setResearch("lumberMill", true);
+                        JOptionPane.showMessageDialog(button, "Lumber Mills Researched");
+                    } else if (label == "Buy Build Deforestation") {
+                        Targaryen.setResearch("deforestation", true);
+                        JOptionPane.showMessageDialog(button, "Deforestation Researched");
+                    } else if (label == "Buy Build Farms") {
+                        Targaryen.setResearch("farm", true);
+                        JOptionPane.showMessageDialog(button, "Farms Researched");
+                    } else if (label == "Buy Build Plantations") {
+                        Targaryen.setResearch("plantation", true);
+                        JOptionPane.showMessageDialog(button, "Plantations Researched");
+                    } else if (label == "Buy Build Schools") {
+                        Targaryen.setResearch("school", true);
+                        JOptionPane.showMessageDialog(button, "Schools Researched");
+                    } else if (label == "Buy Build Colleges") {
+                        Targaryen.setResearch("college", true);
+                        JOptionPane.showMessageDialog(button, "Colleges Researched");
+                    } else if (label == "Buy Train Spearmen") {
+                        Targaryen.setResearch("spearmen", true);
+                        JOptionPane.showMessageDialog(button, " Spearmen Researched");
+                    } else if (label == "Buy Train Mounted Calvalry") {
+                        Targaryen.setResearch("mountedCalvalry", true);
+                        JOptionPane.showMessageDialog(button, "Mounted Calvalry Researched");
+                    } else if (label == "Buy Build War Ships") {
+                        Targaryen.setResearch("warShip", true);
+                        JOptionPane.showMessageDialog(button, " War Ships Researched");
+                    } else if (label == "Buy Tame Wyverns") {
+                        Targaryen.setResearch("wyvern", true);
+                        JOptionPane.showMessageDialog(button, "Wyverns Researched");
+                    } else if (label == "Buy Build Dreadnoughts") {
+                        Targaryen.setResearch("dreadnought", true);
+                        JOptionPane.showMessageDialog(button, "Dreadnoughts Researched");
+                    } else if (label == "Buy Tame Dragons") {
+                        Targaryen.setResearch("dragon", true);
+                        JOptionPane.showMessageDialog(button, "Dragons Researched");
+                    } else {
+                        JOptionPane.showMessageDialog(button, "Need Research");
                     }
                 }
             }
@@ -1655,6 +1939,28 @@ public class Main {
         private int wyvern;
         private int dreadnought;
         private int dragon;
+        private int mine;
+        private int forge;
+        private int lumberMill;
+        private int deforestation;
+        private int farm;
+        private int plantation;
+        private int school;
+        private int college;
+        private boolean mineResearched;
+        private boolean forgeResearched;
+        private boolean lumberMillResearched;
+        private boolean deforestationResearched;
+        private boolean farmResearched;
+        private boolean plantationResearched;
+        private boolean schoolResearched;
+        private boolean collegeResearched;
+        private boolean spearmenResearched;
+        private boolean mountedCalvalryResearched;
+        private boolean warShipResearched;
+        private boolean wyvernResearched;
+        private boolean dreadnoughtResearched;
+        private boolean dragonResearched;
 
         public Nation() {
             inboxTabs.setTabPlacement(JTabbedPane.LEFT);
@@ -1679,6 +1985,28 @@ public class Main {
             wyvern = 0;
             dreadnought = 0;
             dragon = 0;
+            mine = 0;
+            forge = 0;
+            lumberMill = 0;
+            deforestation = 0;
+            farm = 0;
+            plantation = 0;
+            school = 0;
+            college = 0;
+            mineResearched = false;
+            forgeResearched = false;
+            lumberMillResearched = false;
+            deforestationResearched = false;
+            farmResearched = false;
+            plantationResearched = false;
+            schoolResearched = false;
+            collegeResearched = false;
+            spearmenResearched = false;
+            mountedCalvalryResearched = false;
+            warShipResearched = false;
+            wyvernResearched = false;
+            dreadnoughtResearched = false;
+            dragonResearched = false;
         }
 
         public void setActive(boolean status) {
@@ -1770,6 +2098,114 @@ public class Main {
                 return dragon;
             } else {
                 return 0;
+            }
+        }
+
+        public void setBuilding(String unit, int change) {
+            if (unit == "mine") {
+                mine += change;
+            } else if (unit == "forge") {
+                forge += change;
+            } else if (unit == "lumberMill") {
+                lumberMill += change;
+            } else if (unit == "deforestation") {
+                deforestation += change;
+            } else if (unit == "farm") {
+                farm += change;
+            } else if (unit == "plantation") {
+                plantation += change;
+            } else if (unit == "school") {
+                school += change;
+            } else if (unit == "college") {
+                college += change;
+            }
+        }
+
+        public int getBuilding(String unit) {
+            if (unit == "mine") {
+                return mine;
+            } else if (unit == "forge") {
+                return forge;
+            } else if (unit == "lumberMill") {
+                return lumberMill;
+            } else if (unit == "deforestation") {
+                return deforestation;
+            } else if (unit == "farm") {
+                return farm;
+            } else if (unit == "plantation") {
+                return plantation;
+            } else if (unit == "school") {
+                return school;
+            } else if (unit == "college") {
+                return college;
+            } else {
+                return 0;
+            }
+        }
+
+        public void setResearch(String unit, boolean change) {
+            if (unit == "mine") {
+                mineResearched = change;
+            } else if (unit == "forge") {
+                forgeResearched = change;
+            } else if (unit == "lumberMill") {
+                lumberMillResearched = change;
+            } else if (unit == "deforestation") {
+                deforestationResearched = change;
+            } else if (unit == "farm") {
+                farmResearched = change;
+            } else if (unit == "plantation") {
+                plantationResearched = change;
+            } else if (unit == "school") {
+                schoolResearched = change;
+            } else if (unit == "college") {
+                collegeResearched = change;
+            } else if (unit == "spearmen") {
+                spearmenResearched = change;
+            } else if (unit == "mountedCalvalry") {
+                mountedCalvalryResearched = change;
+            } else if (unit == "warShip") {
+                warShipResearched = change;
+            } else if (unit == "wyvern") {
+                wyvernResearched = change;
+            } else if (unit == "dreadnought") {
+                dreadnoughtResearched = change;
+            } else if (unit == "dragon") {
+                dragonResearched = change;
+            }
+        }
+
+        public boolean getResearch(String unit) {
+            if (unit == "mine") {
+                return mineResearched;
+            } else if (unit == "forge") {
+                return forgeResearched;
+            } else if (unit == "lumberMill") {
+                return lumberMillResearched;
+            } else if (unit == "deforestation") {
+                return deforestationResearched;
+            } else if (unit == "farm") {
+                return farmResearched;
+            } else if (unit == "plantation") {
+                return plantationResearched;
+            } else if (unit == "school") {
+                return schoolResearched;
+            } else if (unit == "college") {
+                return collegeResearched;
+            } else if (unit == "spearmen") {
+                return spearmenResearched;
+            } else if (unit == "mountedCalvalry") {
+                return mountedCalvalryResearched;
+            } else if (unit == "warShip") {
+                return warShipResearched;
+            } else if (unit == "wyvern") {
+                return wyvernResearched;
+            } else if (unit == "dreadnought") {
+                return dreadnoughtResearched;
+            } else if (unit == "dragon") {
+                return dragonResearched;
+            } else {
+                return false;
             }
         }
     }

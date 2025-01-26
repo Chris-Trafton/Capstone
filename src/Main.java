@@ -185,18 +185,18 @@ public class Main {
             mount_tile_small = ImageIO.read(new File("images\\mountain_tile_small.png"));
             desert_tile = ImageIO.read(new File("images\\desert_tile.png"));
             desert_tile_small = ImageIO.read(new File("images\\desert_tile_small.png"));
-            player_flat_tile = ImageIO.read(new File("images\\player_flat_tile.png"));
-            enemy_flat_tile = ImageIO.read(new File("images\\enemy_flat_tile.png"));
-            player_flat_tile_small = ImageIO.read(new File("images\\player_flat_tile_small.png"));
-            enemy_flat_tile_small = ImageIO.read(new File("images\\enemy_flat_tile_small.png"));
+            player_flat_tile = ImageIO.read(new File("images\\player_flatland_tile.png"));
+            enemy_flat_tile = ImageIO.read(new File("images\\enemy_flatland_tile.png"));
+            player_flat_tile_small = ImageIO.read(new File("images\\player_flatland_tile_small.png"));
+            enemy_flat_tile_small = ImageIO.read(new File("images\\enemy_flatland_tile_small.png"));
             player_forest_tile = ImageIO.read(new File("images\\player_forest_tile.png"));
             enemy_forest_tile = ImageIO.read(new File("images\\enemy_forest_tile.png"));
             player_forest_tile_small = ImageIO.read(new File("images\\player_forest_tile_small.png"));
             enemy_forest_tile_small = ImageIO.read(new File("images\\enemy_forest_tile_small.png"));
-            player_mount_tile = ImageIO.read(new File("images\\player_mount_tile.png"));
-            enemy_mount_tile = ImageIO.read(new File("images\\enemy_mount_tile.png"));
-            player_mount_tile_small = ImageIO.read(new File("images\\player_mount_tile_small.png"));
-            enemy_mount_tile_small = ImageIO.read(new File("images\\enemy_mount_tile_small.png"));
+            player_mount_tile = ImageIO.read(new File("images\\player_mountain_tile.png"));
+            enemy_mount_tile = ImageIO.read(new File("images\\enemy_mountain_tile.png"));
+            player_mount_tile_small = ImageIO.read(new File("images\\player_mountain_tile_small.png"));
+            enemy_mount_tile_small = ImageIO.read(new File("images\\enemy_mountain_tile_small.png"));
             player_desert_tile = ImageIO.read(new File("images\\player_desert_tile.png"));
             enemy_desert_tile = ImageIO.read(new File("images\\enemy_desert_tile.png"));
             player_desert_tile_small = ImageIO.read(new File("images\\player_desert_tile_small.png"));
@@ -291,27 +291,77 @@ public class Main {
         Graphics2D g2d = (Graphics2D) g;
         for (int i = 0; i < tiles.size(); i++) {
             Tile current = tiles.get(i);
-            if (current.mouseHover) {
-                System.out.println((current.x + current.getWidth() / 2) + " " + (current.y - current.getHeight() / 2) + "\n" + board.mouseX + " " + board.mouseY);
-                if (current.myBiome == biome.Flatland) {
-                    g2d.drawImage(rotateImageObject(current).filter(flat_tile, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
-                } else if (current.myBiome == biome.Forest) {
-                    g2d.drawImage(rotateImageObject(current).filter(forest_tile, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
-                } else if (current.myBiome == biome.Mountain) {
-                    g2d.drawImage(rotateImageObject(current).filter(mount_tile, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
-                } else if (current.myBiome == biome.Desert) {
-                    g2d.drawImage(rotateImageObject(current).filter(desert_tile, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+            if (current.owner.equals(currentNation)) {
+                if (current.mouseHover) {
+                    System.out.println((current.x + current.getWidth() / 2) + " " + (current.y - current.getHeight() / 2) + "\n" + board.mouseX + " " + board.mouseY);
+                    if (current.myBiome == biome.Flatland) {
+                        g2d.drawImage(rotateImageObject(current).filter(player_flat_tile, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                    } else if (current.myBiome == biome.Forest) {
+                        g2d.drawImage(rotateImageObject(current).filter(player_forest_tile, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                    } else if (current.myBiome == biome.Mountain) {
+                        g2d.drawImage(rotateImageObject(current).filter(player_mount_tile, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                    } else if (current.myBiome == biome.Desert) {
+                        g2d.drawImage(rotateImageObject(current).filter(player_desert_tile, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                    }
+                    System.out.println(current.toString());
+                } else {
+                    if (current.myBiome == biome.Flatland) {
+                        g2d.drawImage(rotateImageObject(current).filter(player_flat_tile_small, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                    } else if (current.myBiome == biome.Forest) {
+                        g2d.drawImage(rotateImageObject(current).filter(player_forest_tile_small, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                    } else if (current.myBiome == biome.Mountain) {
+                        g2d.drawImage(rotateImageObject(current).filter(player_mount_tile_small, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                    } else if (current.myBiome == biome.Desert) {
+                        g2d.drawImage(rotateImageObject(current).filter(player_desert_tile_small, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                    }
                 }
-                System.out.println(current.toString());
+            } else if (current.owner.equals("")) {
+                if (current.mouseHover) {
+                    System.out.println((current.x + current.getWidth() / 2) + " " + (current.y - current.getHeight() / 2) + "\n" + board.mouseX + " " + board.mouseY);
+                    if (current.myBiome == biome.Flatland) {
+                        g2d.drawImage(rotateImageObject(current).filter(flat_tile, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                    } else if (current.myBiome == biome.Forest) {
+                        g2d.drawImage(rotateImageObject(current).filter(forest_tile, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                    } else if (current.myBiome == biome.Mountain) {
+                        g2d.drawImage(rotateImageObject(current).filter(mount_tile, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                    } else if (current.myBiome == biome.Desert) {
+                        g2d.drawImage(rotateImageObject(current).filter(desert_tile, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                    }
+                    System.out.println(current.toString());
+                } else {
+                    if (current.myBiome == biome.Flatland) {
+                        g2d.drawImage(rotateImageObject(current).filter(flat_tile_small, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                    } else if (current.myBiome == biome.Forest) {
+                        g2d.drawImage(rotateImageObject(current).filter(forest_tile_small, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                    } else if (current.myBiome == biome.Mountain) {
+                        g2d.drawImage(rotateImageObject(current).filter(mount_tile_small, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                    } else if (current.myBiome == biome.Desert) {
+                        g2d.drawImage(rotateImageObject(current).filter(desert_tile_small, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                    }
+                }
             } else {
-                if (current.myBiome == biome.Flatland) {
-                    g2d.drawImage(rotateImageObject(current).filter(flat_tile_small, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
-                } else if (current.myBiome == biome.Forest) {
-                    g2d.drawImage(rotateImageObject(current).filter(forest_tile_small, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
-                } else if (current.myBiome == biome.Mountain) {
-                    g2d.drawImage(rotateImageObject(current).filter(mount_tile_small, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
-                } else if (current.myBiome == biome.Desert) {
-                    g2d.drawImage(rotateImageObject(current).filter(desert_tile_small, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                if (current.mouseHover) {
+                    System.out.println((current.x + current.getWidth() / 2) + " " + (current.y - current.getHeight() / 2) + "\n" + board.mouseX + " " + board.mouseY);
+                    if (current.myBiome == biome.Flatland) {
+                        g2d.drawImage(rotateImageObject(current).filter(enemy_flat_tile, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                    } else if (current.myBiome == biome.Forest) {
+                        g2d.drawImage(rotateImageObject(current).filter(enemy_forest_tile, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                    } else if (current.myBiome == biome.Mountain) {
+                        g2d.drawImage(rotateImageObject(current).filter(enemy_mount_tile, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                    } else if (current.myBiome == biome.Desert) {
+                        g2d.drawImage(rotateImageObject(current).filter(enemy_desert_tile, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                    }
+                    System.out.println(current.toString());
+                } else {
+                    if (current.myBiome == biome.Flatland) {
+                        g2d.drawImage(rotateImageObject(current).filter(enemy_flat_tile_small, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                    } else if (current.myBiome == biome.Forest) {
+                        g2d.drawImage(rotateImageObject(current).filter(enemy_forest_tile_small, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                    } else if (current.myBiome == biome.Mountain) {
+                        g2d.drawImage(rotateImageObject(current).filter(enemy_mount_tile_small, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                    } else if (current.myBiome == biome.Desert) {
+                        g2d.drawImage(rotateImageObject(current).filter(enemy_desert_tile_small, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                    }
                 }
             }
         }
@@ -793,6 +843,7 @@ public class Main {
             tiles.get(i).generateBiome();
             tiles.get(i).isWaterSide();
             tiles.get(i).setResourceRates();
+            tiles.get(i).setOwner(i);
         }
         return tiles;
     }
@@ -2492,6 +2543,7 @@ public class Main {
 
 
     public static class Tile extends ImageObject {
+        private String owner;
         private Vector<Tile> neighbors;
         private Vector<Integer> resourceRates;
         private Vector<Integer> buildings;
@@ -2509,7 +2561,16 @@ public class Main {
             buildings.add(0);
         }
         public String toString() {
-            return "Labor: " + resourceRates.get(0) + " Wood: " + resourceRates.get(1) + " Metal: " + resourceRates.get(2) + " Food: " + resourceRates.get(3) + " Research: " + resourceRates.get(4);
+            return owner + "- Labor: " + resourceRates.get(0) + " Wood: " + resourceRates.get(1) + " Metal: " + resourceRates.get(2) + " Food: " + resourceRates.get(3) + " Research: " + resourceRates.get(4);
+        }
+        public void setOwner(int index) {
+            if (index == 0) {
+                owner = "Stark";
+            } else if (index == numTiles - 1) {
+                owner = "Lannister";
+            } else {
+                owner = "";
+            }
         }
         public biome getBiome() {
             return myBiome;

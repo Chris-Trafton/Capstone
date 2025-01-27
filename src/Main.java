@@ -117,6 +117,7 @@ public class Main {
                 @Override
                 public void mouseDragged(MouseEvent e) {
                     if (lastPosition != null) {
+                        mousePressed = false;
                         deltaX = e.getX() - lastPosition.getX();
                         deltaY = e.getY() - lastPosition.getY();
                         if (deltaX != 0 || deltaY != 0) {
@@ -645,7 +646,7 @@ public class Main {
 
     private static void openStartScreen() {
         JFrame frame = new JFrame("Start Screen");
-        frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocation(300, 200);
 
         JButton newGameButton = new JButton("New Game");
@@ -670,7 +671,9 @@ public class Main {
             public void actionPerformed(ActionEvent e) {
                 endgame = true;
                 frame.setVisible(false);
-//                appFrame.setVisible(false);
+                appFrame.setVisible(false);
+                frame.dispose();
+                appFrame.dispose();
             }
         });
 
@@ -686,7 +689,7 @@ public class Main {
 
     public static void OpenSetupMenu() {
         JFrame frame = new JFrame("Setup Menu");
-        frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocation(300, 200);
 
         JLabel nationL = new JLabel("Nation:");
@@ -705,6 +708,7 @@ public class Main {
         startButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                appFrame.setVisible(true);
                 board.revalidate();
                 board.repaint();
                 endgame = true;
@@ -774,7 +778,8 @@ public class Main {
         backButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                frame.setVisible(false);
+                frame.dispose();
+                openStartScreen();
             }
         });
 
@@ -1610,6 +1615,7 @@ public class Main {
                     } else if (nationComboBox.getSelectedItem() == "Targaryen") {
                         Targaryen.inboxTabs.addTab((String) nationComboBox.getSelectedItem(), inboxMail);
                     }
+                    backgroundDraw();
                     frame.setVisible(false);
                 }
             });
@@ -2834,7 +2840,6 @@ public class Main {
         board = new MouseTrackerPanel();
 
         appFrame.getContentPane().add(board);
-        appFrame.setVisible(true);
 
         openStartScreen();
     }

@@ -59,6 +59,7 @@ public class Main {
     private static double twoPi;
     private static double tileFixX;
     private static double tileFixY;
+    private static boolean mousePressed;
     private enum biome {Flatland,Forest,Mountain,Desert};
     private static Vector<Integer> biomeCounts;
     private static int numTiles;
@@ -140,6 +141,7 @@ public class Main {
                 @Override
                 public void mousePressed(MouseEvent e) {
                     lastPosition = e.getPoint();
+                    mousePressed = true;
                 }
 
                 @Override
@@ -148,6 +150,7 @@ public class Main {
                         Thread.sleep(100);
                     } catch (InterruptedException ie) {}
                     lastPosition = null;
+                    mousePressed = false;
                     deltaX = 0;
                     deltaY = 0;
                 }
@@ -948,6 +951,65 @@ public class Main {
             frame.setSize(30, 100);
             frame.setVisible(true);
         }
+    }
+
+    private static void OpenTileMenu(Tile tile) {
+        JFrame frame = new JFrame("Tile Menu");
+        frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+        frame.setLocation((int)(tile.getX() + tile.getWidth()),(int)tile.getY());
+
+        JPanel jPanel = new JPanel();
+        jPanel.setLayout(new GridLayout(7, 1));
+
+        JLabel tileOwner = new JLabel(tile.owner);
+        JLabel tileLabor = new JLabel("Labor: " + tile.resourceRates.get(0));
+        JLabel tileWood = new JLabel("Wood: " + tile.resourceRates.get(1));
+        JLabel tileMetal = new JLabel("Metal: " + tile.resourceRates.get(2));
+        JLabel tileFood = new JLabel("Food: " + tile.resourceRates.get(3));
+        JLabel tileResearch = new JLabel("Education: " + tile.resourceRates.get(4));
+
+        JButton claimTile = new JButton("Claim Tile");
+        claimTile.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                tile.owner = currentNation;
+                tileOwner.setText(currentNation);
+                if (currentNation.equals("Stark")) {
+                    Stark.labor += tile.resourceRates.get(0);
+                    Stark.wood += tile.resourceRates.get(1);
+                    Stark.metal += tile.resourceRates.get(2);
+                    Stark.food += tile.resourceRates.get(3);
+                    Stark.education += tile.resourceRates.get(4);
+                } else if (currentNation.equals("Lannister")) {
+                    Lannister.labor += tile.resourceRates.get(0);
+                    Lannister.wood += tile.resourceRates.get(1);
+                    Lannister.metal += tile.resourceRates.get(2);
+                    Lannister.food += tile.resourceRates.get(3);
+                    Lannister.education += tile.resourceRates.get(4);
+                } else {
+                    Targaryen.labor += tile.resourceRates.get(0);
+                    Targaryen.wood += tile.resourceRates.get(1);
+                    Targaryen.metal += tile.resourceRates.get(2);
+                    Targaryen.food += tile.resourceRates.get(3);
+                    Targaryen.education += tile.resourceRates.get(4);
+                }
+                jPanel.remove(claimTile);
+                jPanel.repaint();
+                backgroundDraw();
+            }
+        });
+        jPanel.add(tileOwner);
+        jPanel.add(tileLabor);
+        jPanel.add(tileWood);
+        jPanel.add(tileMetal);
+        jPanel.add(tileFood);
+        jPanel.add(tileResearch);
+        if (tile.owner.equals("")) {
+            jPanel.add(claimTile);
+        }
+        frame.add(jPanel);
+        frame.setSize(50,200);
+        frame.setVisible(true);
     }
 
     private static class OpenNationMenu implements ActionListener {
@@ -2357,6 +2419,10 @@ public class Main {
                         if (MouseOver(tiles.get(i))) {
                             tiles.get(i).mouseHover = true;
                             System.out.println(tiles.get(i).toString());
+                            if (mousePressed) {
+                                mousePressed = false;
+                                OpenTileMenu(tiles.get(i));
+                            }
 
                         } else if (tiles.get(i).mouseHover){
                             backgroundDraw();

@@ -7,17 +7,20 @@ import java.awt.geom.Point2D;
 import java.awt.image.AffineTransformOp;
 import java.awt.Dimension;
 import java.awt.Toolkit;
+import java.io.*;
+import java.net.ServerSocket;
 import java.util.Date;
+import java.util.Map;
 import java.util.Random;
 import java.util.Vector;
+import java.net.*;
 
 import javax.swing.*;
 
 import javax.imageio.ImageIO;
 
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
@@ -28,6 +31,7 @@ import javax.swing.table.TableCellRenderer;
 public class Main {
     // global variables for the game
     private static MouseTrackerPanel board;
+    private static String ip;
     private static BufferedImage tile;
     private static BufferedImage tile_small;
     private static BufferedImage flat_tile;
@@ -654,6 +658,7 @@ public class Main {
             @Override
             public void actionPerformed(ActionEvent e) {
                 frame.setVisible(false);
+                frame.dispose();
                 OpenSetupMenu();
             }
         });
@@ -663,6 +668,15 @@ public class Main {
             public void actionPerformed(ActionEvent e) {
                 frame.setVisible(false);
                 OpenLoadMenu();
+            }
+        });
+        JButton joinGameButton = new JButton("Join Game");
+        newGameButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                frame.setVisible(false);
+                frame.dispose();
+                OpenJoinMenu();
             }
         });
         JButton quitGameButton = new JButton("Quit Game");
@@ -680,6 +694,7 @@ public class Main {
         JPanel jPanel = new JPanel();
         jPanel.setLayout(new GridLayout(3, 1));
         jPanel.add(newGameButton);
+        jPanel.add(joinGameButton);
         jPanel.add(loadGameButton);
         jPanel.add(quitGameButton);
         frame.add(jPanel);
@@ -708,6 +723,7 @@ public class Main {
         startButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+
                 appFrame.setVisible(true);
                 board.revalidate();
                 board.repaint();
@@ -764,12 +780,136 @@ public class Main {
                 Thread t1 = new Thread(new Animate());
                 Thread t2 = new Thread(new TileMover());
                 Thread t3 = new Thread(new MouseOverChecker());
+                Thread t4 = new Thread(new ServerRunner());
+                Thread t5 = new Thread(new ClientRunner());
 //                    Thread t4 = new Thread(new AudioLooper());
 //                    Thread t5 = new Thread(new EnemyMover());
                 t1.start();
                 t2.start();
                 t3.start();
-//                    t4.start();
+                t4.start();
+                t5.start();
+                frame.setVisible(false);
+            }
+        });
+        JButton backButton = new JButton("Back");
+        backButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                frame.dispose();
+                openStartScreen();
+            }
+        });
+
+        JPanel jPanel = new JPanel();
+        jPanel.setLayout(new GridLayout(8, 2));
+        jPanel.add(nationL);
+        jPanel.add(nationComboBox);
+        jPanel.add(metalL);
+        jPanel.add(metalT);
+        jPanel.add(woodL);
+        jPanel.add(woodT);
+        jPanel.add(foodL);
+        jPanel.add(foodT);
+        jPanel.add(laborL);
+        jPanel.add(laborT);
+        jPanel.add(educationL);
+        jPanel.add(educationT);
+        jPanel.add(backButton);
+        jPanel.add(startButton);
+        frame.add(jPanel);
+        frame.setSize(700, 300);
+        frame.setVisible(true);
+    }
+
+    public static void OpenJoinMenu() {
+        JFrame frame = new JFrame("Join Game");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setLocation(300, 200);
+
+        JLabel nationL = new JLabel("Nation:");
+        JComboBox nationComboBox = new JComboBox<>(nations);
+        JLabel ipL = new JLabel("IP:");
+        JTextField ipT = new JTextField(24);
+        JLabel metalL = new JLabel("Metal:");
+        JTextField metalT = new JTextField(8);
+        JLabel woodL = new JLabel("Wood:");
+        JTextField woodT = new JTextField(8);
+        JLabel foodL = new JLabel("Food:");
+        JTextField foodT = new JTextField(8);
+        JLabel laborL = new JLabel("Labor:");
+        JTextField laborT = new JTextField(8);
+        JLabel educationL = new JLabel("Education:");
+        JTextField educationT = new JTextField(8);
+        JButton startButton = new JButton("Start");
+        startButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+                appFrame.setVisible(true);
+                board.revalidate();
+                board.repaint();
+                endgame = true;
+                tileFixX = 0;
+                tileFixY = 0;
+                biomeCounts = new Vector<>();
+                numTiles = 100;
+                biomeCounts.add(0);
+                biomeCounts.add(0);
+                biomeCounts.add(0);
+                biomeCounts.add(0);
+                tiles = new Vector<Tile>();
+                tiles = CreateBoard(numTiles);
+                tileFixX = 0;
+                tileFixY = 0;
+                upPressed = false;
+                downPressed = false;
+                leftPressed = false;
+                rightPressed = false;
+                background_drawn = false;
+                lastAudioStart = System.currentTimeMillis();
+//                    playAudio(backgroundState);
+                currentNation = (String) nationComboBox.getSelectedItem();
+                ip = ipT.getText();
+                if (currentNation == "Stark") {
+                    Stark.setActive(true);
+                    Lannister.setActive(false);
+                    Targaryen.setActive(false);
+                    Stark.setResource("metal", Integer.parseInt(metalT.getText()));
+                    Stark.setResource("wood", Integer.parseInt(woodT.getText()));
+                    Stark.setResource("food", Integer.parseInt(foodT.getText()));
+                    Stark.setResource("labor", Integer.parseInt(laborT.getText()));
+                    Stark.setResource("education", Integer.parseInt(educationT.getText()));
+                } else if (currentNation == "Lannister") {
+                    Stark.setActive(false);
+                    Lannister.setActive(true);
+                    Targaryen.setActive(false);
+                    Lannister.setResource("metal", Integer.parseInt(metalT.getText()));
+                    Lannister.setResource("wood", Integer.parseInt(woodT.getText()));
+                    Lannister.setResource("food", Integer.parseInt(foodT.getText()));
+                    Lannister.setResource("labor", Integer.parseInt(laborT.getText()));
+                    Lannister.setResource("education", Integer.parseInt(educationT.getText()));
+                } else if (currentNation == "Targaryen") {
+                    Stark.setActive(false);
+                    Lannister.setActive(false);
+                    Targaryen.setActive(true);
+                    Targaryen.setResource("metal", Integer.parseInt(metalT.getText()));
+                    Targaryen.setResource("wood", Integer.parseInt(woodT.getText()));
+                    Targaryen.setResource("food", Integer.parseInt(foodT.getText()));
+                    Targaryen.setResource("labor", Integer.parseInt(laborT.getText()));
+                    Targaryen.setResource("education", Integer.parseInt(educationT.getText()));
+                }
+                endgame = false;
+                Thread t1 = new Thread(new Animate());
+                Thread t2 = new Thread(new TileMover());
+                Thread t3 = new Thread(new MouseOverChecker());
+                Thread t4 = new Thread(new ClientRunner());
+//                    Thread t4 = new Thread(new AudioLooper());
+//                    Thread t5 = new Thread(new EnemyMover());
+                t1.start();
+                t2.start();
+                t3.start();
+                t4.start();
 //                    t5.start();
                 frame.setVisible(false);
             }
@@ -802,6 +942,129 @@ public class Main {
         frame.add(jPanel);
         frame.setSize(700, 300);
         frame.setVisible(true);
+    }
+
+    //All Network Stuff
+    private static class ServerRunner implements Runnable {
+        private static Map<String, PlayerHandler> players = new ConcurrentHashMap<>();
+        public void run() {
+            try (ServerSocket serverSocket = new ServerSocket(12345)) {
+                System.out.println("DND Server is running on port 12345");
+
+                while (true) {
+                    Socket clientSocket = serverSocket.accept();
+                    PlayerHandler playerHandler = new PlayerHandler(clientSocket);
+                    new Thread(playerHandler).start();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        public static synchronized void broadcast(String message, PlayerHandler sender) {
+            for (PlayerHandler player : players.values()) {
+                if (player != sender) {
+                    player.sendMessage(message);
+                }
+            }
+        }
+
+        public static synchronized void updatePlayerMove(String playerName, String move) {
+            String message = "UPDATE: " + playerName + ": " + move;
+            broadcast(message, players.get(playerName));
+        }
+
+        public static synchronized void addPlayer(String playerName, PlayerHandler playerHandler) {
+            players.put(playerName, playerHandler);
+        }
+
+        public static synchronized void removePlayer(String playerName) {
+            players.remove(playerName);
+        }
+    }
+
+    private static class PlayerHandler implements Runnable {
+        private Socket socket;
+        private PrintWriter out;
+        private BufferedReader in;
+        private String playerName;
+
+        public PlayerHandler(Socket socket) {
+            this.socket = socket;
+        }
+
+        @Override
+        public void run() {
+            try {
+                in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                out = new PrintWriter(socket.getOutputStream(),true);
+
+                playerName = currentNation;
+                ServerRunner.addPlayer(playerName, this);
+                System.out.println(playerName + " has joined the game.");
+
+                //Deal with moves here
+                String message;
+                while ((message = in.readLine()) != null) {
+                    if (message.startsWith("MOVE:")) {
+                        String move = message.substring(5);
+                        System.out.println("Server: received move from " + playerName);
+                        ServerRunner.updatePlayerMove(playerName,move);
+                    }
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                try {
+                    ServerRunner.removePlayer(playerName);
+                    socket.close();
+                    System.out.println(playerName + " has left the game.");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        public void sendMessage(String message) {
+            out.println(message);
+        }
+    }
+
+    private static class ClientRunner implements Runnable {
+        public void run() {
+            try {
+                Socket socket;
+                if (ip == null) {
+                    socket = new Socket("localhost",12345);
+                } else {
+                    socket = new Socket(ip,12345);
+                }
+                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                PrintWriter out = new PrintWriter(socket.getOutputStream(),true);
+
+                new Thread(() -> {
+                    String serverMessage;
+                    try {
+                        while ((serverMessage = in.readLine()) != null) {
+                            if (serverMessage.startsWith("UPDATE:")) {
+                                String[] parts = serverMessage.split(",");
+                                System.out.println("Client: " + serverMessage);
+                            }
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }).start();
+
+                String move = "MOVE: I am moving";
+                if (move.startsWith("MOVE:")) {
+                    out.println(move);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private static Vector<Tile> CreateBoard(int numTiles) {

@@ -68,6 +68,7 @@ public class Main {
     private static Vector<Integer> biomeCounts;
     private static int numTiles;
     private static Boolean endgame;
+    private static int actionsTaken;
     private static BufferedImage background;
     private static boolean background_drawn;
     private static BufferedImage scrollBackground;
@@ -655,16 +656,29 @@ public class Main {
         newGameButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                frame.setVisible(false);
+//                frame.setVisible(false);
                 OpenSetupMenu();
+                frame.dispose();
             }
         });
+
+        JButton joinGameButton = new JButton("Join Game");
+        joinGameButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+//                frame.setVisible(false);
+                OpenJoinMenu();
+                frame.dispose();
+            }
+        });
+
         JButton loadGameButton = new JButton("Load Game");
         loadGameButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                frame.setVisible(false);
+//                frame.setVisible(false);
                 OpenLoadMenu();
+                frame.dispose();
             }
         });
         JButton quitGameButton = new JButton("Quit Game");
@@ -682,6 +696,7 @@ public class Main {
         JPanel jPanel = new JPanel();
         jPanel.setLayout(new GridLayout(3, 1));
         jPanel.add(newGameButton);
+        jPanel.add(joinGameButton);
         jPanel.add(loadGameButton);
         jPanel.add(quitGameButton);
         frame.add(jPanel);
@@ -734,6 +749,7 @@ public class Main {
                 lastAudioStart = System.currentTimeMillis();
 //                    playAudio(backgroundState);
                 currentNation = (String) nationComboBox.getSelectedItem();
+                actionsTaken = 0;
                 if (currentNation == "Stark") {
                     Stark.setActive(true);
                     Lannister.setActive(false);
@@ -775,7 +791,8 @@ public class Main {
                 t3.start();
                 t4.start();
                 t5.start();
-                frame.setVisible(false);
+//                frame.setVisible(false);
+                frame.dispose();
             }
         });
         JButton backButton = new JButton("Back");
@@ -897,7 +914,8 @@ public class Main {
                 t3.start();
                 t4.start();
 //                    t5.start();
-                frame.setVisible(false);
+//                frame.setVisible(false);
+                frame.dispose();
             }
         });
         JButton backButton = new JButton("Back");
@@ -910,7 +928,9 @@ public class Main {
         });
 
         JPanel jPanel = new JPanel();
-        jPanel.setLayout(new GridLayout(8, 2));
+        jPanel.setLayout(new GridLayout(9, 2));
+        jPanel.add(ipL);
+        jPanel.add(ipT);
         jPanel.add(nationL);
         jPanel.add(nationComboBox);
         jPanel.add(metalL);
@@ -1049,6 +1069,8 @@ public class Main {
                 }
             } catch (IOException e) {
                 e.printStackTrace();
+                appFrame.setVisible(false);
+                openStartScreen();
             }
         }
     }

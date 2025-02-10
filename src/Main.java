@@ -1006,8 +1006,6 @@ public class Main {
                 out = new PrintWriter(socket.getOutputStream(),true);
 
                 playerName = currentNation;
-                ServerRunner.addPlayer(playerName, this);
-                System.out.println(playerName + " has joined the game.");
 
                 //Deal with moves here
                 String message;
@@ -1016,6 +1014,10 @@ public class Main {
                         String move = message.substring(5);
                         System.out.println("Server: received move from " + playerName);
                         ServerRunner.updatePlayerMove(playerName,move);
+                    } else if (message.startsWith("JOIN:")) {
+                        playerName = message.substring(5);
+                        ServerRunner.addPlayer(playerName, this);
+                        System.out.println(playerName + " has joined the game.");
                     }
                 }
 
@@ -1060,11 +1062,13 @@ public class Main {
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
+                        appFrame.setVisible(false);
+                        openStartScreen();
                     }
                 }).start();
 
-                String move = "MOVE: I am moving";
-                if (move.startsWith("MOVE:")) {
+                String move = "JOIN: " + currentNation;
+                if (move.startsWith("MOVE:") || move.startsWith("JOIN:")) {
                     out.println(move);
                 }
             } catch (IOException e) {

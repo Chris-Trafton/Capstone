@@ -1240,7 +1240,7 @@ public class Main {
 
         JLabel tileOwner = new JLabel(tile.owner);
         DefaultTableModel dm = new DefaultTableModel();
-        dm.setDataVector(new Object[][]{{"Metal: " + tile.resourceRates.get(2), "Mines: " + tile.mine, "Swordmen: "},
+        dm.setDataVector(new Object[][]{{"Metal: " + tile.resourceRates.get(2), "Mines: " + tile.mine},
                         {"Wood: " + tile.resourceRates.get(1), "Forges: " + tile.forge},
                         {"Food: " + tile.resourceRates.get(3), "Lumber Mills: " + tile.lumberMill},
                         {"Labor: " + tile.resourceRates.get(0), "Deforestation: " + tile.deforestation},
@@ -1248,7 +1248,7 @@ public class Main {
                         {"", "Plantations: " + tile.plantation},
                         {"", "Schools: " + tile.school},
                         {"", "Colleges: " + tile.college}},
-                new Object[]{"Resource", "Building", "Military"});
+                new Object[]{"Resource", "Building"});
         JTable table = new JTable(dm);
 
         JButton claimTile = new JButton("Claim Tile");
@@ -1405,14 +1405,16 @@ public class Main {
         frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
         frame.setLocation(300, 200);
 
-        String unitList = "";
+        DefaultTableModel dm = new DefaultTableModel();
+        dm.setDataVector(new Object[][]{{"Unit", "Owner"}},
+                new Object[]{"Unit", "Owner"});
         for (int i = 0; i < tile.occupyingUnits.size(); i++) {
-            unitList += tile.occupyingUnits.get(i).unitName + ", ";
+            dm.addRow(new Object[]{tile.occupyingUnits.get(i).unitName, tile.occupyingUnits.get(i).owner});
         }
-        JLabel unitsL = new JLabel(unitList);
+        JTable table = new JTable(dm);
 
-        frame.setSize(1000, 300);
-        frame.add(unitsL);
+        frame.setSize(300, 300);
+        frame.add(table);
 //            frame.pack();
         frame.setVisible(true);
     }
@@ -2063,31 +2065,31 @@ public class Main {
                         JOptionPane.showMessageDialog(button, "Mine Built");
                     } else if (label == "Buy Forge" && Stark.getResearch("forge") && Stark.getResource("metal") >= 50 && Stark.getResource("wood") >= 40 && Stark.getResource("food") >= 20 && Stark.getResource("labor") >= 20) {
 //                        Stark.setBuilding("forge", 1);
-                        selectedTile.setBuilding("mine", 1);
+                        selectedTile.setBuilding("forge", 1);
                         JOptionPane.showMessageDialog(button, "Forge Built");
                     } else if (label == "Buy Lumber Mill" && Stark.getResearch("lumberMill") && Stark.getResource("metal") >= 50 && Stark.getResource("wood") >= 10 && Stark.getResource("food") >= 20 && Stark.getResource("labor") >= 20) {
 //                        Stark.setBuilding("lumberMill", 1);
-                        selectedTile.setBuilding("mine", 1);
+                        selectedTile.setBuilding("lumberMill", 1);
                         JOptionPane.showMessageDialog(button, "Lumber Mill Built");
                     } else if (label == "Buy Deforestation" && Stark.getResearch("deforestation") && Stark.getResource("metal") >= 20 && Stark.getResource("wood") >= 40 && Stark.getResource("food") >= 50 && Stark.getResource("labor") >= 40) {
 //                        Stark.setBuilding("deforestation", 1);
-                        selectedTile.setBuilding("mine", 1);
+                        selectedTile.setBuilding("deforestation", 1);
                         JOptionPane.showMessageDialog(button, "Deforestation Built");
                     } else if (label == "Buy Farm" && Stark.getResearch("farm") && Stark.getResource("metal") >= 20 && Stark.getResource("wood") >= 40 && Stark.getResource("food") >= 20 && Stark.getResource("labor") >= 20) {
 //                        Stark.setBuilding("farm", 1);
-                        selectedTile.setBuilding("mine", 1);
+                        selectedTile.setBuilding("farm", 1);
                         JOptionPane.showMessageDialog(button, "Farm Built");
                     } else if (label == "Buy Plantation" && Stark.getResearch("plantation") && Stark.getResource("metal") >= 40 && Stark.getResource("wood") >= 50 && Stark.getResource("food") >= 20 && Stark.getResource("labor") >= 40) {
 //                        Stark.setBuilding("plantation", 1);
-                        selectedTile.setBuilding("mine", 1);
+                        selectedTile.setBuilding("plantation", 1);
                         JOptionPane.showMessageDialog(button, "Plantation Built");
                     } else if (label == "Buy School" && Stark.getResearch("school") && Stark.getResource("metal") >= 40 && Stark.getResource("wood") >= 20 && Stark.getResource("food") >= 20 && Stark.getResource("labor") >= 20) {
 //                        Stark.setBuilding("school", 1);
-                        selectedTile.setBuilding("mine", 1);
+                        selectedTile.setBuilding("school", 1);
                         JOptionPane.showMessageDialog(button, "School Built");
                     } else if (label == "Buy College" && Stark.getResearch("college") && Stark.getResource("metal") >= 40 && Stark.getResource("wood") >= 40 && Stark.getResource("food") >= 30 && Stark.getResource("labor") >= 40) {
 //                        Stark.setBuilding("college", 1);
-                        selectedTile.setBuilding("mine", 1);
+                        selectedTile.setBuilding("college", 1);
                         JOptionPane.showMessageDialog(button, "College Built");
                     } else if (label == "Buy Build Mines" && Stark.getResource("education") >= 50 && Stark.getResource("labor") >= 10) {
                         Stark.setResearch("mine", true);

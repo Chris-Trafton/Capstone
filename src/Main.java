@@ -985,6 +985,11 @@ public class Main {
             broadcast(message, players.get(playerName));
         }
 
+        public static synchronized void sendBoard(String playerName, String move) {
+            String message = "BOARD" + move;
+            broadcast(message, players.get(playerName));
+        }
+
         public static synchronized void addPlayer(String playerName, PlayerHandler playerHandler) {
             players.put(playerName, playerHandler);
         }
@@ -1024,10 +1029,12 @@ public class Main {
                         ServerRunner.addPlayer(playerName, this);
                         System.out.println(playerName + " has joined the game.");
                         if (!playerName.equals(currentNation)) {
-                            ServerRunner.broadcast("BOARD: Request",ServerRunner.players.get(playerName));
+                            ServerRunner.sendBoard(playerName,": Request");
+                            //ServerRunner.broadcast("BOARD: Request",ServerRunner.players.get(playerName));
                         }
                     } else if (message.startsWith("BOARD[")) {
-                        ServerRunner.broadcast(message,ServerRunner.players.get(playerName));
+                        ServerRunner.sendBoard(playerName,message);
+                        //ServerRunner.broadcast(message,ServerRunner.players.get(playerName));
                     }
                 }
 
@@ -1069,8 +1076,10 @@ public class Main {
                                 String[] parts = serverMessage.split(",");
                                 System.out.println("Client: " + serverMessage);
                             } else if (serverMessage.equals("BOARD: Request")) {
+                                System.out.println("Sending board");
                                 out.println(getGameState());
                             } else if (serverMessage.startsWith("BOARD[")) {
+                                System.out.println("Received board");
                                 tiles = CreateBoard(serverMessage);
                             }
                         }

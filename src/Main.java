@@ -913,7 +913,7 @@ public class Main {
 //                    Thread t5 = new Thread(new EnemyMover());
                 t4.start();
                 while (tiles.isEmpty()) {
-                    System.out.println("Loading...");
+//                    System.out.println("Loading...");
                 }
                 t1.start();
                 t2.start();
@@ -1128,9 +1128,13 @@ public class Main {
     private static Vector<Tile> CreateBoard(String board) {
         Vector<Tile> tiles = new Vector<>();
         board = board.substring(6);
-        String[] tileArr = board.split("[(]");
+        System.out.println(board);
+        String[] tileArr = board.split("\\(");
         for (String tile: tileArr) {
-            String[] items = tile.split("[,]");
+            if (tile.equals(tileArr[0])) continue;
+            String[] items = tile.split(",");
+            items[11] = items[11].substring(0,1);
+            System.out.println(tileArr[1]);
             Tile current = new Tile(items[0],Double.parseDouble(items[1]),Double.parseDouble(items[2]),tile_small.getWidth(),tile_small.getHeight(),0,items[3],Integer.parseInt(items[4]),Integer.parseInt(items[5]),Integer.parseInt(items[6]),Integer.parseInt(items[7]),Integer.parseInt(items[8]),Integer.parseInt(items[9]),Integer.parseInt(items[10]),Integer.parseInt(items[11]));
             tiles.add(current);
         }

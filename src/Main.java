@@ -1035,7 +1035,7 @@ public class Main {
                         }
                     } else if (message.startsWith("BOARD[")) {
                         System.out.println("Server: Recieved board");
-                        ServerRunner.sendBoard(playerName,message);
+                        ServerRunner.sendBoard(playerName,message.substring(5));
                         //ServerRunner.broadcast(message,ServerRunner.players.get(playerName));
                     }
                 }
@@ -1116,7 +1116,7 @@ public class Main {
     }
 
     private static String getGameState() {
-        String gameState = "Board[";
+        String gameState = "BOARD[";
         for (Tile tile: tiles) {
             biome biomeEnum = tile.getBiome();
             gameState = gameState + "(" + tile.owner + "," + tile.getX() + "," + tile.getY() + "," + biomeEnum.name() + "," + tile.mine + "," + tile.forge + "," + tile.lumberMill + "," + tile.deforestation + "," + tile.farm + "," + tile.plantation + "," + tile.school + "," + tile.college + ")";

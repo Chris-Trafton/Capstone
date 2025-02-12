@@ -1029,10 +1029,12 @@ public class Main {
                         ServerRunner.addPlayer(playerName, this);
                         System.out.println(playerName + " has joined the game.");
                         if (!playerName.equals(currentNation)) {
+                            System.out.println("Requesting board");
                             ServerRunner.sendBoard(playerName,": Request");
                             //ServerRunner.broadcast("BOARD: Request",ServerRunner.players.get(playerName));
                         }
                     } else if (message.startsWith("BOARD[")) {
+                        System.out.println("Server: Recieved board");
                         ServerRunner.sendBoard(playerName,message);
                         //ServerRunner.broadcast(message,ServerRunner.players.get(playerName));
                     }

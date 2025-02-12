@@ -69,6 +69,8 @@ public class Main {
     private static int numTiles;
     private static Boolean endgame;
     private static int actionsTaken;
+    private static boolean hosting;
+    private static boolean joined;
     private static BufferedImage background;
     private static boolean background_drawn;
     private static BufferedImage scrollBackground;
@@ -178,6 +180,7 @@ public class Main {
         WINWIDTH = (int)screenSize.getWidth(); //338
         WINHEIGHT = (int)screenSize.getHeight() - 40; //271
         endgame = false;
+        hosting = false;
         audiolifetime = 78000L; // 78 seconds for KI.WAV, was new Long(78000)
 
         try {
@@ -862,7 +865,6 @@ public class Main {
                 biomeCounts.add(0);
                 biomeCounts.add(0);
                 tiles = new Vector<Tile>();
-                tiles = CreateBoard(numTiles);
                 tileFixX = 0;
                 tileFixY = 0;
                 upPressed = false;
@@ -909,10 +911,13 @@ public class Main {
                 Thread t4 = new Thread(new ClientRunner());
 //                    Thread t4 = new Thread(new AudioLooper());
 //                    Thread t5 = new Thread(new EnemyMover());
+                t4.start();
+                while (tiles.isEmpty()) {
+                    System.out.println("Loading...");
+                }
                 t1.start();
                 t2.start();
                 t3.start();
-                t4.start();
 //                    t5.start();
 //                frame.setVisible(false);
                 frame.dispose();
@@ -976,7 +981,7 @@ public class Main {
         }
 
         public static synchronized void updatePlayerMove(String playerName, String move) {
-            String message = "UPDATE: " + playerName + ": " + move;
+            String message = "UPDATE: " + move;
             broadcast(message, players.get(playerName));
         }
 
@@ -1011,13 +1016,18 @@ public class Main {
                 String message;
                 while ((message = in.readLine()) != null) {
                     if (message.startsWith("MOVE:")) {
-                        String move = message.substring(5);
+                        String move = message.substring(6);
                         System.out.println("Server: received move from " + playerName);
                         ServerRunner.updatePlayerMove(playerName,move);
                     } else if (message.startsWith("JOIN:")) {
-                        playerName = message.substring(5);
+                        playerName = message.substring(6);
                         ServerRunner.addPlayer(playerName, this);
                         System.out.println(playerName + " has joined the game.");
+                        if (!playerName.equals(currentNation)) {
+                            ServerRunner.broadcast("BOARD: Request",ServerRunner.players.get(playerName));
+                        }
+                    } else if (message.startsWith("BOARD[")) {
+                        ServerRunner.broadcast(message,ServerRunner.players.get(playerName));
                     }
                 }
 
@@ -1058,6 +1068,10 @@ public class Main {
                             if (serverMessage.startsWith("UPDATE:")) {
                                 String[] parts = serverMessage.split(",");
                                 System.out.println("Client: " + serverMessage);
+                            } else if (serverMessage.equals("BOARD: Request")) {
+                                out.println(getGameState());
+                            } else if (serverMessage.startsWith("BOARD[")) {
+                                tiles = CreateBoard(serverMessage);
                             }
                         }
                     } catch (IOException e) {
@@ -1067,9 +1081,20 @@ public class Main {
                     }
                 }).start();
 
-                String move = "JOIN: " + currentNation;
-                if (move.startsWith("MOVE:") || move.startsWith("JOIN:")) {
+                String move = "";
+                String lastMove = "";
+                if (!joined) {
+                    move = "JOIN: " + currentNation;
                     out.println(move);
+                    joined = true;
+                }
+                while (true) {
+                    if (actionsTaken == 3 && joined) {
+                        if (!move.equals(lastMove)) {
+                            out.println(move);
+                            lastMove = move;
+                        }
+                    }
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -1077,6 +1102,33 @@ public class Main {
                 openStartScreen();
             }
         }
+    }
+
+    private static String getGameState() {
+        String gameState = "Board[";
+        for (Tile tile: tiles) {
+            biome biomeEnum = tile.getBiome();
+            gameState = gameState + "(" + tile.owner + "," + tile.getX() + "," + tile.getY() + "," + biomeEnum.name() + "," + tile.mine + "," + tile.forge + "," + tile.lumberMill + "," + tile.deforestation + "," + tile.farm + "," + tile.plantation + "," + tile.school + "," + tile.college + ")";
+        }
+        gameState = gameState + "]";
+        return gameState;
+    }
+
+    private static Vector<Tile> CreateBoard(String board) {
+        Vector<Tile> tiles = new Vector<>();
+        board = board.substring(6);
+        String[] tileArr = board.split("[(]");
+        for (String tile: tileArr) {
+            String[] items = tile.split("[,]");
+            Tile current = new Tile(items[0],Double.parseDouble(items[1]),Double.parseDouble(items[2]),tile_small.getWidth(),tile_small.getHeight(),0,items[3],Integer.parseInt(items[4]),Integer.parseInt(items[5]),Integer.parseInt(items[6]),Integer.parseInt(items[7]),Integer.parseInt(items[8]),Integer.parseInt(items[9]),Integer.parseInt(items[10]),Integer.parseInt(items[11]));
+            tiles.add(current);
+        }
+        for (Tile tile: tiles) {
+            tile.findNeighbors(tiles);
+            tile.isWaterSide();
+            tile.setResourceRates();
+        }
+        return tiles;
     }
 
     private static Vector<Tile> CreateBoard(int numTiles) {
@@ -3117,6 +3169,27 @@ public class Main {
             plantation = 0;
             school = 0;
             college = 0;
+        }
+
+        public Tile(String owner, double xinput, double yinput, double width, double height, double angle, String myBiome, int mine, int forge, int lumberMill, int deforestation, int farm, int plantation, int school, int college) {
+            super(xinput,yinput,width,height,angle);
+            neighbors = new Vector<>();
+            resourceRates = new Vector<>();
+            occupyingUnits = new Vector<>();
+            this.owner = owner;
+            this.myBiome = biome.valueOf(myBiome);
+            if (this.myBiome == biome.Flatland) biomeCounts.set(0,biomeCounts.get(0)+1);
+            if (this.myBiome == biome.Flatland) biomeCounts.set(1,biomeCounts.get(1)+1);
+            if (this.myBiome == biome.Flatland) biomeCounts.set(2,biomeCounts.get(2)+1);
+            if (this.myBiome == biome.Flatland) biomeCounts.set(3,biomeCounts.get(3)+1);
+            this.mine = mine;
+            this.forge = forge;
+            this.lumberMill = lumberMill;
+            this.deforestation = deforestation;
+            this.farm = farm;
+            this.plantation = plantation;
+            this.school = school;
+            this.college = college;
         }
         public String toString() {
             return owner + "- Labor: " + resourceRates.get(0) + " Wood: " + resourceRates.get(1) + " Metal: " + resourceRates.get(2) + " Food: " + resourceRates.get(3) + " Research: " + resourceRates.get(4);

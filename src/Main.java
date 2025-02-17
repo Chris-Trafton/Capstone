@@ -91,6 +91,7 @@ public class Main {
     private static JLabel foodLabel = new JLabel();
     private static JLabel laborLabel = new JLabel();
     private static JLabel educationLabel = new JLabel();
+    private static JLabel actionLabel = new JLabel();
     private static final int IFW = JComponent.WHEN_IN_FOCUSED_WINDOW;
     private static String nations[] = new String[]{"Stark", "Lannister", "Targaryen"};;
     private static String currentNation;
@@ -295,6 +296,7 @@ public class Main {
             laborLabel.setText("    Labor: " + Targaryen.getResource("labor"));
             educationLabel.setText("    Education: " + Targaryen.getResource("education"));
         }
+        actionLabel.setText("    Actions: " + (10-actionsTaken));
     }
 
     private static void tileDraw() {
@@ -876,6 +878,7 @@ public class Main {
 //                    playAudio(backgroundState);
                 currentNation = (String) nationComboBox.getSelectedItem();
                 ip = ipT.getText();
+                actionsTaken = 11;
                 if (currentNation == "Stark") {
                     Stark.setActive(true);
                     Lannister.setActive(false);
@@ -1022,14 +1025,16 @@ public class Main {
                 while ((message = in.readLine()) != null) {
                     if (message.startsWith("MOVE:")) {
                         String move = message.substring(6);
+                        String[] parts = move.split("\\|");
+                        playerName = parts[0];
                         System.out.println("Server: received move from " + playerName);
-                        ServerRunner.updatePlayerMove(playerName,move);
+                        ServerRunner.sendBoard(playerName,parts[1]);
                     } else if (message.startsWith("JOIN:")) {
                         playerName = message.substring(6);
                         ServerRunner.addPlayer(playerName, this);
                         System.out.println(playerName + " has joined the game.");
                         if (!playerName.equals(currentNation)) {
-                            System.out.println("Requesting board");
+                            System.out.println("Server: Requesting board");
                             ServerRunner.sendBoard(playerName,": Request");
                             //ServerRunner.broadcast("BOARD: Request",ServerRunner.players.get(playerName));
                         }
@@ -1078,11 +1083,12 @@ public class Main {
                                 String[] parts = serverMessage.split(",");
                                 System.out.println("Client: " + serverMessage);
                             } else if (serverMessage.equals("BOARD: Request")) {
-                                System.out.println("Sending board");
+                                System.out.println("Client: Sending board");
                                 out.println(getGameState());
                             } else if (serverMessage.startsWith("BOARD[")) {
-                                System.out.println("Received board");
+                                System.out.println("Client: Received board");
                                 tiles = CreateBoard(serverMessage);
+                                actionsTaken = 0;
                             }
                         }
                     } catch (IOException e) {
@@ -1100,11 +1106,13 @@ public class Main {
                     joined = true;
                 }
                 while (true) {
-                    if (actionsTaken == 3 && joined) {
-                        if (!move.equals(lastMove)) {
-                            out.println(move);
-                            lastMove = move;
-                        }
+                    try {
+                        Thread.sleep(300);
+                    } catch (InterruptedException ie) {}
+                    if (actionsTaken == 10 && joined) {
+                        System.out.println("Client: Sending moves");
+                        actionsTaken = 11;
+                        out.println("MOVE: " + currentNation + "|" + getGameState());
                     }
                 }
             } catch (IOException e) {
@@ -1176,7 +1184,7 @@ public class Main {
                 checkPoint = new Point2D.Double();
             }
             for (int j = 0; j < tiles.size(); j++) {
-                if (checkPoint.getX() < 0 || checkPoint.getX() + tile_small.getWidth() > WINWIDTH || checkPoint.getY() > WINHEIGHT || checkPoint.getY() - tile_small.getHeight() < 40 || isInside(checkPoint.getX() + (tile_small.getWidth() * 0.5),checkPoint.getY() - (tile_small.getHeight() * 0.5),tiles.get(j).getX(),tiles.get(j).getY(),tiles.get(j).getX()+tile_small.getWidth(),tiles.get(j).getY()-tile_small.getHeight())) {
+                if (checkPoint.getX() < 0 || checkPoint.getX() + tile_small.getWidth() > WINWIDTH || checkPoint.getY() > appFrame.getHeight() - YOFFSET - 25 || checkPoint.getY() - tile_small.getHeight() < 40 || isInside(checkPoint.getX() + (tile_small.getWidth() * 0.5),checkPoint.getY() - (tile_small.getHeight() * 0.5),tiles.get(j).getX(),tiles.get(j).getY(),tiles.get(j).getX()+tile_small.getWidth(),tiles.get(j).getY()-tile_small.getHeight())) {
                     createTile = false;
                     i--;
                     fails++;
@@ -1322,30 +1330,39 @@ public class Main {
         claimTile.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                tile.owner = currentNation;
-                tileOwner.setText(currentNation);
-                if (currentNation.equals("Stark")) {
-                    Stark.labor += tile.resourceRates.get(0);
-                    Stark.wood += tile.resourceRates.get(1);
-                    Stark.metal += tile.resourceRates.get(2);
-                    Stark.food += tile.resourceRates.get(3);
-                    Stark.education += tile.resourceRates.get(4);
-                } else if (currentNation.equals("Lannister")) {
-                    Lannister.labor += tile.resourceRates.get(0);
-                    Lannister.wood += tile.resourceRates.get(1);
-                    Lannister.metal += tile.resourceRates.get(2);
-                    Lannister.food += tile.resourceRates.get(3);
-                    Lannister.education += tile.resourceRates.get(4);
+                actionsTaken+=5;
+                if (actionsTaken > 10) {
+                    JOptionPane.showMessageDialog(claimTile,"You need 5 action points to claim a tile");
+                    actionsTaken-=5;
+                } else if (actionsTaken == 11) {
+                    JOptionPane.showMessageDialog(claimTile,"It is not your turn");
+                    actionsTaken-=5;
                 } else {
-                    Targaryen.labor += tile.resourceRates.get(0);
-                    Targaryen.wood += tile.resourceRates.get(1);
-                    Targaryen.metal += tile.resourceRates.get(2);
-                    Targaryen.food += tile.resourceRates.get(3);
-                    Targaryen.education += tile.resourceRates.get(4);
+                    tile.owner = currentNation;
+                    tileOwner.setText(currentNation);
+                    if (currentNation.equals("Stark")) {
+                        Stark.labor += tile.resourceRates.get(0);
+                        Stark.wood += tile.resourceRates.get(1);
+                        Stark.metal += tile.resourceRates.get(2);
+                        Stark.food += tile.resourceRates.get(3);
+                        Stark.education += tile.resourceRates.get(4);
+                    } else if (currentNation.equals("Lannister")) {
+                        Lannister.labor += tile.resourceRates.get(0);
+                        Lannister.wood += tile.resourceRates.get(1);
+                        Lannister.metal += tile.resourceRates.get(2);
+                        Lannister.food += tile.resourceRates.get(3);
+                        Lannister.education += tile.resourceRates.get(4);
+                    } else {
+                        Targaryen.labor += tile.resourceRates.get(0);
+                        Targaryen.wood += tile.resourceRates.get(1);
+                        Targaryen.metal += tile.resourceRates.get(2);
+                        Targaryen.food += tile.resourceRates.get(3);
+                        Targaryen.education += tile.resourceRates.get(4);
+                    }
+                    jPanel.remove(claimTile);
+                    jPanel.repaint();
+                    backgroundDraw();
                 }
-                jPanel.remove(claimTile);
-                jPanel.repaint();
-                backgroundDraw();
             }
         });
 
@@ -2081,371 +2098,383 @@ public class Main {
         @Override
         public Object getCellEditorValue() {
             if (isPushed) {
-                if (Stark.isActive()) {
-                    if (label == "Buy Swordmen" && Stark.getResource("metal") >= 10 && Stark.getResource("food") >= 10 && Stark.getResource("labor") >= 10) {
+                actionsTaken++;
+                if (actionsTaken > 10) {
+                    actionsTaken--;
+                    JOptionPane.showMessageDialog(button,"You are out of action points");
+                } else if (actionsTaken == 11) {
+                    actionsTaken--;
+                    JOptionPane.showMessageDialog(button,"It is not your turn");
+                } else {
+                    if (Stark.isActive()) {
+                        if (label == "Buy Swordmen" && Stark.getResource("metal") >= 10 && Stark.getResource("food") >= 10 && Stark.getResource("labor") >= 10) {
 //                        Stark.setMilitary("swordmen", 1);
-                        selectedTile.setMilitary("swordmen", 1);
-                        JOptionPane.showMessageDialog(button, "Swordmen Trained");
-                    } else if (label == "Buy Shieldmen" && Stark.getResource("metal") >= 10 && Stark.getResource("food") >= 10 && Stark.getResource("labor") >= 20) {
+                            selectedTile.setMilitary("swordmen", 1);
+                            JOptionPane.showMessageDialog(button, "Swordmen Trained");
+                        } else if (label == "Buy Shieldmen" && Stark.getResource("metal") >= 10 && Stark.getResource("food") >= 10 && Stark.getResource("labor") >= 20) {
 //                        Stark.setMilitary("shieldmen", 1);
-                        selectedTile.setMilitary("shieldmen", 1);
-                        JOptionPane.showMessageDialog(button, "Shieldmen Trained");
-                    } else if (label == "Buy Spearmen" && Stark.getResearch("spearmen") && Stark.getResource("metal") >= 20 && Stark.getResource("food") >= 10 && Stark.getResource("labor") >= 10) {
+                            selectedTile.setMilitary("shieldmen", 1);
+                            JOptionPane.showMessageDialog(button, "Shieldmen Trained");
+                        } else if (label == "Buy Spearmen" && Stark.getResearch("spearmen") && Stark.getResource("metal") >= 20 && Stark.getResource("food") >= 10 && Stark.getResource("labor") >= 10) {
 //                        Stark.setMilitary("spearmen", 1);
-                        selectedTile.setMilitary("spearmen", 1);
-                        JOptionPane.showMessageDialog(button, "Spearmen Trained");
-                    } else if (label == "Buy Mounted Calvalry" && Stark.getResearch("mountedCalvalry") && Stark.getResource("metal") >= 20 && Stark.getResource("food") >= 10 && Stark.getResource("labor") >= 20) {
+                            selectedTile.setMilitary("spearmen", 1);
+                            JOptionPane.showMessageDialog(button, "Spearmen Trained");
+                        } else if (label == "Buy Mounted Calvalry" && Stark.getResearch("mountedCalvalry") && Stark.getResource("metal") >= 20 && Stark.getResource("food") >= 10 && Stark.getResource("labor") >= 20) {
 //                        Stark.setMilitary("mountedCavalry", 1);
-                        selectedTile.setMilitary("mountedCalvalry", 1);
-                        JOptionPane.showMessageDialog(button, "Mounted Calvalry Trained");
-                    } else if (label == "Buy Archer" && Stark.getResource("metal") >= 10 && Stark.getResource("food") >= 10 && Stark.getResource("labor") >= 10) {
+                            selectedTile.setMilitary("mountedCalvalry", 1);
+                            JOptionPane.showMessageDialog(button, "Mounted Calvalry Trained");
+                        } else if (label == "Buy Archer" && Stark.getResource("metal") >= 10 && Stark.getResource("food") >= 10 && Stark.getResource("labor") >= 10) {
 //                        Stark.setMilitary("archer", 1);
-                        selectedTile.setMilitary("archer", 1);
-                        JOptionPane.showMessageDialog(button, "Archer Trained");
-                    } else if (label == "Buy Scout Raven" && Stark.getResource("food") >= 10 && Stark.getResource("labor") >= 10) {
+                            selectedTile.setMilitary("archer", 1);
+                            JOptionPane.showMessageDialog(button, "Archer Trained");
+                        } else if (label == "Buy Scout Raven" && Stark.getResource("food") >= 10 && Stark.getResource("labor") >= 10) {
 //                        Stark.setMilitary("scoutRaven", 1);
-                        selectedTile.setMilitary("scoutRaven", 1);
-                        JOptionPane.showMessageDialog(button, "Scout Raven Trained");
-                    } else if (label == "Buy Transport Ship" && Stark.getResource("metal") >= 10 && Stark.getResource("wood") >= 20 && Stark.getResource("food") >= 10 && Stark.getResource("labor") >= 10) {
+                            selectedTile.setMilitary("scoutRaven", 1);
+                            JOptionPane.showMessageDialog(button, "Scout Raven Trained");
+                        } else if (label == "Buy Transport Ship" && Stark.getResource("metal") >= 10 && Stark.getResource("wood") >= 20 && Stark.getResource("food") >= 10 && Stark.getResource("labor") >= 10) {
 //                        Stark.setMilitary("transportShip", 1);
-                        selectedTile.setMilitary("transportShip", 1);
-                        JOptionPane.showMessageDialog(button, "Transport Ship Built");
-                    } else if (label == "Buy War Ship" && Stark.getResearch("warShip") && Stark.getResource("metal") >= 20 && Stark.getResource("wood") >= 30 && Stark.getResource("food") >= 10 && Stark.getResource("labor") >= 10) {
+                            selectedTile.setMilitary("transportShip", 1);
+                            JOptionPane.showMessageDialog(button, "Transport Ship Built");
+                        } else if (label == "Buy War Ship" && Stark.getResearch("warShip") && Stark.getResource("metal") >= 20 && Stark.getResource("wood") >= 30 && Stark.getResource("food") >= 10 && Stark.getResource("labor") >= 10) {
 //                        Stark.setMilitary("warShip", 1);
-                        selectedTile.setMilitary("warShip", 1);
-                        JOptionPane.showMessageDialog(button, "War Ship Built");
-                    } else if (label == "Buy Wyvern" && Stark.getResearch("wyvern") && Stark.getResource("food") >= 50 && Stark.getResource("labor") >= 25) {
+                            selectedTile.setMilitary("warShip", 1);
+                            JOptionPane.showMessageDialog(button, "War Ship Built");
+                        } else if (label == "Buy Wyvern" && Stark.getResearch("wyvern") && Stark.getResource("food") >= 50 && Stark.getResource("labor") >= 25) {
 //                        Stark.setMilitary("wyvern", 1);
-                        selectedTile.setMilitary("wyvern", 1);
-                        JOptionPane.showMessageDialog(button, "Wyvern Trained");
-                    } else if (label == "Buy Dreadnought" && Stark.getResearch("dreadnought") && Stark.getResource("metal") >= 10 && Stark.getResource("wood") >= 100 && Stark.getResource("food") >= 10 && Stark.getResource("labor") >= 50) {
+                            selectedTile.setMilitary("wyvern", 1);
+                            JOptionPane.showMessageDialog(button, "Wyvern Trained");
+                        } else if (label == "Buy Dreadnought" && Stark.getResearch("dreadnought") && Stark.getResource("metal") >= 10 && Stark.getResource("wood") >= 100 && Stark.getResource("food") >= 10 && Stark.getResource("labor") >= 50) {
 //                        Stark.setMilitary("dreadnought", 1);
-                        selectedTile.setMilitary("dreadnought", 1);
-                        JOptionPane.showMessageDialog(button, "Dreadnought Built");
-                    } else if (label == "Buy Dragon" && Stark.getResearch("dragon") && Stark.getResource("food") >= 100 && Stark.getResource("labor") >= 100) {
+                            selectedTile.setMilitary("dreadnought", 1);
+                            JOptionPane.showMessageDialog(button, "Dreadnought Built");
+                        } else if (label == "Buy Dragon" && Stark.getResearch("dragon") && Stark.getResource("food") >= 100 && Stark.getResource("labor") >= 100) {
 //                        Stark.setMilitary("dragon", 1);
-                        selectedTile.setMilitary("dragon", 1);
-                        JOptionPane.showMessageDialog(button, "Dragon Trained");
-                    } else if (label == "Buy Mine" && Stark.getResearch("mine") && Stark.getResource("metal") >= 10 && Stark.getResource("wood") >= 50 && Stark.getResource("food") >= 20 && Stark.getResource("labor") >= 20) {
+                            selectedTile.setMilitary("dragon", 1);
+                            JOptionPane.showMessageDialog(button, "Dragon Trained");
+                        } else if (label == "Buy Mine" && Stark.getResearch("mine") && Stark.getResource("metal") >= 10 && Stark.getResource("wood") >= 50 && Stark.getResource("food") >= 20 && Stark.getResource("labor") >= 20) {
 //                        Stark.setBuilding("mine", 1);
-                        selectedTile.setBuilding("mine", 1);
-                        JOptionPane.showMessageDialog(button, "Mine Built");
-                    } else if (label == "Buy Forge" && Stark.getResearch("forge") && Stark.getResource("metal") >= 50 && Stark.getResource("wood") >= 40 && Stark.getResource("food") >= 20 && Stark.getResource("labor") >= 20) {
+                            selectedTile.setBuilding("mine", 1);
+                            JOptionPane.showMessageDialog(button, "Mine Built");
+                        } else if (label == "Buy Forge" && Stark.getResearch("forge") && Stark.getResource("metal") >= 50 && Stark.getResource("wood") >= 40 && Stark.getResource("food") >= 20 && Stark.getResource("labor") >= 20) {
 //                        Stark.setBuilding("forge", 1);
-                        selectedTile.setBuilding("forge", 1);
-                        JOptionPane.showMessageDialog(button, "Forge Built");
-                    } else if (label == "Buy Lumber Mill" && Stark.getResearch("lumberMill") && Stark.getResource("metal") >= 50 && Stark.getResource("wood") >= 10 && Stark.getResource("food") >= 20 && Stark.getResource("labor") >= 20) {
+                            selectedTile.setBuilding("forge", 1);
+                            JOptionPane.showMessageDialog(button, "Forge Built");
+                        } else if (label == "Buy Lumber Mill" && Stark.getResearch("lumberMill") && Stark.getResource("metal") >= 50 && Stark.getResource("wood") >= 10 && Stark.getResource("food") >= 20 && Stark.getResource("labor") >= 20) {
 //                        Stark.setBuilding("lumberMill", 1);
-                        selectedTile.setBuilding("lumberMill", 1);
-                        JOptionPane.showMessageDialog(button, "Lumber Mill Built");
-                    } else if (label == "Buy Deforestation" && Stark.getResearch("deforestation") && Stark.getResource("metal") >= 20 && Stark.getResource("wood") >= 40 && Stark.getResource("food") >= 50 && Stark.getResource("labor") >= 40) {
+                            selectedTile.setBuilding("lumberMill", 1);
+                            JOptionPane.showMessageDialog(button, "Lumber Mill Built");
+                        } else if (label == "Buy Deforestation" && Stark.getResearch("deforestation") && Stark.getResource("metal") >= 20 && Stark.getResource("wood") >= 40 && Stark.getResource("food") >= 50 && Stark.getResource("labor") >= 40) {
 //                        Stark.setBuilding("deforestation", 1);
-                        selectedTile.setBuilding("deforestation", 1);
-                        JOptionPane.showMessageDialog(button, "Deforestation Built");
-                    } else if (label == "Buy Farm" && Stark.getResearch("farm") && Stark.getResource("metal") >= 20 && Stark.getResource("wood") >= 40 && Stark.getResource("food") >= 20 && Stark.getResource("labor") >= 20) {
+                            selectedTile.setBuilding("deforestation", 1);
+                            JOptionPane.showMessageDialog(button, "Deforestation Built");
+                        } else if (label == "Buy Farm" && Stark.getResearch("farm") && Stark.getResource("metal") >= 20 && Stark.getResource("wood") >= 40 && Stark.getResource("food") >= 20 && Stark.getResource("labor") >= 20) {
 //                        Stark.setBuilding("farm", 1);
-                        selectedTile.setBuilding("farm", 1);
-                        JOptionPane.showMessageDialog(button, "Farm Built");
-                    } else if (label == "Buy Plantation" && Stark.getResearch("plantation") && Stark.getResource("metal") >= 40 && Stark.getResource("wood") >= 50 && Stark.getResource("food") >= 20 && Stark.getResource("labor") >= 40) {
+                            selectedTile.setBuilding("farm", 1);
+                            JOptionPane.showMessageDialog(button, "Farm Built");
+                        } else if (label == "Buy Plantation" && Stark.getResearch("plantation") && Stark.getResource("metal") >= 40 && Stark.getResource("wood") >= 50 && Stark.getResource("food") >= 20 && Stark.getResource("labor") >= 40) {
 //                        Stark.setBuilding("plantation", 1);
-                        selectedTile.setBuilding("plantation", 1);
-                        JOptionPane.showMessageDialog(button, "Plantation Built");
-                    } else if (label == "Buy School" && Stark.getResearch("school") && Stark.getResource("metal") >= 40 && Stark.getResource("wood") >= 20 && Stark.getResource("food") >= 20 && Stark.getResource("labor") >= 20) {
+                            selectedTile.setBuilding("plantation", 1);
+                            JOptionPane.showMessageDialog(button, "Plantation Built");
+                        } else if (label == "Buy School" && Stark.getResearch("school") && Stark.getResource("metal") >= 40 && Stark.getResource("wood") >= 20 && Stark.getResource("food") >= 20 && Stark.getResource("labor") >= 20) {
 //                        Stark.setBuilding("school", 1);
-                        selectedTile.setBuilding("school", 1);
-                        JOptionPane.showMessageDialog(button, "School Built");
-                    } else if (label == "Buy College" && Stark.getResearch("college") && Stark.getResource("metal") >= 40 && Stark.getResource("wood") >= 40 && Stark.getResource("food") >= 30 && Stark.getResource("labor") >= 40) {
+                            selectedTile.setBuilding("school", 1);
+                            JOptionPane.showMessageDialog(button, "School Built");
+                        } else if (label == "Buy College" && Stark.getResearch("college") && Stark.getResource("metal") >= 40 && Stark.getResource("wood") >= 40 && Stark.getResource("food") >= 30 && Stark.getResource("labor") >= 40) {
 //                        Stark.setBuilding("college", 1);
-                        selectedTile.setBuilding("college", 1);
-                        JOptionPane.showMessageDialog(button, "College Built");
-                    } else if (label == "Buy Build Mines" && Stark.getResource("education") >= 50 && Stark.getResource("labor") >= 10) {
-                        Stark.setResearch("mine", true);
-                        JOptionPane.showMessageDialog(button, "Mines Researched");
-                    } else if (label == "Buy Build Forges" && Stark.getResource("education") >= 75 && Stark.getResource("labor") >= 25) {
-                        Stark.setResearch("forge", true);
-                        JOptionPane.showMessageDialog(button, "Forges Researched");
-                    } else if (label == "Buy Build Lumber Mills" && Stark.getResource("education") >= 50 && Stark.getResource("labor") >= 10) {
-                        Stark.setResearch("lumberMill", true);
-                        JOptionPane.showMessageDialog(button, "Lumber Mills Researched");
-                    } else if (label == "Buy Build Deforestation" && Stark.getResource("education") >= 75 && Stark.getResource("labor") >= 25) {
-                        Stark.setResearch("deforestation", true);
-                        JOptionPane.showMessageDialog(button, "Deforestation Researched");
-                    } else if (label == "Buy Build Farms" && Stark.getResource("education") >= 50 && Stark.getResource("labor") >= 10) {
-                        Stark.setResearch("farm", true);
-                        JOptionPane.showMessageDialog(button, "Farms Researched");
-                    } else if (label == "Buy Build Plantations" && Stark.getResource("education") >= 75 && Stark.getResource("labor") >= 25) {
-                        Stark.setResearch("plantation", true);
-                        JOptionPane.showMessageDialog(button, "Plantations Researched");
-                    } else if (label == "Buy Build Schools" && Stark.getResource("education") >= 50 && Stark.getResource("labor") >= 10) {
-                        Stark.setResearch("school", true);
-                        JOptionPane.showMessageDialog(button, "Schools Researched");
-                    } else if (label == "Buy Build Colleges" && Stark.getResource("education") >= 75 && Stark.getResource("labor") >= 25) {
-                        Stark.setResearch("college", true);
-                        JOptionPane.showMessageDialog(button, "Colleges Researched");
-                    } else if (label == "Buy Train Spearmen" && Stark.getResource("education") >= 50 && Stark.getResource("labor") >= 10) {
-                        Stark.setResearch("spearmen", true);
-                        JOptionPane.showMessageDialog(button, "Spearmen Researched");
-                    } else if (label == "Buy Train Mounted Calvalry" && Stark.getResource("education") >= 50 && Stark.getResource("labor") >= 10) {
-                        Stark.setResearch("mountedCalvalry", true);
-                        JOptionPane.showMessageDialog(button, "Mounted Calvalry Researched");
-                    } else if (label == "Buy Build War Ships" && Stark.getResource("education") >= 50 && Stark.getResource("labor") >= 10) {
-                        Stark.setResearch("warShip", true);
-                        JOptionPane.showMessageDialog(button, "War Ships Researched");
-                    } else if (label == "Buy Tame Wyverns" && Stark.getResource("education") >= 50 && Stark.getResource("labor") >= 10) {
-                        Stark.setResearch("wyvern", true);
-                        JOptionPane.showMessageDialog(button, "Wyverns Researched");
-                    } else if (label == "Buy Build Dreadnoughts" && Stark.getResource("education") >= 75 && Stark.getResource("labor") >= 25) {
-                        Stark.setResearch("dreadnought", true);
-                        JOptionPane.showMessageDialog(button, "Dreadnoughts Researched");
-                    } else if (label == "Buy Tame Dragons" && Stark.getResource("education") >= 75 && Stark.getResource("labor") >= 25) {
-                        Stark.setResearch("dragon", true);
-                        JOptionPane.showMessageDialog(button, "Dragons Researched");
-                    } else {
-                        JOptionPane.showMessageDialog(button, "Unable to Buy");
-                    }
-                } else if (Lannister.isActive()) {
-                    if (label == "Buy Swordmen" && Lannister.getResource("metal") >= 10 && Lannister.getResource("food") >= 10 && Lannister.getResource("labor") >= 10) {
+                            selectedTile.setBuilding("college", 1);
+                            JOptionPane.showMessageDialog(button, "College Built");
+                        } else if (label == "Buy Build Mines" && Stark.getResource("education") >= 50 && Stark.getResource("labor") >= 10) {
+                            Stark.setResearch("mine", true);
+                            JOptionPane.showMessageDialog(button, "Mines Researched");
+                        } else if (label == "Buy Build Forges" && Stark.getResource("education") >= 75 && Stark.getResource("labor") >= 25) {
+                            Stark.setResearch("forge", true);
+                            JOptionPane.showMessageDialog(button, "Forges Researched");
+                        } else if (label == "Buy Build Lumber Mills" && Stark.getResource("education") >= 50 && Stark.getResource("labor") >= 10) {
+                            Stark.setResearch("lumberMill", true);
+                            JOptionPane.showMessageDialog(button, "Lumber Mills Researched");
+                        } else if (label == "Buy Build Deforestation" && Stark.getResource("education") >= 75 && Stark.getResource("labor") >= 25) {
+                            Stark.setResearch("deforestation", true);
+                            JOptionPane.showMessageDialog(button, "Deforestation Researched");
+                        } else if (label == "Buy Build Farms" && Stark.getResource("education") >= 50 && Stark.getResource("labor") >= 10) {
+                            Stark.setResearch("farm", true);
+                            JOptionPane.showMessageDialog(button, "Farms Researched");
+                        } else if (label == "Buy Build Plantations" && Stark.getResource("education") >= 75 && Stark.getResource("labor") >= 25) {
+                            Stark.setResearch("plantation", true);
+                            JOptionPane.showMessageDialog(button, "Plantations Researched");
+                        } else if (label == "Buy Build Schools" && Stark.getResource("education") >= 50 && Stark.getResource("labor") >= 10) {
+                            Stark.setResearch("school", true);
+                            JOptionPane.showMessageDialog(button, "Schools Researched");
+                        } else if (label == "Buy Build Colleges" && Stark.getResource("education") >= 75 && Stark.getResource("labor") >= 25) {
+                            Stark.setResearch("college", true);
+                            JOptionPane.showMessageDialog(button, "Colleges Researched");
+                        } else if (label == "Buy Train Spearmen" && Stark.getResource("education") >= 50 && Stark.getResource("labor") >= 10) {
+                            Stark.setResearch("spearmen", true);
+                            JOptionPane.showMessageDialog(button, "Spearmen Researched");
+                        } else if (label == "Buy Train Mounted Calvalry" && Stark.getResource("education") >= 50 && Stark.getResource("labor") >= 10) {
+                            Stark.setResearch("mountedCalvalry", true);
+                            JOptionPane.showMessageDialog(button, "Mounted Calvalry Researched");
+                        } else if (label == "Buy Build War Ships" && Stark.getResource("education") >= 50 && Stark.getResource("labor") >= 10) {
+                            Stark.setResearch("warShip", true);
+                            JOptionPane.showMessageDialog(button, "War Ships Researched");
+                        } else if (label == "Buy Tame Wyverns" && Stark.getResource("education") >= 50 && Stark.getResource("labor") >= 10) {
+                            Stark.setResearch("wyvern", true);
+                            JOptionPane.showMessageDialog(button, "Wyverns Researched");
+                        } else if (label == "Buy Build Dreadnoughts" && Stark.getResource("education") >= 75 && Stark.getResource("labor") >= 25) {
+                            Stark.setResearch("dreadnought", true);
+                            JOptionPane.showMessageDialog(button, "Dreadnoughts Researched");
+                        } else if (label == "Buy Tame Dragons" && Stark.getResource("education") >= 75 && Stark.getResource("labor") >= 25) {
+                            Stark.setResearch("dragon", true);
+                            JOptionPane.showMessageDialog(button, "Dragons Researched");
+                        } else {
+                            JOptionPane.showMessageDialog(button, "Unable to Buy");
+                            actionsTaken--;
+                        }
+                    } else if (Lannister.isActive()) {
+                        if (label == "Buy Swordmen" && Lannister.getResource("metal") >= 10 && Lannister.getResource("food") >= 10 && Lannister.getResource("labor") >= 10) {
 //                        Lannister.setMilitary("swordmen", 1);
-                        selectedTile.setMilitary("swordmen", 1);
-                        JOptionPane.showMessageDialog(button, "Swordmen Trained");
-                    } else if (label == "Buy Shieldmen" && Lannister.getResource("metal") >= 10 && Lannister.getResource("food") >= 10 && Lannister.getResource("labor") >= 20) {
+                            selectedTile.setMilitary("swordmen", 1);
+                            JOptionPane.showMessageDialog(button, "Swordmen Trained");
+                        } else if (label == "Buy Shieldmen" && Lannister.getResource("metal") >= 10 && Lannister.getResource("food") >= 10 && Lannister.getResource("labor") >= 20) {
 //                        Lannister.setMilitary("shieldmen", 1);
-                        selectedTile.setMilitary("shieldmen", 1);
-                        JOptionPane.showMessageDialog(button, "Shieldmen Trained");
-                    } else if (label == "Buy Spearmen" && Lannister.getResearch("spearmen") && Lannister.getResource("metal") >= 20 && Lannister.getResource("food") >= 10 && Lannister.getResource("labor") >= 10) {
+                            selectedTile.setMilitary("shieldmen", 1);
+                            JOptionPane.showMessageDialog(button, "Shieldmen Trained");
+                        } else if (label == "Buy Spearmen" && Lannister.getResearch("spearmen") && Lannister.getResource("metal") >= 20 && Lannister.getResource("food") >= 10 && Lannister.getResource("labor") >= 10) {
 //                        Lannister.setMilitary("spearmen", 1);
-                        selectedTile.setMilitary("spearmen", 1);
-                        JOptionPane.showMessageDialog(button, "Spearmen Trained");
-                    } else if (label == "Buy Mounted Calvalry" && Lannister.getResearch("mountedCalvalry") && Lannister.getResource("metal") >= 20 && Lannister.getResource("food") >= 10 && Lannister.getResource("labor") >= 20) {
+                            selectedTile.setMilitary("spearmen", 1);
+                            JOptionPane.showMessageDialog(button, "Spearmen Trained");
+                        } else if (label == "Buy Mounted Calvalry" && Lannister.getResearch("mountedCalvalry") && Lannister.getResource("metal") >= 20 && Lannister.getResource("food") >= 10 && Lannister.getResource("labor") >= 20) {
 //                        Lannister.setMilitary("mountedCavalry", 1);
-                        selectedTile.setMilitary("mountedCalvalry", 1);
-                        JOptionPane.showMessageDialog(button, "Mounted Calvalry Trained");
-                    } else if (label == "Buy Archer" && Lannister.getResource("metal") >= 10 && Lannister.getResource("food") >= 10 && Lannister.getResource("labor") >= 10) {
+                            selectedTile.setMilitary("mountedCalvalry", 1);
+                            JOptionPane.showMessageDialog(button, "Mounted Calvalry Trained");
+                        } else if (label == "Buy Archer" && Lannister.getResource("metal") >= 10 && Lannister.getResource("food") >= 10 && Lannister.getResource("labor") >= 10) {
 //                        Lannister.setMilitary("archer", 1);
-                        selectedTile.setMilitary("archer", 1);
-                        JOptionPane.showMessageDialog(button, "Archer Trained");
-                    } else if (label == "Buy Scout Raven" && Lannister.getResource("food") >= 10 && Lannister.getResource("labor") >= 10) {
+                            selectedTile.setMilitary("archer", 1);
+                            JOptionPane.showMessageDialog(button, "Archer Trained");
+                        } else if (label == "Buy Scout Raven" && Lannister.getResource("food") >= 10 && Lannister.getResource("labor") >= 10) {
 //                        Lannister.setMilitary("scoutRaven", 1);
-                        selectedTile.setMilitary("scoutRaven", 1);
-                        JOptionPane.showMessageDialog(button, "Scout Raven Trained");
-                    } else if (label == "Buy Transport Ship" && Lannister.getResource("metal") >= 10 && Lannister.getResource("wood") >= 20 && Lannister.getResource("food") >= 10 && Lannister.getResource("labor") >= 10) {
+                            selectedTile.setMilitary("scoutRaven", 1);
+                            JOptionPane.showMessageDialog(button, "Scout Raven Trained");
+                        } else if (label == "Buy Transport Ship" && Lannister.getResource("metal") >= 10 && Lannister.getResource("wood") >= 20 && Lannister.getResource("food") >= 10 && Lannister.getResource("labor") >= 10) {
 //                        Lannister.setMilitary("transportShip", 1);
-                        selectedTile.setMilitary("transportShip", 1);
-                        JOptionPane.showMessageDialog(button, "Transport Ship Built");
-                    } else if (label == "Buy War Ship" && Lannister.getResearch("warShip") && Lannister.getResource("metal") >= 20 && Lannister.getResource("wood") >= 30 && Lannister.getResource("food") >= 10 && Lannister.getResource("labor") >= 10) {
+                            selectedTile.setMilitary("transportShip", 1);
+                            JOptionPane.showMessageDialog(button, "Transport Ship Built");
+                        } else if (label == "Buy War Ship" && Lannister.getResearch("warShip") && Lannister.getResource("metal") >= 20 && Lannister.getResource("wood") >= 30 && Lannister.getResource("food") >= 10 && Lannister.getResource("labor") >= 10) {
 //                        Lannister.setMilitary("warShip", 1);
-                        selectedTile.setMilitary("warShip", 1);
-                        JOptionPane.showMessageDialog(button, "War Ship Built");
-                    } else if (label == "Buy Wyvern" && Lannister.getResearch("wyvern") && Lannister.getResource("food") >= 50 && Lannister.getResource("labor") >= 25) {
+                            selectedTile.setMilitary("warShip", 1);
+                            JOptionPane.showMessageDialog(button, "War Ship Built");
+                        } else if (label == "Buy Wyvern" && Lannister.getResearch("wyvern") && Lannister.getResource("food") >= 50 && Lannister.getResource("labor") >= 25) {
 //                        Lannister.setMilitary("wyvern", 1);
-                        selectedTile.setMilitary("wyvern", 1);
-                        JOptionPane.showMessageDialog(button, "Wyvern Trained");
-                    } else if (label == "Buy Dreadnought" && Lannister.getResearch("dreadnought") && Lannister.getResource("metal") >= 10 && Lannister.getResource("wood") >= 100 && Lannister.getResource("food") >= 10 && Lannister.getResource("labor") >= 50) {
+                            selectedTile.setMilitary("wyvern", 1);
+                            JOptionPane.showMessageDialog(button, "Wyvern Trained");
+                        } else if (label == "Buy Dreadnought" && Lannister.getResearch("dreadnought") && Lannister.getResource("metal") >= 10 && Lannister.getResource("wood") >= 100 && Lannister.getResource("food") >= 10 && Lannister.getResource("labor") >= 50) {
 //                        Lannister.setMilitary("dreadnought", 1);
-                        selectedTile.setMilitary("dreadnought", 1);
-                        JOptionPane.showMessageDialog(button, "Dreadnought Built");
-                    } else if (label == "Buy Dragon" && Lannister.getResearch("dragon") && Lannister.getResource("food") >= 100 && Lannister.getResource("labor") >= 100) {
+                            selectedTile.setMilitary("dreadnought", 1);
+                            JOptionPane.showMessageDialog(button, "Dreadnought Built");
+                        } else if (label == "Buy Dragon" && Lannister.getResearch("dragon") && Lannister.getResource("food") >= 100 && Lannister.getResource("labor") >= 100) {
 //                        Lannister.setMilitary("dragon", 1);
-                        selectedTile.setMilitary("dragon", 1);
-                        JOptionPane.showMessageDialog(button, "Dragon Trained");
-                    } else if (label == "Buy Mine" && Lannister.getResearch("mine") && Lannister.getResource("metal") >= 10 && Lannister.getResource("wood") >= 50 && Lannister.getResource("food") >= 20 && Lannister.getResource("labor") >= 20) {
+                            selectedTile.setMilitary("dragon", 1);
+                            JOptionPane.showMessageDialog(button, "Dragon Trained");
+                        } else if (label == "Buy Mine" && Lannister.getResearch("mine") && Lannister.getResource("metal") >= 10 && Lannister.getResource("wood") >= 50 && Lannister.getResource("food") >= 20 && Lannister.getResource("labor") >= 20) {
 //                        Lannister.setBuilding("mine", 1);
-                        selectedTile.setBuilding("mine", 1);
-                        JOptionPane.showMessageDialog(button, "Mine Built");
-                    } else if (label == "Buy Forge" && Lannister.getResearch("forge") && Lannister.getResource("metal") >= 50 && Lannister.getResource("wood") >= 40 && Lannister.getResource("food") >= 20 && Lannister.getResource("labor") >= 20) {
+                            selectedTile.setBuilding("mine", 1);
+                            JOptionPane.showMessageDialog(button, "Mine Built");
+                        } else if (label == "Buy Forge" && Lannister.getResearch("forge") && Lannister.getResource("metal") >= 50 && Lannister.getResource("wood") >= 40 && Lannister.getResource("food") >= 20 && Lannister.getResource("labor") >= 20) {
 //                        Lannister.setBuilding("forge", 1);
-                        selectedTile.setBuilding("forge", 1);
-                        JOptionPane.showMessageDialog(button, "Forge Built");
-                    } else if (label == "Buy Lumber Mill" && Lannister.getResearch("lumberMill") && Lannister.getResource("metal") >= 50 && Lannister.getResource("wood") >= 10 && Lannister.getResource("food") >= 20 && Lannister.getResource("labor") >= 20) {
+                            selectedTile.setBuilding("forge", 1);
+                            JOptionPane.showMessageDialog(button, "Forge Built");
+                        } else if (label == "Buy Lumber Mill" && Lannister.getResearch("lumberMill") && Lannister.getResource("metal") >= 50 && Lannister.getResource("wood") >= 10 && Lannister.getResource("food") >= 20 && Lannister.getResource("labor") >= 20) {
 //                        Lannister.setBuilding("lumberMill", 1);
-                        selectedTile.setBuilding("lumberMill", 1);
-                        JOptionPane.showMessageDialog(button, "Lumber Mill Built");
-                    } else if (label == "Buy Deforestation" && Lannister.getResearch("deforestation") && Lannister.getResource("metal") >= 20 && Lannister.getResource("wood") >= 40 && Lannister.getResource("food") >= 50 && Lannister.getResource("labor") >= 40) {
+                            selectedTile.setBuilding("lumberMill", 1);
+                            JOptionPane.showMessageDialog(button, "Lumber Mill Built");
+                        } else if (label == "Buy Deforestation" && Lannister.getResearch("deforestation") && Lannister.getResource("metal") >= 20 && Lannister.getResource("wood") >= 40 && Lannister.getResource("food") >= 50 && Lannister.getResource("labor") >= 40) {
 //                        Lannister.setBuilding("deforestation", 1);
-                        selectedTile.setBuilding("deforestation", 1);
-                        JOptionPane.showMessageDialog(button, "Deforestation Built");
-                    } else if (label == "Buy Farm" && Lannister.getResearch("farm") && Lannister.getResource("metal") >= 20 && Lannister.getResource("wood") >= 40 && Lannister.getResource("food") >= 20 && Lannister.getResource("labor") >= 20) {
+                            selectedTile.setBuilding("deforestation", 1);
+                            JOptionPane.showMessageDialog(button, "Deforestation Built");
+                        } else if (label == "Buy Farm" && Lannister.getResearch("farm") && Lannister.getResource("metal") >= 20 && Lannister.getResource("wood") >= 40 && Lannister.getResource("food") >= 20 && Lannister.getResource("labor") >= 20) {
 //                        Lannister.setBuilding("farm", 1);
-                        selectedTile.setBuilding("farm", 1);
-                        JOptionPane.showMessageDialog(button, "Farm Built");
-                    } else if (label == "Buy Plantation" && Lannister.getResearch("plantation") && Lannister.getResource("metal") >= 40 && Lannister.getResource("wood") >= 50 && Lannister.getResource("food") >= 20 && Lannister.getResource("labor") >= 40) {
+                            selectedTile.setBuilding("farm", 1);
+                            JOptionPane.showMessageDialog(button, "Farm Built");
+                        } else if (label == "Buy Plantation" && Lannister.getResearch("plantation") && Lannister.getResource("metal") >= 40 && Lannister.getResource("wood") >= 50 && Lannister.getResource("food") >= 20 && Lannister.getResource("labor") >= 40) {
 //                        Lannister.setBuilding("plantation", 1);
-                        selectedTile.setBuilding("plantation", 1);
-                        JOptionPane.showMessageDialog(button, "Plantation Built");
-                    } else if (label == "Buy School" && Lannister.getResearch("school") && Lannister.getResource("metal") >= 40 && Lannister.getResource("wood") >= 20 && Lannister.getResource("food") >= 20 && Lannister.getResource("labor") >= 20) {
+                            selectedTile.setBuilding("plantation", 1);
+                            JOptionPane.showMessageDialog(button, "Plantation Built");
+                        } else if (label == "Buy School" && Lannister.getResearch("school") && Lannister.getResource("metal") >= 40 && Lannister.getResource("wood") >= 20 && Lannister.getResource("food") >= 20 && Lannister.getResource("labor") >= 20) {
 //                        Lannister.setBuilding("school", 1);
-                        selectedTile.setBuilding("school", 1);
-                        JOptionPane.showMessageDialog(button, "School Built");
-                    } else if (label == "Buy College" && Lannister.getResearch("college") && Lannister.getResource("metal") >= 40 && Lannister.getResource("wood") >= 40 && Lannister.getResource("food") >= 30 && Lannister.getResource("labor") >= 40) {
+                            selectedTile.setBuilding("school", 1);
+                            JOptionPane.showMessageDialog(button, "School Built");
+                        } else if (label == "Buy College" && Lannister.getResearch("college") && Lannister.getResource("metal") >= 40 && Lannister.getResource("wood") >= 40 && Lannister.getResource("food") >= 30 && Lannister.getResource("labor") >= 40) {
 //                        Lannister.setBuilding("college", 1);
-                        selectedTile.setBuilding("college", 1);
-                        JOptionPane.showMessageDialog(button, "College Built");
-                    } else if (label == "Buy Build Mines" && Lannister.getResource("education") >= 50 && Lannister.getResource("labor") >= 10) {
-                        Lannister.setResearch("mine", true);
-                        JOptionPane.showMessageDialog(button, "Mines Researched");
-                    } else if (label == "Buy Build Forges" && Lannister.getResource("education") >= 75 && Lannister.getResource("labor") >= 25) {
-                        Lannister.setResearch("forge", true);
-                        JOptionPane.showMessageDialog(button, "Forges Researched");
-                    } else if (label == "Buy Build Lumber Mills" && Lannister.getResource("education") >= 50 && Lannister.getResource("labor") >= 10) {
-                        Lannister.setResearch("lumberMill", true);
-                        JOptionPane.showMessageDialog(button, "Lumber Mills Researched");
-                    } else if (label == "Buy Build Deforestation" && Lannister.getResource("education") >= 75 && Lannister.getResource("labor") >= 25) {
-                        Lannister.setResearch("deforestation", true);
-                        JOptionPane.showMessageDialog(button, "Deforestation Researched");
-                    } else if (label == "Buy Build Farms" && Lannister.getResource("education") >= 50 && Lannister.getResource("labor") >= 10) {
-                        Lannister.setResearch("farm", true);
-                        JOptionPane.showMessageDialog(button, "Farms Researched");
-                    } else if (label == "Buy Build Plantations" && Lannister.getResource("education") >= 75 && Lannister.getResource("labor") >= 25) {
-                        Lannister.setResearch("plantation", true);
-                        JOptionPane.showMessageDialog(button, "Plantations Researched");
-                    } else if (label == "Buy Build Schools" && Lannister.getResource("education") >= 50 && Lannister.getResource("labor") >= 10) {
-                        Lannister.setResearch("school", true);
-                        JOptionPane.showMessageDialog(button, "Schools Researched");
-                    } else if (label == "Buy Build Colleges" && Lannister.getResource("education") >= 75 && Lannister.getResource("labor") >= 25) {
-                        Lannister.setResearch("college", true);
-                        JOptionPane.showMessageDialog(button, "Colleges Researched");
-                    } else if (label == "Buy Train Spearmen" && Lannister.getResource("education") >= 50 && Lannister.getResource("labor") >= 10) {
-                        Lannister.setResearch("spearmen", true);
-                        JOptionPane.showMessageDialog(button, "Spearmen Researched");
-                    } else if (label == "Buy Train Mounted Calvalry" && Lannister.getResource("education") >= 50 && Lannister.getResource("labor") >= 10) {
-                        Lannister.setResearch("mountedCalvalry", true);
-                        JOptionPane.showMessageDialog(button, "Mounted Calvalry Researched");
-                    } else if (label == "Buy Build War Ships" && Lannister.getResource("education") >= 50 && Lannister.getResource("labor") >= 10) {
-                        Lannister.setResearch("warShip", true);
-                        JOptionPane.showMessageDialog(button, "War Ships Researched");
-                    } else if (label == "Buy Tame Wyverns" && Lannister.getResource("education") >= 50 && Lannister.getResource("labor") >= 10) {
-                        Lannister.setResearch("wyvern", true);
-                        JOptionPane.showMessageDialog(button, "Wyverns Researched");
-                    } else if (label == "Buy Build Dreadnoughts" && Lannister.getResource("education") >= 75 && Lannister.getResource("labor") >= 25) {
-                        Lannister.setResearch("dreadnought", true);
-                        JOptionPane.showMessageDialog(button, "Dreadnoughts Researched");
-                    } else if (label == "Buy Tame Dragons" && Lannister.getResource("education") >= 75 && Lannister.getResource("labor") >= 25) {
-                        Lannister.setResearch("dragon", true);
-                        JOptionPane.showMessageDialog(button, "Dragons Researched");
-                    } else {
-                        JOptionPane.showMessageDialog(button, "Unable to Buy");
-                    }
-                } else if (Targaryen.isActive()) {
-                    if (label == "Buy Swordmen" && Targaryen.getResource("metal") >= 10 && Targaryen.getResource("food") >= 10 && Targaryen.getResource("labor") >= 10) {
+                            selectedTile.setBuilding("college", 1);
+                            JOptionPane.showMessageDialog(button, "College Built");
+                        } else if (label == "Buy Build Mines" && Lannister.getResource("education") >= 50 && Lannister.getResource("labor") >= 10) {
+                            Lannister.setResearch("mine", true);
+                            JOptionPane.showMessageDialog(button, "Mines Researched");
+                        } else if (label == "Buy Build Forges" && Lannister.getResource("education") >= 75 && Lannister.getResource("labor") >= 25) {
+                            Lannister.setResearch("forge", true);
+                            JOptionPane.showMessageDialog(button, "Forges Researched");
+                        } else if (label == "Buy Build Lumber Mills" && Lannister.getResource("education") >= 50 && Lannister.getResource("labor") >= 10) {
+                            Lannister.setResearch("lumberMill", true);
+                            JOptionPane.showMessageDialog(button, "Lumber Mills Researched");
+                        } else if (label == "Buy Build Deforestation" && Lannister.getResource("education") >= 75 && Lannister.getResource("labor") >= 25) {
+                            Lannister.setResearch("deforestation", true);
+                            JOptionPane.showMessageDialog(button, "Deforestation Researched");
+                        } else if (label == "Buy Build Farms" && Lannister.getResource("education") >= 50 && Lannister.getResource("labor") >= 10) {
+                            Lannister.setResearch("farm", true);
+                            JOptionPane.showMessageDialog(button, "Farms Researched");
+                        } else if (label == "Buy Build Plantations" && Lannister.getResource("education") >= 75 && Lannister.getResource("labor") >= 25) {
+                            Lannister.setResearch("plantation", true);
+                            JOptionPane.showMessageDialog(button, "Plantations Researched");
+                        } else if (label == "Buy Build Schools" && Lannister.getResource("education") >= 50 && Lannister.getResource("labor") >= 10) {
+                            Lannister.setResearch("school", true);
+                            JOptionPane.showMessageDialog(button, "Schools Researched");
+                        } else if (label == "Buy Build Colleges" && Lannister.getResource("education") >= 75 && Lannister.getResource("labor") >= 25) {
+                            Lannister.setResearch("college", true);
+                            JOptionPane.showMessageDialog(button, "Colleges Researched");
+                        } else if (label == "Buy Train Spearmen" && Lannister.getResource("education") >= 50 && Lannister.getResource("labor") >= 10) {
+                            Lannister.setResearch("spearmen", true);
+                            JOptionPane.showMessageDialog(button, "Spearmen Researched");
+                        } else if (label == "Buy Train Mounted Calvalry" && Lannister.getResource("education") >= 50 && Lannister.getResource("labor") >= 10) {
+                            Lannister.setResearch("mountedCalvalry", true);
+                            JOptionPane.showMessageDialog(button, "Mounted Calvalry Researched");
+                        } else if (label == "Buy Build War Ships" && Lannister.getResource("education") >= 50 && Lannister.getResource("labor") >= 10) {
+                            Lannister.setResearch("warShip", true);
+                            JOptionPane.showMessageDialog(button, "War Ships Researched");
+                        } else if (label == "Buy Tame Wyverns" && Lannister.getResource("education") >= 50 && Lannister.getResource("labor") >= 10) {
+                            Lannister.setResearch("wyvern", true);
+                            JOptionPane.showMessageDialog(button, "Wyverns Researched");
+                        } else if (label == "Buy Build Dreadnoughts" && Lannister.getResource("education") >= 75 && Lannister.getResource("labor") >= 25) {
+                            Lannister.setResearch("dreadnought", true);
+                            JOptionPane.showMessageDialog(button, "Dreadnoughts Researched");
+                        } else if (label == "Buy Tame Dragons" && Lannister.getResource("education") >= 75 && Lannister.getResource("labor") >= 25) {
+                            Lannister.setResearch("dragon", true);
+                            JOptionPane.showMessageDialog(button, "Dragons Researched");
+                        } else {
+                            JOptionPane.showMessageDialog(button, "Unable to Buy");
+                            actionsTaken--;
+                        }
+                    } else if (Targaryen.isActive()) {
+                        if (label == "Buy Swordmen" && Targaryen.getResource("metal") >= 10 && Targaryen.getResource("food") >= 10 && Targaryen.getResource("labor") >= 10) {
 //                        Targaryen.setMilitary("swordmen", 1);
-                        selectedTile.setMilitary("swordmen", 1);
-                        JOptionPane.showMessageDialog(button, "Swordmen Trained");
-                    } else if (label == "Buy Shieldmen" && Targaryen.getResource("metal") >= 10 && Targaryen.getResource("food") >= 10 && Targaryen.getResource("labor") >= 20) {
+                            selectedTile.setMilitary("swordmen", 1);
+                            JOptionPane.showMessageDialog(button, "Swordmen Trained");
+                        } else if (label == "Buy Shieldmen" && Targaryen.getResource("metal") >= 10 && Targaryen.getResource("food") >= 10 && Targaryen.getResource("labor") >= 20) {
 //                        Targaryen.setMilitary("shieldmen", 1);
-                        selectedTile.setMilitary("shieldmen", 1);
-                        JOptionPane.showMessageDialog(button, "Shieldmen Trained");
-                    } else if (label == "Buy Spearmen" && Targaryen.getResearch("spearmen") && Targaryen.getResource("metal") >= 20 && Targaryen.getResource("food") >= 10 && Targaryen.getResource("labor") >= 10) {
+                            selectedTile.setMilitary("shieldmen", 1);
+                            JOptionPane.showMessageDialog(button, "Shieldmen Trained");
+                        } else if (label == "Buy Spearmen" && Targaryen.getResearch("spearmen") && Targaryen.getResource("metal") >= 20 && Targaryen.getResource("food") >= 10 && Targaryen.getResource("labor") >= 10) {
 //                        Targaryen.setMilitary("spearmen", 1);
-                        selectedTile.setMilitary("spearmen", 1);
-                        JOptionPane.showMessageDialog(button, "Spearmen Trained");
-                    } else if (label == "Buy Mounted Calvalry" && Targaryen.getResearch("mountedCalvalry") && Targaryen.getResource("metal") >= 20 && Targaryen.getResource("food") >= 10 && Targaryen.getResource("labor") >= 20) {
+                            selectedTile.setMilitary("spearmen", 1);
+                            JOptionPane.showMessageDialog(button, "Spearmen Trained");
+                        } else if (label == "Buy Mounted Calvalry" && Targaryen.getResearch("mountedCalvalry") && Targaryen.getResource("metal") >= 20 && Targaryen.getResource("food") >= 10 && Targaryen.getResource("labor") >= 20) {
 //                        Targaryen.setMilitary("mountedCavalry", 1);
-                        selectedTile.setMilitary("mountedCalvalry", 1);
-                        JOptionPane.showMessageDialog(button, "Mounted Calvalry Trained");
-                    } else if (label == "Buy Archer" && Targaryen.getResource("metal") >= 10 && Targaryen.getResource("food") >= 10 && Targaryen.getResource("labor") >= 10) {
+                            selectedTile.setMilitary("mountedCalvalry", 1);
+                            JOptionPane.showMessageDialog(button, "Mounted Calvalry Trained");
+                        } else if (label == "Buy Archer" && Targaryen.getResource("metal") >= 10 && Targaryen.getResource("food") >= 10 && Targaryen.getResource("labor") >= 10) {
 //                        Targaryen.setMilitary("archer", 1);
-                        selectedTile.setMilitary("archer", 1);
-                        JOptionPane.showMessageDialog(button, "Archer Trained");
-                    } else if (label == "Buy Scout Raven" && Targaryen.getResource("food") >= 10 && Targaryen.getResource("labor") >= 10) {
+                            selectedTile.setMilitary("archer", 1);
+                            JOptionPane.showMessageDialog(button, "Archer Trained");
+                        } else if (label == "Buy Scout Raven" && Targaryen.getResource("food") >= 10 && Targaryen.getResource("labor") >= 10) {
 //                        Targaryen.setMilitary("scoutRaven", 1);
-                        selectedTile.setMilitary("scoutRaven", 1);
-                        JOptionPane.showMessageDialog(button, "Scout Raven Trained");
-                    } else if (label == "Buy Transport Ship" && Targaryen.getResource("metal") >= 10 && Targaryen.getResource("wood") >= 20 && Targaryen.getResource("food") >= 10 && Targaryen.getResource("labor") >= 10) {
+                            selectedTile.setMilitary("scoutRaven", 1);
+                            JOptionPane.showMessageDialog(button, "Scout Raven Trained");
+                        } else if (label == "Buy Transport Ship" && Targaryen.getResource("metal") >= 10 && Targaryen.getResource("wood") >= 20 && Targaryen.getResource("food") >= 10 && Targaryen.getResource("labor") >= 10) {
 //                        Targaryen.setMilitary("transportShip", 1);
-                        selectedTile.setMilitary("transportShip", 1);
-                        JOptionPane.showMessageDialog(button, "Transport Ship Built");
-                    } else if (label == "Buy War Ship" && Targaryen.getResearch("warShip") && Targaryen.getResource("metal") >= 20 && Targaryen.getResource("wood") >= 30 && Targaryen.getResource("food") >= 10 && Targaryen.getResource("labor") >= 10) {
+                            selectedTile.setMilitary("transportShip", 1);
+                            JOptionPane.showMessageDialog(button, "Transport Ship Built");
+                        } else if (label == "Buy War Ship" && Targaryen.getResearch("warShip") && Targaryen.getResource("metal") >= 20 && Targaryen.getResource("wood") >= 30 && Targaryen.getResource("food") >= 10 && Targaryen.getResource("labor") >= 10) {
 //                        Targaryen.setMilitary("warShip", 1);
-                        selectedTile.setMilitary("warShip", 1);
-                        JOptionPane.showMessageDialog(button, "War Ship Built");
-                    } else if (label == "Buy Wyvern" && Targaryen.getResearch("wyvern") && Targaryen.getResource("food") >= 50 && Targaryen.getResource("labor") >= 25) {
+                            selectedTile.setMilitary("warShip", 1);
+                            JOptionPane.showMessageDialog(button, "War Ship Built");
+                        } else if (label == "Buy Wyvern" && Targaryen.getResearch("wyvern") && Targaryen.getResource("food") >= 50 && Targaryen.getResource("labor") >= 25) {
 //                        Targaryen.setMilitary("wyvern", 1);
-                        selectedTile.setMilitary("wyvern", 1);
-                        JOptionPane.showMessageDialog(button, "Wyvern Trained");
-                    } else if (label == "Buy Dreadnought" && Targaryen.getResearch("dreadnought") && Targaryen.getResource("metal") >= 10 && Targaryen.getResource("wood") >= 100 && Targaryen.getResource("food") >= 10 && Targaryen.getResource("labor") >= 50) {
+                            selectedTile.setMilitary("wyvern", 1);
+                            JOptionPane.showMessageDialog(button, "Wyvern Trained");
+                        } else if (label == "Buy Dreadnought" && Targaryen.getResearch("dreadnought") && Targaryen.getResource("metal") >= 10 && Targaryen.getResource("wood") >= 100 && Targaryen.getResource("food") >= 10 && Targaryen.getResource("labor") >= 50) {
 //                        Targaryen.setMilitary("dreadnought", 1);
-                        selectedTile.setMilitary("dreadnought", 1);
-                        JOptionPane.showMessageDialog(button, "Dreadnought Built");
-                    } else if (label == "Buy Dragon" && Targaryen.getResearch("dragon") && Targaryen.getResource("food") >= 100 && Targaryen.getResource("labor") >= 100) {
+                            selectedTile.setMilitary("dreadnought", 1);
+                            JOptionPane.showMessageDialog(button, "Dreadnought Built");
+                        } else if (label == "Buy Dragon" && Targaryen.getResearch("dragon") && Targaryen.getResource("food") >= 100 && Targaryen.getResource("labor") >= 100) {
 //                        Targaryen.setMilitary("dragon", 1);
-                        selectedTile.setMilitary("dragon", 1);
-                        JOptionPane.showMessageDialog(button, "Dragon Trained");
-                    } else if (label == "Buy Mine" && Targaryen.getResearch("mine") && Targaryen.getResource("metal") >= 10 && Targaryen.getResource("wood") >= 50 && Targaryen.getResource("food") >= 20 && Targaryen.getResource("labor") >= 20) {
+                            selectedTile.setMilitary("dragon", 1);
+                            JOptionPane.showMessageDialog(button, "Dragon Trained");
+                        } else if (label == "Buy Mine" && Targaryen.getResearch("mine") && Targaryen.getResource("metal") >= 10 && Targaryen.getResource("wood") >= 50 && Targaryen.getResource("food") >= 20 && Targaryen.getResource("labor") >= 20) {
 //                        Targaryen.setBuilding("mine", 1);
-                        selectedTile.setBuilding("mine", 1);
-                        JOptionPane.showMessageDialog(button, "Mine Built");
-                    } else if (label == "Buy Forge" && Targaryen.getResearch("forge") && Targaryen.getResource("metal") >= 50 && Targaryen.getResource("wood") >= 40 && Targaryen.getResource("food") >= 20 && Targaryen.getResource("labor") >= 20) {
+                            selectedTile.setBuilding("mine", 1);
+                            JOptionPane.showMessageDialog(button, "Mine Built");
+                        } else if (label == "Buy Forge" && Targaryen.getResearch("forge") && Targaryen.getResource("metal") >= 50 && Targaryen.getResource("wood") >= 40 && Targaryen.getResource("food") >= 20 && Targaryen.getResource("labor") >= 20) {
 //                        Targaryen.setBuilding("forge", 1);
-                        selectedTile.setBuilding("forge", 1);
-                        JOptionPane.showMessageDialog(button, "Forge Built");
-                    } else if (label == "Buy Lumber Mill" && Targaryen.getResearch("lumberMill") && Targaryen.getResource("metal") >= 50 && Targaryen.getResource("wood") >= 10 && Targaryen.getResource("food") >= 20 && Targaryen.getResource("labor") >= 20) {
+                            selectedTile.setBuilding("forge", 1);
+                            JOptionPane.showMessageDialog(button, "Forge Built");
+                        } else if (label == "Buy Lumber Mill" && Targaryen.getResearch("lumberMill") && Targaryen.getResource("metal") >= 50 && Targaryen.getResource("wood") >= 10 && Targaryen.getResource("food") >= 20 && Targaryen.getResource("labor") >= 20) {
 //                        Targaryen.setBuilding("lumberMill", 1);
-                        selectedTile.setBuilding("lumberMill", 1);
-                        JOptionPane.showMessageDialog(button, "Lumber Mill Built");
-                    } else if (label == "Buy Deforestation" && Targaryen.getResearch("deforestation") && Targaryen.getResource("metal") >= 20 && Targaryen.getResource("wood") >= 40 && Targaryen.getResource("food") >= 50 && Targaryen.getResource("labor") >= 40) {
+                            selectedTile.setBuilding("lumberMill", 1);
+                            JOptionPane.showMessageDialog(button, "Lumber Mill Built");
+                        } else if (label == "Buy Deforestation" && Targaryen.getResearch("deforestation") && Targaryen.getResource("metal") >= 20 && Targaryen.getResource("wood") >= 40 && Targaryen.getResource("food") >= 50 && Targaryen.getResource("labor") >= 40) {
 //                        Targaryen.setBuilding("deforestation", 1);
-                        selectedTile.setBuilding("deforestation", 1);
-                        JOptionPane.showMessageDialog(button, "Deforestation Built");
-                    } else if (label == "Buy Farm" && Targaryen.getResearch("farm") && Targaryen.getResource("metal") >= 20 && Targaryen.getResource("wood") >= 40 && Targaryen.getResource("food") >= 20 && Targaryen.getResource("labor") >= 20) {
+                            selectedTile.setBuilding("deforestation", 1);
+                            JOptionPane.showMessageDialog(button, "Deforestation Built");
+                        } else if (label == "Buy Farm" && Targaryen.getResearch("farm") && Targaryen.getResource("metal") >= 20 && Targaryen.getResource("wood") >= 40 && Targaryen.getResource("food") >= 20 && Targaryen.getResource("labor") >= 20) {
 //                        Targaryen.setBuilding("farm", 1);
-                        selectedTile.setBuilding("farm", 1);
-                        JOptionPane.showMessageDialog(button, "Farm Built");
-                    } else if (label == "Buy Plantation" && Targaryen.getResearch("plantation") && Targaryen.getResource("metal") >= 40 && Targaryen.getResource("wood") >= 50 && Targaryen.getResource("food") >= 20 && Targaryen.getResource("labor") >= 40) {
+                            selectedTile.setBuilding("farm", 1);
+                            JOptionPane.showMessageDialog(button, "Farm Built");
+                        } else if (label == "Buy Plantation" && Targaryen.getResearch("plantation") && Targaryen.getResource("metal") >= 40 && Targaryen.getResource("wood") >= 50 && Targaryen.getResource("food") >= 20 && Targaryen.getResource("labor") >= 40) {
 //                        Targaryen.setBuilding("plantation", 1);
-                        selectedTile.setBuilding("plantation", 1);
-                        JOptionPane.showMessageDialog(button, "Plantation Built");
-                    } else if (label == "Buy School" && Targaryen.getResearch("school") && Targaryen.getResource("metal") >= 40 && Targaryen.getResource("wood") >= 20 && Targaryen.getResource("food") >= 20 && Targaryen.getResource("labor") >= 20) {
+                            selectedTile.setBuilding("plantation", 1);
+                            JOptionPane.showMessageDialog(button, "Plantation Built");
+                        } else if (label == "Buy School" && Targaryen.getResearch("school") && Targaryen.getResource("metal") >= 40 && Targaryen.getResource("wood") >= 20 && Targaryen.getResource("food") >= 20 && Targaryen.getResource("labor") >= 20) {
 //                        Targaryen.setBuilding("school", 1);
-                        selectedTile.setBuilding("school", 1);
-                        JOptionPane.showMessageDialog(button, "School Built");
-                    } else if (label == "Buy College" && Targaryen.getResearch("college") && Targaryen.getResource("metal") >= 40 && Targaryen.getResource("wood") >= 40 && Targaryen.getResource("food") >= 30 && Targaryen.getResource("labor") >= 40) {
+                            selectedTile.setBuilding("school", 1);
+                            JOptionPane.showMessageDialog(button, "School Built");
+                        } else if (label == "Buy College" && Targaryen.getResearch("college") && Targaryen.getResource("metal") >= 40 && Targaryen.getResource("wood") >= 40 && Targaryen.getResource("food") >= 30 && Targaryen.getResource("labor") >= 40) {
 //                        Targaryen.setBuilding("college", 1);
-                        selectedTile.setBuilding("college", 1);
-                        JOptionPane.showMessageDialog(button, "College Built");
-                    } else if (label == "Buy Build Mines" && Targaryen.getResource("education") >= 50 && Targaryen.getResource("labor") >= 10) {
-                        Targaryen.setResearch("mine", true);
-                        JOptionPane.showMessageDialog(button, "Mines Researched");
-                    } else if (label == "Buy Build Forges" && Targaryen.getResource("education") >= 75 && Targaryen.getResource("labor") >= 25) {
-                        Targaryen.setResearch("forge", true);
-                        JOptionPane.showMessageDialog(button, "Forges Researched");
-                    } else if (label == "Buy Build Lumber Mills" && Targaryen.getResource("education") >= 50 && Targaryen.getResource("labor") >= 10) {
-                        Targaryen.setResearch("lumberMill", true);
-                        JOptionPane.showMessageDialog(button, "Lumber Mills Researched");
-                    } else if (label == "Buy Build Deforestation" && Targaryen.getResource("education") >= 75 && Targaryen.getResource("labor") >= 25) {
-                        Targaryen.setResearch("deforestation", true);
-                        JOptionPane.showMessageDialog(button, "Deforestation Researched");
-                    } else if (label == "Buy Build Farms" && Targaryen.getResource("education") >= 50 && Targaryen.getResource("labor") >= 10) {
-                        Targaryen.setResearch("farm", true);
-                        JOptionPane.showMessageDialog(button, "Farms Researched");
-                    } else if (label == "Buy Build Plantations" && Targaryen.getResource("education") >= 75 && Targaryen.getResource("labor") >= 25) {
-                        Targaryen.setResearch("plantation", true);
-                        JOptionPane.showMessageDialog(button, "Plantations Researched");
-                    } else if (label == "Buy Build Schools" && Targaryen.getResource("education") >= 50 && Targaryen.getResource("labor") >= 10) {
-                        Targaryen.setResearch("school", true);
-                        JOptionPane.showMessageDialog(button, "Schools Researched");
-                    } else if (label == "Buy Build Colleges" && Targaryen.getResource("education") >= 75 && Targaryen.getResource("labor") >= 25) {
-                        Targaryen.setResearch("college", true);
-                        JOptionPane.showMessageDialog(button, "Colleges Researched");
-                    } else if (label == "Buy Train Spearmen" && Targaryen.getResource("education") >= 50 && Targaryen.getResource("labor") >= 10) {
-                        Targaryen.setResearch("spearmen", true);
-                        JOptionPane.showMessageDialog(button, "Spearmen Researched");
-                    } else if (label == "Buy Train Mounted Calvalry" && Targaryen.getResource("education") >= 50 && Targaryen.getResource("labor") >= 10) {
-                        Targaryen.setResearch("mountedCalvalry", true);
-                        JOptionPane.showMessageDialog(button, "Mounted Calvalry Researched");
-                    } else if (label == "Buy Build War Ships" && Targaryen.getResource("education") >= 50 && Targaryen.getResource("labor") >= 10) {
-                        Targaryen.setResearch("warShip", true);
-                        JOptionPane.showMessageDialog(button, "War Ships Researched");
-                    } else if (label == "Buy Tame Wyverns" && Targaryen.getResource("education") >= 50 && Targaryen.getResource("labor") >= 10) {
-                        Targaryen.setResearch("wyvern", true);
-                        JOptionPane.showMessageDialog(button, "Wyverns Researched");
-                    } else if (label == "Buy Build Dreadnoughts" && Targaryen.getResource("education") >= 75 && Targaryen.getResource("labor") >= 25) {
-                        Targaryen.setResearch("dreadnought", true);
-                        JOptionPane.showMessageDialog(button, "Dreadnoughts Researched");
-                    } else if (label == "Buy Tame Dragons" && Targaryen.getResource("education") >= 75 && Targaryen.getResource("labor") >= 25) {
-                        Targaryen.setResearch("dragon", true);
-                        JOptionPane.showMessageDialog(button, "Dragons Researched");
-                    } else {
-                        JOptionPane.showMessageDialog(button, "Unable to Buy");
+                            selectedTile.setBuilding("college", 1);
+                            JOptionPane.showMessageDialog(button, "College Built");
+                        } else if (label == "Buy Build Mines" && Targaryen.getResource("education") >= 50 && Targaryen.getResource("labor") >= 10) {
+                            Targaryen.setResearch("mine", true);
+                            JOptionPane.showMessageDialog(button, "Mines Researched");
+                        } else if (label == "Buy Build Forges" && Targaryen.getResource("education") >= 75 && Targaryen.getResource("labor") >= 25) {
+                            Targaryen.setResearch("forge", true);
+                            JOptionPane.showMessageDialog(button, "Forges Researched");
+                        } else if (label == "Buy Build Lumber Mills" && Targaryen.getResource("education") >= 50 && Targaryen.getResource("labor") >= 10) {
+                            Targaryen.setResearch("lumberMill", true);
+                            JOptionPane.showMessageDialog(button, "Lumber Mills Researched");
+                        } else if (label == "Buy Build Deforestation" && Targaryen.getResource("education") >= 75 && Targaryen.getResource("labor") >= 25) {
+                            Targaryen.setResearch("deforestation", true);
+                            JOptionPane.showMessageDialog(button, "Deforestation Researched");
+                        } else if (label == "Buy Build Farms" && Targaryen.getResource("education") >= 50 && Targaryen.getResource("labor") >= 10) {
+                            Targaryen.setResearch("farm", true);
+                            JOptionPane.showMessageDialog(button, "Farms Researched");
+                        } else if (label == "Buy Build Plantations" && Targaryen.getResource("education") >= 75 && Targaryen.getResource("labor") >= 25) {
+                            Targaryen.setResearch("plantation", true);
+                            JOptionPane.showMessageDialog(button, "Plantations Researched");
+                        } else if (label == "Buy Build Schools" && Targaryen.getResource("education") >= 50 && Targaryen.getResource("labor") >= 10) {
+                            Targaryen.setResearch("school", true);
+                            JOptionPane.showMessageDialog(button, "Schools Researched");
+                        } else if (label == "Buy Build Colleges" && Targaryen.getResource("education") >= 75 && Targaryen.getResource("labor") >= 25) {
+                            Targaryen.setResearch("college", true);
+                            JOptionPane.showMessageDialog(button, "Colleges Researched");
+                        } else if (label == "Buy Train Spearmen" && Targaryen.getResource("education") >= 50 && Targaryen.getResource("labor") >= 10) {
+                            Targaryen.setResearch("spearmen", true);
+                            JOptionPane.showMessageDialog(button, "Spearmen Researched");
+                        } else if (label == "Buy Train Mounted Calvalry" && Targaryen.getResource("education") >= 50 && Targaryen.getResource("labor") >= 10) {
+                            Targaryen.setResearch("mountedCalvalry", true);
+                            JOptionPane.showMessageDialog(button, "Mounted Calvalry Researched");
+                        } else if (label == "Buy Build War Ships" && Targaryen.getResource("education") >= 50 && Targaryen.getResource("labor") >= 10) {
+                            Targaryen.setResearch("warShip", true);
+                            JOptionPane.showMessageDialog(button, "War Ships Researched");
+                        } else if (label == "Buy Tame Wyverns" && Targaryen.getResource("education") >= 50 && Targaryen.getResource("labor") >= 10) {
+                            Targaryen.setResearch("wyvern", true);
+                            JOptionPane.showMessageDialog(button, "Wyverns Researched");
+                        } else if (label == "Buy Build Dreadnoughts" && Targaryen.getResource("education") >= 75 && Targaryen.getResource("labor") >= 25) {
+                            Targaryen.setResearch("dreadnought", true);
+                            JOptionPane.showMessageDialog(button, "Dreadnoughts Researched");
+                        } else if (label == "Buy Tame Dragons" && Targaryen.getResource("education") >= 75 && Targaryen.getResource("labor") >= 25) {
+                            Targaryen.setResearch("dragon", true);
+                            JOptionPane.showMessageDialog(button, "Dragons Researched");
+                        } else {
+                            JOptionPane.showMessageDialog(button, "Unable to Buy");
+                            actionsTaken--;
+                        }
                     }
                 }
             }
@@ -3501,6 +3530,7 @@ public class Main {
         jMenuBar.add(foodLabel);
         jMenuBar.add(laborLabel);
         jMenuBar.add(educationLabel);
+        jMenuBar.add(actionLabel);
 
         //  Don't even know if we need keys?
 //        bindKey(myPanel, "UP");

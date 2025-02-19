@@ -25,6 +25,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 
@@ -98,6 +100,8 @@ public class Main {
     private static Nation Stark = new Nation();
     private static Nation Lannister = new Nation();
     private static Nation Targaryen = new Nation();
+    private static Color colorBackground = Color.decode("#dec590");
+    private static Color colorButton = Color.decode("#bda46f");
 
     //  Don't know where this even came from?
 //    public Main() {
@@ -700,6 +704,12 @@ public class Main {
 
         JPanel jPanel = new JPanel();
         jPanel.setLayout(new GridLayout(3, 1));
+        jPanel.setBackground(colorBackground);
+        newGameButton.setBackground(colorButton);
+        joinGameButton.setBackground(colorButton);
+        loadGameButton.setBackground(colorButton);
+        quitGameButton.setBackground(colorButton);
+        frame.setBackground(colorBackground);
         jPanel.add(newGameButton);
         jPanel.add(joinGameButton);
         jPanel.add(loadGameButton);
@@ -811,6 +821,16 @@ public class Main {
 
         JPanel jPanel = new JPanel();
         jPanel.setLayout(new GridLayout(8, 2));
+        jPanel.setBackground(colorBackground);
+        nationComboBox.setBackground(colorButton);
+        metalT.setBackground(colorButton);
+        woodT.setBackground(colorButton);
+        foodT.setBackground(colorButton);
+        laborT.setBackground(colorButton);
+        educationT.setBackground(colorButton);
+        backButton.setBackground(colorButton);
+        startButton.setBackground(colorButton);
+        frame.setBackground(colorBackground);
         jPanel.add(nationL);
         jPanel.add(nationComboBox);
         jPanel.add(metalL);
@@ -937,6 +957,17 @@ public class Main {
 
         JPanel jPanel = new JPanel();
         jPanel.setLayout(new GridLayout(9, 2));
+        jPanel.setBackground(colorBackground);
+        ipT.setBackground(colorButton);
+        nationComboBox.setBackground(colorButton);
+        metalT.setBackground(colorButton);
+        woodT.setBackground(colorButton);
+        foodT.setBackground(colorButton);
+        laborT.setBackground(colorButton);
+        educationT.setBackground(colorButton);
+        backButton.setBackground(colorButton);
+        startButton.setBackground(colorButton);
+        frame.setBackground(colorBackground);
         jPanel.add(ipL);
         jPanel.add(ipT);
         jPanel.add(nationL);
@@ -1296,6 +1327,11 @@ public class Main {
 
             JPanel jPanel = new JPanel();
             jPanel.setLayout(new GridLayout(3, 1));
+            jPanel.setBackground(colorBackground);
+            startButton.setBackground(colorButton);
+            quitButton.setBackground(colorButton);
+            nationComboBox.setBackground(colorButton);
+            frame.setBackground(colorBackground);
             jPanel.add(startButton);
             jPanel.add(quitButton);
             jPanel.add(nationComboBox);
@@ -1330,6 +1366,7 @@ public class Main {
         claimTile.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                frame.setVisible(false);
                 actionsTaken+=5;
                 if (actionsTaken > 10) {
                     JOptionPane.showMessageDialog(claimTile,"You need 5 action points to claim a tile");
@@ -1392,6 +1429,14 @@ public class Main {
             }
         });
 
+        jPanel.setBackground(colorBackground);
+        table.getTableHeader().setBackground(colorButton);
+        table.setBackground(colorBackground);
+        claimTile.setBackground(colorButton);
+        buildButton.setBackground(colorButton);
+        trainButton.setBackground(colorButton);
+        commandButton.setBackground(colorButton);
+        frame.setBackground(colorBackground);
         jPanel.add(tileOwner);
         jPanel.add(table);
         if (tile.owner.equals("")) {
@@ -1467,11 +1512,15 @@ public class Main {
             }
 
             JTable militaryTable = new JTable(dm);
+            militaryTable.getTableHeader().setBackground(colorButton);
+            militaryTable.setBackground(colorBackground);
             JScrollPane scroll = new JScrollPane(militaryTable);
             militaryTable.setPreferredScrollableViewportSize(militaryTable.getPreferredSize());
 
             JPanel jPanel = new JPanel();
             jPanel.setLayout(new BoxLayout(jPanel, BoxLayout.Y_AXIS));
+            jPanel.setBackground(colorBackground);
+            frame.setBackground(colorBackground);
             jPanel.add(nationName);
             jPanel.add(nationTeam);
             jPanel.add(nationMilitary);
@@ -1490,16 +1539,65 @@ public class Main {
         frame.setLocation(300, 200);
 
         DefaultTableModel dm = new DefaultTableModel();
-        dm.setDataVector(new Object[][]{{"Unit", "Owner"}},
-                new Object[]{"Unit", "Owner"});
+        dm.setDataVector(null,
+                new Object[]{"Unit", "Owner", "Move"});
         for (int i = 0; i < tile.occupyingUnits.size(); i++) {
-            dm.addRow(new Object[]{tile.occupyingUnits.get(i).unitName, tile.occupyingUnits.get(i).owner});
+            dm.addRow(new Object[]{tile.occupyingUnits.get(i).unitName, tile.occupyingUnits.get(i).owner, false});
         }
-        JTable table = new JTable(dm);
+        JTable table = new JTable(dm) {
+            @Override
+            public Class getColumnClass(int column) {
+                switch (column) {
+                    case 0:
+                        return String.class;
+                    case 1:
+                        return String.class;
+                    default:
+                        return Boolean.class;
+                }
+            }
+        };
 
+        JLabel selectedUnits = new JLabel();
+        table.getModel().addTableModelListener(new TableModelListener() {
+            @Override
+            public void tableChanged(TableModelEvent e) {
+                String temp = "<html>";
+                for(int i=0;i<table.getModel().getRowCount();i++)
+                {
+                    if ((Boolean) table.getModel().getValueAt(i,2))
+                    {
+                        temp += table.getValueAt(i, 0) + " " + table.getValueAt(i,2) + "<br/>";
+//                        System.out.println(table.getValueAt(i, 0) + " " + table.getValueAt(i,2));
+                    }
+                }
+                temp += "</html>";
+                selectedUnits.setText(temp);
+            }
+        });
+
+        JButton moveButton = new JButton("Move Units");
+        moveButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                frame.setVisible(false);
+//                OpenCommandMenu(tile);
+            }
+        });
+
+        JPanel jPanel = new JPanel();
+//        jPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+        jPanel.setLayout(new BoxLayout(jPanel, BoxLayout.Y_AXIS));
+        jPanel.setBackground(colorBackground);
+        table.setBackground(colorBackground);
+        moveButton.setBackground(colorButton);
+        frame.setBackground(colorBackground);
+        jPanel.add(table);
+        jPanel.add(selectedUnits);
+        jPanel.add(moveButton);
+
+        frame.add(jPanel);
         frame.setSize(300, 300);
-        frame.add(table);
-//            frame.pack();
         frame.setVisible(true);
     }
 
@@ -1525,8 +1623,15 @@ public class Main {
         JTable table = new JTable(dm);
         table.getColumn("").setCellRenderer(new ButtonRenderer());
         table.getColumn("").setCellEditor(new ButtonEditor(new JCheckBox(), tile));
+        table.getTableHeader().setBackground(colorButton);
+        table.setBackground(colorBackground);
+        frame.setBackground(colorBackground);
 
         JScrollPane scroll = new JScrollPane(table);
+        JPanel temp = new JPanel();
+        temp.setBackground(colorBackground);
+        scroll.setCorner(JScrollPane.UPPER_RIGHT_CORNER, temp);
+        scroll.getVerticalScrollBar().setBackground(colorBackground);
         table.setPreferredScrollableViewportSize(table.getPreferredSize());
         table.getColumnModel().getColumn(0).setPreferredWidth(200);
         table.getColumnModel().getColumn(1).setPreferredWidth(400);
@@ -1558,8 +1663,15 @@ public class Main {
         JTable table = new JTable(dm);
         table.getColumn("").setCellRenderer(new ButtonRenderer());
         table.getColumn("").setCellEditor(new ButtonEditor(new JCheckBox(), tile));
+        table.getTableHeader().setBackground(colorButton);
+        table.setBackground(colorBackground);
+        frame.setBackground(colorBackground);
 
         JScrollPane scroll = new JScrollPane(table);
+        JPanel temp = new JPanel();
+        temp.setBackground(colorBackground);
+        scroll.setCorner(JScrollPane.UPPER_RIGHT_CORNER, temp);
+        scroll.getVerticalScrollBar().setBackground(colorBackground);
         table.setPreferredScrollableViewportSize(table.getPreferredSize());
         table.getColumnModel().getColumn(0).setPreferredWidth(200);
         table.getColumnModel().getColumn(1).setPreferredWidth(400);
@@ -1597,8 +1709,15 @@ public class Main {
             JTable table = new JTable(dm);
             table.getColumn("").setCellRenderer(new ButtonRenderer());
             table.getColumn("").setCellEditor(new ButtonEditor(new JCheckBox()));
+            table.getTableHeader().setBackground(colorButton);
+            table.setBackground(colorBackground);
+            frame.setBackground(colorBackground);
 
             JScrollPane scroll = new JScrollPane(table);
+            JPanel temp = new JPanel();
+            temp.setBackground(colorBackground);
+            scroll.setCorner(JScrollPane.UPPER_RIGHT_CORNER, temp);
+            scroll.getVerticalScrollBar().setBackground(colorBackground);
             table.setPreferredScrollableViewportSize(table.getPreferredSize());
             table.getColumnModel().getColumn(0).setPreferredWidth(200);
             table.getColumnModel().getColumn(1).setPreferredWidth(400);
@@ -1660,6 +1779,9 @@ public class Main {
             }
 
             JTable table = new JTable(dm);
+            table.getTableHeader().setBackground(colorButton);
+            table.setBackground(colorBackground);
+            frame.setBackground(colorBackground);
 
             JScrollPane scroll = new JScrollPane(table);
             table.setPreferredScrollableViewportSize(table.getPreferredSize());
@@ -2038,10 +2160,12 @@ public class Main {
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
             if (isSelected) {
                 setForeground(table.getSelectionForeground());
-                setBackground(table.getSelectionBackground());
+//                setBackground(table.getSelectionBackground());
+                setBackground(colorButton);
             } else {
                 setForeground(table.getForeground());
-                setBackground(UIManager.getColor("Button.background"));
+//                setBackground(UIManager.getColor("Button.background"));
+                setBackground(colorButton);
             }
             setText((value == null) ? "" : value.toString());
             return this;
@@ -3503,10 +3627,6 @@ public class Main {
         pauseButton.addActionListener(new OpenPauseMenu());
         JButton nationButton = new JButton("Nation");
         nationButton.addActionListener(new OpenNationMenu());
-//        JButton militaryButton = new JButton("Military");
-//        militaryButton.addActionListener(new OpenMilitaryMenu());
-//        JButton constructionButton = new JButton("Construction");
-//        constructionButton.addActionListener(new OpenConstructionMenu());
         JButton researchButton = new JButton("Research");
         researchButton.addActionListener(new OpenResearchMenu());
         JButton infoButton = new JButton("Info");
@@ -3516,11 +3636,18 @@ public class Main {
         JButton tradeButton = new JButton("Trade");
         tradeButton.addActionListener(new OpenTradeMenu());
 
+        pauseButton.setBackground(colorButton);
+        nationButton.setBackground(colorButton);
+        researchButton.setBackground(colorButton);
+        infoButton.setBackground(colorButton);
+        mailButton.setBackground(colorButton);
+        tradeButton.setBackground(colorButton);
+        jMenuBar.setBackground(colorBackground);
+        appFrame.setBackground(colorBackground);
+
         //  Throws all the JButtons into the JMenuBar
         jMenuBar.add(pauseButton);
         jMenuBar.add(nationButton);
-//        jMenuBar.add(militaryButton);
-//        jMenuBar.add(constructionButton);
         jMenuBar.add(researchButton);
         jMenuBar.add(infoButton);
         jMenuBar.add(mailButton);

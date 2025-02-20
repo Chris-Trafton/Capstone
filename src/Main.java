@@ -3,6 +3,7 @@
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.image.AffineTransformOp;
 import java.awt.Dimension;
@@ -10,10 +11,7 @@ import java.awt.Toolkit;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Date;
-import java.util.Map;
-import java.util.Random;
-import java.util.Vector;
+import java.util.*;
 
 import javax.swing.*;
 
@@ -283,6 +281,10 @@ public class Main {
             } else if (current.owner.equals("")) {
                 if (current.mouseHover) {
 //                    System.out.println((current.x + current.getWidth() / 2) + " " + (current.y - current.getHeight() / 2) + "\n" + board.mouseX + " " + board.mouseY);
+                    drawPath(g2d,current);
+                    try {
+                        Thread.sleep(300);
+                    } catch (InterruptedException ie) {}
                     if (current.myBiome == biome.Flatland) {
                         g2d.drawImage(rotateImageObject(current).filter(flat_tile, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
                     } else if (current.myBiome == biome.Forest) {
@@ -332,6 +334,13 @@ public class Main {
         }
     }
 
+    private static void drawPath(Graphics2D g2d, Tile current) {
+        Vector<Tile> path = getPath(tiles.get(0),current);
+        for (int i = 0; i < path.size()-1; i++) {
+            g2d.drawLine((int)path.get(i).getCenter().getX(),(int)path.get(i).getCenter().getY(),(int)path.get(i+1).getCenter().getX(),(int)path.get(i+1).getCenter().getY());
+        }
+    }
+
     private static void openStartScreen() {
         JFrame frame = new JFrame("Start Screen");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -341,6 +350,7 @@ public class Main {
         newGameButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+//                frame.setVisible(false);
                 OpenSetupMenu();
                 frame.dispose();
             }
@@ -1253,6 +1263,84 @@ public class Main {
         frame.setSize(300, 300);
         frame.setVisible(true);
     }
+
+    private static class PathItem {
+        Tile node;
+        Vector<Tile> path;
+        int cost;
+        public PathItem(Tile node, Vector<Tile> path, int cost) {
+            this.node = node;
+            this.path = path;
+            this.cost = cost;
+        }
+    }
+
+    private static Vector<Tile> getPath(Tile a, Tile b) {
+        Line2D.Double straight = new Line2D.Double(a.getCenter(),b.getCenter());
+        Vector<Tile> explored = new Vector<>();
+        Comparator<PathItem> comp = new Comparator<PathItem>() {
+            @Override
+            public int compare(PathItem o1, PathItem o2) {
+                if (o1.node.getCenter().distance(b.getCenter()) + o1.cost > o2.node.getCenter().distance(b.getCenter()) + o2.cost) {
+                    return 1;
+                } else if (o1.node.getCenter().distance(b.getCenter()) + o1.cost < o2.node.getCenter().distance(b.getCenter()) + o2.cost) {
+                    return -1;
+                } else {
+                    return 0;
+                }
+            }
+        };
+        PriorityQueue<PathItem> fringe = new PriorityQueue<>(comp);
+        fringe.add(new PathItem(a,new Vector<Tile>(),0));
+        while(true) {
+            if (fringe.isEmpty()) return null;
+            PathItem current = fringe.remove();
+            Tile node = current.node;
+            Vector<Tile> path = current.path;
+            System.out.println(fringe.size());
+            int totalCost = current.cost;
+            if (node.equals(b)) {
+                path.add(node);
+                return path;
+            }
+            if (!explored.contains(node)) {
+                explored.add(node);
+                for (int i = 0; i < node.neighbors.size(); i++) {
+                    Vector<Tile> newPath = new Vector<>(path);
+                    newPath.add(node);
+                    totalCost+=10;
+                    PathItem next = new PathItem(node.neighbors.get(i),newPath,totalCost);
+                    fringe.add(next);
+                }
+            }
+        }
+
+
+
+
+
+//        Tile current = a;
+//        while (!path.get(path.size()-1).equals(b.getCenter())) {
+//            Tile bestNext = current.neighbors.get(0);
+//            double bestDist = straight.ptLineDist(bestNext.getCenter());
+//            for (int i = 0; i < current.neighbors.size(); i++) {
+//                double dist = straight.ptLineDist(current.neighbors.get(i).getCenter());
+//                if (dist < bestDist) {
+//                    if (path.contains(current.neighbors.get(i).getCenter())) continue;
+//                    bestNext = current.neighbors.get(i);
+//                    bestDist = dist;
+//
+//                }
+//            }
+//            path.add(bestNext.getCenter());
+//        }
+//        return path;
+    }
+
+//    private static Line2D.Double getPath(Tile a, Tile b) {
+//        Line2D.Double straight = new Line2D.Double(a.getCenter(),b.getCenter());
+//        return straight;
+//    }
 
     private static void OpenMilitaryMenu(Tile tile) {
         JFrame frame = new JFrame("Military Menu");
@@ -2854,6 +2942,9 @@ public class Main {
         public String toString() {
             return owner + "- Labor: " + resourceRates.get(0) + " Wood: " + resourceRates.get(1) + " Metal: " + resourceRates.get(2) + " Food: " + resourceRates.get(3) + " Research: " + resourceRates.get(4);
         }
+        public boolean equals(Tile a) {
+            return x == a.x && y == a.y;
+        }
         public void setOwner(int index) {
             if (index == 0) {
                 owner = "Stark";
@@ -2867,6 +2958,9 @@ public class Main {
             return myBiome;
         }
         public void isWaterSide() { waterSide = (neighbors.size() < 6); }
+        public Point2D.Double getCenter() {
+            return new Point2D.Double(x + (xwidth*0.5),y+(yheight*1.5));
+        }
         public void setResourceRates() {
             resourceRates.clear();
             int labor, wood, metal, food, research;

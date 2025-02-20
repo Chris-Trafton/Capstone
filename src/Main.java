@@ -61,7 +61,6 @@ public class Main {
     private static BufferedImage player_desert_tile_small;
     private static BufferedImage enemy_desert_tile_small;
     private static Vector<Tile> tiles;
-    private static double pi;
     private static double twoPi;
     private static double tileFixX;
     private static double tileFixY;
@@ -76,13 +75,6 @@ public class Main {
     private static BufferedImage background;
     private static boolean background_drawn;
     private static BufferedImage scrollBackground;
-    private static Boolean upPressed;
-    private static Boolean downPressed;
-    private static Boolean leftPressed;
-    private static Boolean rightPressed;
-    private static Long audiolifetime;
-    private static Long lastAudioStart;
-    private static Clip clip;
     private static int XOFFSET;
     private static int YOFFSET;
     private static int WINWIDTH;
@@ -102,11 +94,8 @@ public class Main {
     private static Nation Targaryen = new Nation();
     private static Color colorBackground = Color.decode("#dec590");
     private static Color colorButton = Color.decode("#bda46f");
-
-    //  Don't know where this even came from?
-//    public Main() {
-//        setup();
-//    }
+    private static Vector<MilitaryUnit> movingUnits = new Vector<>();
+    private static int maxActions = 100;
 
     public static class MouseTrackerPanel extends JPanel {
 
@@ -177,7 +166,6 @@ public class Main {
 
     public static void setup() {
         appFrame = new JFrame("Capstone");
-        pi = 3.14159265358979;
         twoPi = 2.0 * 3.14159265358979;
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         XOFFSET = 0;
@@ -186,7 +174,6 @@ public class Main {
         WINHEIGHT = (int)screenSize.getHeight() - 40; //271
         endgame = false;
         hosting = false;
-        audiolifetime = 78000L; // 78 seconds for KI.WAV, was new Long(78000)
 
         try {
             background = ImageIO.read(new File("images\\ocean.png"));
@@ -220,45 +207,6 @@ public class Main {
         } catch (IOException ioe) { }
     }
 
-    private static class AudioLooper implements Runnable {
-        public void run() {
-            while (endgame == false) {
-                Long currTime = Long.valueOf(System.currentTimeMillis()); // was new Long(System.currentTimeMillis()
-//                if (currTime - lastAudioStart > audiolifetime) {
-//                    playAudio(backgroundState);
-//                }
-            }
-        }
-    }
-
-    private static void playAudio(String backgroundState) {
-        try {
-            clip.stop();
-        } catch (Exception e) {
-            // NOP
-        }
-
-        try {
-            if (backgroundState.substring(0, 2).equals("KI")) {
-                AudioInputStream ais = AudioSystem.getAudioInputStream(new File("audio\\TitleKI.wav").getAbsoluteFile());
-                clip = AudioSystem.getClip();
-                clip.open(ais);
-                clip.start();
-                lastAudioStart = System.currentTimeMillis();
-                audiolifetime = Long.valueOf(78000); // was new Long(78000)
-            } else if (backgroundState.substring(0, 2).equals("TC")) {
-                AudioInputStream ais = AudioSystem.getAudioInputStream(new File("audio\\TC.wav").getAbsoluteFile());
-                clip = AudioSystem.getClip();
-                clip.open(ais);
-                clip.start();
-                lastAudioStart = System.currentTimeMillis();
-                audiolifetime = Long.valueOf(219000); // was new Long(191000)
-            }
-        } catch (Exception e) {
-            // NOP
-        }
-    }
-
     private static class Animate implements Runnable {
         public void run() {
 //            backgroundDraw();
@@ -282,25 +230,25 @@ public class Main {
         g2D.drawImage(background, XOFFSET, YOFFSET + 25, null);
         background_drawn = true;
         if (Stark.isActive()) {
-            metalLabel.setText("    Metal: " + Stark.getResource("metal"));
-            woodLabel.setText("    Wood: " + Stark.getResource("wood"));
-            foodLabel.setText("    Food: " + Stark.getResource("food"));
-            laborLabel.setText("    Labor: " + Stark.getResource("labor"));
-            educationLabel.setText("    Education: " + Stark.getResource("education"));
+            metalLabel.setText("    Metal: " + Stark.metal);
+            woodLabel.setText("    Wood: " + Stark.wood);
+            foodLabel.setText("    Food: " + Stark.food);
+            laborLabel.setText("    Labor: " + Stark.labor);
+            educationLabel.setText("    Education: " + Stark.education);
         } else if (Lannister.isActive()) {
-            metalLabel.setText("    Metal: " + Lannister.getResource("metal"));
-            woodLabel.setText("    Wood: " + Lannister.getResource("wood"));
-            foodLabel.setText("    Food: " + Lannister.getResource("food"));
-            laborLabel.setText("    Labor: " + Lannister.getResource("labor"));
-            educationLabel.setText("    Education: " + Lannister.getResource("education"));
+            metalLabel.setText("    Metal: " + Lannister.metal);
+            woodLabel.setText("    Wood: " + Lannister.wood);
+            foodLabel.setText("    Food: " + Lannister.food);
+            laborLabel.setText("    Labor: " + Lannister.labor);
+            educationLabel.setText("    Education: " + Lannister.education);
         } else if (Targaryen.isActive()) {
-            metalLabel.setText("    Metal: " + Targaryen.getResource("metal"));
-            woodLabel.setText("    Wood: " + Targaryen.getResource("wood"));
-            foodLabel.setText("    Food: " + Targaryen.getResource("food"));
-            laborLabel.setText("    Labor: " + Targaryen.getResource("labor"));
-            educationLabel.setText("    Education: " + Targaryen.getResource("education"));
+            metalLabel.setText("    Metal: " + Targaryen.metal);
+            woodLabel.setText("    Wood: " + Targaryen.wood);
+            foodLabel.setText("    Food: " + Targaryen.food);
+            laborLabel.setText("    Labor: " + Targaryen.labor);
+            educationLabel.setText("    Education: " + Targaryen.education);
         }
-        actionLabel.setText("    Actions: " + (10-actionsTaken));
+        actionLabel.setText("    Actions: " + (maxActions-actionsTaken));
     }
 
     private static void tileDraw() {
@@ -384,278 +332,6 @@ public class Main {
         }
     }
 
-//    private static class EnemyMover implements Runnable {
-//        private double bluepigvelocitystep;
-//        private double bluepigvelocity;
-//
-//        public EnemyMover() {
-//            bluepigvelocitystep = 2;
-//        }
-//
-//        public void run() {
-//            Random randomNumbers = new Random(LocalTime.now().getNano());
-//            while (endgame == false) {
-//                try {
-//                    Thread.sleep(10);
-//                } catch (InterruptedException e) {
-//                    // NOP
-//                }
-//
-//                // TODO
-//                try {
-//                    for (int i = 0; i < bluepigEnemies.size(); i++) {
-//                        int state = randomNumbers.nextInt(1000);
-//                        if (state < 5) {
-//                            bluepigvelocity = bluepigvelocitystep;
-//                            bluepigEnemies.elementAt(i).setInternalAngle(0);
-//                        } else if (state < 10) {
-//                            bluepigvelocity = bluepigvelocitystep;
-//                            bluepigEnemies.elementAt(i).setInternalAngle(halfPi);
-//                        } else if (state < 15) {
-//                            bluepigvelocity = bluepigvelocitystep;
-//                            bluepigEnemies.elementAt(i).setInternalAngle(pi);
-//                        } else if (state < 20) {
-//                            bluepigvelocity = bluepigvelocitystep;
-//                            bluepigEnemies.elementAt(i).setInternalAngle(threehavlesPi);
-//                        } else if (state < 250) {
-//                            bluepigvelocity = bluepigvelocitystep;
-//                        } else {
-//                            bluepigvelocity = 0;
-//                        }
-//
-//                        bluepigEnemies.elementAt(i).updateBounce();
-//                        bluepigEnemies.elementAt(i).move(bluepigvelocity *
-//                                        Math.cos(bluepigEnemies.elementAt(i).getInternalAngle()),
-//                                bluepigvelocity * Math.sin(bluepigEnemies.elementAt(i).getInternalAngle()));
-//                    }
-//
-//                    for (int i = 0; i < bubblebossEnemies.size(); i++) {
-//
-//                    }
-//                } catch (java.lang.NullPointerException jlnpe) {
-//                    // NOP
-//                }
-//            }
-//        }
-//    }
-
-//    private static void playerDraw() {
-//        Graphics g = appFrame.getGraphics();
-//        Graphics2D g2D = (Graphics2D) g;
-//        p1.setMaxFrames(10);
-//
-//        if (upPressed || downPressed || leftPressed || rightPressed) {
-//            if (upPressed == true) {
-//                if (p1.getCurrentFrame() < 5) {
-////                    g2D.drawImage(rotateImageObject(p1).filter(link[0], null),
-//                    g2D.drawImage(link[0],
-//                            (int) (p1.getX() + 0.5), (int)(p1.getY() + 0.5), null);
-//                } else if (p1.getCurrentFrame() > 5) {
-////                    g2D.drawImage(rotateImageObject(p1).filter(link[1], null),
-//                    g2D.drawImage(link[1],
-//                            (int)(p1.getX() + 0.5), (int)(p1.getY() + 0.5), null);
-//                }
-//                p1.updateCurrentFrame();
-//            }
-//            if (downPressed == true) {
-//                if (p1.getCurrentFrame() < 5) {
-////                    g2D.drawImage(rotateImageObject(p1).filter(link[2], null),
-//                    g2D.drawImage(link[2],
-//                            (int)(p1.getX() + 0.5), (int) (p1.getY() + 0.5), null);
-//                } else if (p1.getCurrentFrame() > 5) {
-////                    g2D.drawImage(rotateImageObject(p1).filter(link[3], null),
-//                    g2D.drawImage(link[3],
-//                            (int)(p1.getX() + 0.5), (int)(p1.getY() + 0.5), null);
-//                }
-//                p1.updateCurrentFrame();
-//            }
-//            if (leftPressed == true) {
-//                if (p1.getCurrentFrame() < 5) {
-//
-////                    g2D.drawImage(rotateImageObject(p1).filter(link[4], null),
-//                    g2D.drawImage(link[4],
-//                            (int)(p1.getX() + 0.5), (int)(p1.getY() + 0.5), null);
-//                } else if (p1.getCurrentFrame() > 5) {
-////                    g2D.drawImage(rotateImageObject(p1).filter(link[5], null),
-//                    g2D.drawImage(link[5],
-//                            (int)(p1.getX() + 0.5), (int)(p1.getY() + 0.5), null);
-//                }
-//                p1.updateCurrentFrame();
-//            }
-//            if (rightPressed == true) {
-//                if (p1.getCurrentFrame() < 5) {
-////                    g2D.drawImage(rotateImageObject(p1).filter(link[6], null),
-//                    g2D.drawImage(link[6],
-//                            (int)(p1.getX() + 0.5), (int)(p1.getY() + 0.5), null);
-//                } else if (p1.getCurrentFrame() > 5) {
-////                    g2D.drawImage(rotateImageObject(p1).filter(link[7], null),
-//                    g2D.drawImage(link[7],
-//                            (int)(p1.getX() + 0.5), (int)(p1.getY() + 0.5), null);
-//                }
-//                p1.updateCurrentFrame();
-//            }
-//        } else {
-//            if (Math.abs(lastPressed - 90.0) < 1.0) {
-////                g2D.drawImage(rotateImageObject(p1).filter(link[0], null),
-//                g2D.drawImage(link[0],
-//                        (int)(p1.getX() + 0.5), (int)(p1.getY() + 0.5), null);
-//            }
-//            if (Math.abs(lastPressed - 270.0) < 1.0) {
-////                g2D.drawImage(rotateImageObject(p1).filter(link[2], null),
-//                g2D.drawImage(link[2],
-//                        (int)(p1.getX() + 0.5), (int)(p1.getY() + 0.5), null);
-//            }
-//            if (Math.abs(lastPressed - 0.0) < 1.0) {
-////                g2D.drawImage(rotateImageObject(p1).filter(link[6], null),
-//                g2D.drawImage(link[6],
-//                        (int)(p1.getX() + 0.5), (int)(p1.getY() + 0.5), null);
-//            }
-//            if (Math.abs(lastPressed - 180.0) < 1.0) {
-////                g2D.drawImage(rotateImageObject(p1).filter(link[4], null),
-//                g2D.drawImage(link[4],
-//                        (int)(p1.getX() + 0.5), (int)(p1.getY() + 0.5), null);
-//            }
-//        }
-//
-//        // g2D.drawImage(rotateImageObject(p1).filter(player, null), (int)(p1.getX() + 0.5), (int)(p1.getY() + 0.5), null);
-//    }
-//
-//    private static void healthDraw() {
-//        Graphics g = appFrame.getGraphics();
-//        Graphics2D g2D = (Graphics2D) g;
-//
-//        int leftscale = 10;
-//        int leftoffset = 10;
-//        int rightoffset = 9;
-//        int interioroffset = 2;
-//        int halfinterioroffset = 1;
-//        for (int i = 0; i < p1.getMaxLife(); i++) {
-//            if (i % 2 == 0) {
-//                g2D.drawImage(leftHeartOutline, leftscale * i + leftoffset + XOFFSET, YOFFSET, null);
-////                g2D.drawImage(rotateImageObject(p1).filter(leftHeartOutline, null),
-////                        leftscale * i + leftoffset + XOFFSET, YOFFSET, null);
-//            } else {
-//                g2D.drawImage(rightHeartOutline, leftscale * i + rightoffset + XOFFSET, YOFFSET, null);
-////                g2D.drawImage(rotateImageObject(p1).filter(rightHeartOutline, null),
-////                        leftscale * i + rightoffset + XOFFSET, YOFFSET, null);
-//            }
-//        }
-//
-//        for (int i = 0; i < p1.getLife(); i++) {
-//            if (i % 2 == 0) {
-//                g2D.drawImage(leftHeart, leftscale * i + leftoffset + interioroffset + XOFFSET,
-//                        interioroffset + YOFFSET, null);
-////                g2D.drawImage(rotateImageObject(p1).filter(leftHeart, null),
-////                        leftscale * i + leftoffset + interioroffset + XOFFSET, interioroffset + YOFFSET, null);
-//            } else {
-//                g2D.drawImage(rightHeart, leftscale * i + leftoffset - halfinterioroffset + XOFFSET,
-//                        interioroffset + YOFFSET, null);
-////                g2D.drawImage(rotateImageObject(p1).filter(rightHeart, null),
-////                        leftscale * i + leftoffset - halfinterioroffset + XOFFSET, interioroffset + YOFFSET, null);
-//            }
-//        }
-//    }
-//
-//    private static void enemiesDraw() {
-//        Graphics g = appFrame.getGraphics();
-//        Graphics2D g2D = (Graphics2D) g;
-//
-//        for (int i = 0; i < bluepigEnemies.size(); i++) {
-//            if (Math.abs(bluepigEnemies.elementAt(i).getInternalAngle() - 0.0) < 1.0) {
-//                if (bluepigEnemies.elementAt(i).getCurrentFrame() < bluepigEnemies.elementAt(i).getMaxFrames() / 2) {
-//                    g2D.drawImage(rotateImageObject(bluepigEnemies.elementAt(i)).filter(bluepigEnemy.elementAt(6), null),
-//                            (int)(bluepigEnemies.elementAt(i).getX() + 0.5),
-//                            (int)(bluepigEnemies.elementAt(i).getY() + 0.5), null);
-//                } else {
-//                    g2D.drawImage(rotateImageObject(bluepigEnemies.elementAt(i)).filter(bluepigEnemy.elementAt(7), null),
-//                            (int)(bluepigEnemies.elementAt(i).getX() + 0.5),
-//                            (int)(bluepigEnemies.elementAt(i).getY() + 0.5), null);
-//                }
-//                bluepigEnemies.elementAt(i).updateCurrentFrame();;
-//            }
-//            if(Math.abs(bluepigEnemies.elementAt(i).getInternalAngle() - pi) < 1.0) {
-//                if (bluepigEnemies.elementAt(i).getCurrentFrame() < bluepigEnemies.elementAt(i).getMaxFrames() / 2) {
-//                    g2D.drawImage(rotateImageObject(bluepigEnemies.elementAt(i)).filter(bluepigEnemy.elementAt(4), null),
-//                            (int)(bluepigEnemies.elementAt(i).getX() + 0.5),
-//                            (int)(bluepigEnemies.elementAt(i).getY() + 0.5), null);
-//                } else {
-//                    g2D.drawImage(rotateImageObject(bluepigEnemies.elementAt(i)).filter(bluepigEnemy.elementAt(5), null),
-//                            (int)(bluepigEnemies.elementAt(i).getX() + 0.5),
-//                            (int)(bluepigEnemies.elementAt(i).getY() + 0.5), null);
-//                }
-//                bluepigEnemies.elementAt(i).updateCurrentFrame();
-//            }
-//            if (Math.abs(bluepigEnemies.elementAt(i).getInternalAngle() - halfPi) < 1.0) {
-//                if (bluepigEnemies.elementAt(i).getCurrentFrame() < bluepigEnemies.elementAt(i).getMaxFrames() / 2) {
-//                    g2D.drawImage(rotateImageObject(bluepigEnemies.elementAt(i)).filter(bluepigEnemy.elementAt(2), null),
-//                            (int)(bluepigEnemies.elementAt(i).getX() + 0.5),
-//                            (int)(bluepigEnemies.elementAt(i).getY() + 0.5), null);
-//                } else {
-//                    g2D.drawImage(rotateImageObject(bluepigEnemies.elementAt(i)).filter(bluepigEnemy.elementAt(3), null),
-//                            (int)(bluepigEnemies.elementAt(i).getX() + 0.5),
-//                            (int)(bluepigEnemies.elementAt(i).getY() + 0.5), null);
-//                }
-//                bluepigEnemies.elementAt(i).updateCurrentFrame();
-//            }
-//            if (Math.abs(bluepigEnemies.elementAt(i).getInternalAngle() - threehavlesPi) < 1.0) {
-//                if (bluepigEnemies.elementAt(i).getCurrentFrame() < bluepigEnemies.elementAt(i).getMaxFrames() / 2) {
-//                    g2D.drawImage(rotateImageObject(bluepigEnemies.elementAt(i)).filter(bluepigEnemy.elementAt(0), null),
-//                            (int)(bluepigEnemies.elementAt(i).getX() + 0.5),
-//                            (int)(bluepigEnemies.elementAt(i).getY() + 0.5), null);
-//                } else {
-//                    g2D.drawImage(rotateImageObject(bluepigEnemies.elementAt(i)).filter(bluepigEnemy.elementAt(1), null),
-//                            (int)(bluepigEnemies.elementAt(i).getX() + 0.5),
-//                            (int)(bluepigEnemies.elementAt(i).getY() + 0.5), null);
-//                }
-//                bluepigEnemies.elementAt(i).updateCurrentFrame();
-//            }
-//        }
-//    }
-
-    private static class KeyPressed extends AbstractAction {
-        private String action;
-
-        public KeyPressed() { action = ""; }
-        public KeyPressed(String input) { action = input; }
-
-        public void actionPerformed(ActionEvent e) {
-            if (action.equals("UP")) {
-                upPressed = true;
-            }
-            if (action.equals("DOWN")) {
-                downPressed = true;
-            }
-            if (action.equals("LEFT")) {
-                leftPressed = true;
-            }
-            if (action.equals("RIGHT")) {
-                rightPressed = true;
-            }
-        }
-    }
-
-    private static class KeyReleased extends AbstractAction {
-        private String action;
-
-        public KeyReleased() { action = ""; }
-        public KeyReleased(String input) { action = input; }
-
-        public void actionPerformed(ActionEvent e) {
-            if(action.equals("UP")) {
-                upPressed = false;
-            }
-            if (action.equals("DOWN")) {
-                downPressed = false;
-            }
-            if (action.equals("LEFT")) {
-                leftPressed = false;
-            }
-            if (action.equals("RIGHT")) {
-                rightPressed = false;
-            }
-        }
-    }
-
     private static void openStartScreen() {
         JFrame frame = new JFrame("Start Screen");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -665,7 +341,6 @@ public class Main {
         newGameButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-//                frame.setVisible(false);
                 OpenSetupMenu();
                 frame.dispose();
             }
@@ -756,13 +431,7 @@ public class Main {
                 tiles = CreateBoard(numTiles);
                 tileFixX = 0;
                 tileFixY = 0;
-                upPressed = false;
-                downPressed = false;
-                leftPressed = false;
-                rightPressed = false;
                 background_drawn = false;
-                lastAudioStart = System.currentTimeMillis();
-//                    playAudio(backgroundState);
                 currentNation = (String) nationComboBox.getSelectedItem();
                 actionsTaken = 0;
                 if (currentNation == "Stark") {
@@ -799,14 +468,11 @@ public class Main {
                 Thread t3 = new Thread(new MouseOverChecker());
                 Thread t4 = new Thread(new ServerRunner());
                 Thread t5 = new Thread(new ClientRunner());
-//                    Thread t4 = new Thread(new AudioLooper());
-//                    Thread t5 = new Thread(new EnemyMover());
                 t1.start();
                 t2.start();
                 t3.start();
                 t4.start();
                 t5.start();
-//                frame.setVisible(false);
                 frame.dispose();
             }
         });
@@ -889,13 +555,7 @@ public class Main {
                 tiles = new Vector<Tile>();
                 tileFixX = 0;
                 tileFixY = 0;
-                upPressed = false;
-                downPressed = false;
-                leftPressed = false;
-                rightPressed = false;
                 background_drawn = false;
-                lastAudioStart = System.currentTimeMillis();
-//                    playAudio(backgroundState);
                 currentNation = (String) nationComboBox.getSelectedItem();
                 ip = ipT.getText();
                 actionsTaken = 11;
@@ -932,8 +592,6 @@ public class Main {
                 Thread t2 = new Thread(new TileMover());
                 Thread t3 = new Thread(new MouseOverChecker());
                 Thread t4 = new Thread(new ClientRunner());
-//                    Thread t4 = new Thread(new AudioLooper());
-//                    Thread t5 = new Thread(new EnemyMover());
                 t4.start();
                 while (tiles.isEmpty()) {
 //                    System.out.println("Loading...");
@@ -941,8 +599,6 @@ public class Main {
                 t1.start();
                 t2.start();
                 t3.start();
-//                    t5.start();
-//                frame.setVisible(false);
                 frame.dispose();
             }
         });
@@ -1140,9 +796,9 @@ public class Main {
                     try {
                         Thread.sleep(300);
                     } catch (InterruptedException ie) {}
-                    if (actionsTaken == 10 && joined) {
+                    if (actionsTaken == maxActions && joined) {
                         System.out.println("Client: Sending moves");
-                        actionsTaken = 11;
+                        actionsTaken = maxActions + 1;
                         out.println("MOVE: " + currentNation + "|" + getGameState());
                     }
                 }
@@ -1284,13 +940,7 @@ public class Main {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     endgame = true;
-                    upPressed = false;
-                    downPressed = false;
-                    leftPressed = false;
-                    rightPressed = false;
                     background_drawn = false;
-                    lastAudioStart = System.currentTimeMillis();
-//                    playAudio(backgroundState);
                     currentNation = (String) nationComboBox.getSelectedItem();
                     if (currentNation == "Stark") {
                         Stark.setActive(true);
@@ -1307,12 +957,8 @@ public class Main {
                     }
                     endgame = false;
                     Thread t1 = new Thread(new Animate());
-//                    Thread t4 = new Thread(new AudioLooper());
-//                    Thread t5 = new Thread(new EnemyMover());
                     t1.start();
-//                    t4.start();
-//                    t5.start();
-                    frame.setVisible(false);
+                    frame.dispose();
                 }
             });
 
@@ -1321,7 +967,7 @@ public class Main {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     endgame = true;
-                    frame.setVisible(false);
+                    frame.dispose();
                 }
             });
 
@@ -1346,6 +992,13 @@ public class Main {
         frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
         frame.setLocation((int)(tile.getX() + tile.getWidth()),(int)tile.getY());
 
+        if (movingUnits.size() > 0) {
+            for (int i = 0; i < movingUnits.size(); i++) {
+                tile.setMilitary(movingUnits.get(i).unitName, 0);
+            }
+            movingUnits = new Vector<>();
+        }
+
         JPanel jPanel = new JPanel();
         jPanel.setLayout(new BoxLayout(jPanel, BoxLayout.Y_AXIS));
 
@@ -1368,10 +1021,10 @@ public class Main {
             public void actionPerformed(ActionEvent e) {
                 frame.setVisible(false);
                 actionsTaken+=5;
-                if (actionsTaken > 10) {
+                if (actionsTaken > maxActions) {
                     JOptionPane.showMessageDialog(claimTile,"You need 5 action points to claim a tile");
                     actionsTaken-=5;
-                } else if (actionsTaken == 11) {
+                } else if (actionsTaken == maxActions + 1) {
                     JOptionPane.showMessageDialog(claimTile,"It is not your turn");
                     actionsTaken-=5;
                 } else {
@@ -1407,7 +1060,7 @@ public class Main {
         buildButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                frame.setVisible(false);
+                frame.dispose();
                 OpenConstructionMenu(tile);
             }
         });
@@ -1415,7 +1068,7 @@ public class Main {
         trainButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                frame.setVisible(false);
+                frame.dispose();
                 OpenMilitaryMenu(tile);
             }
         });
@@ -1424,7 +1077,7 @@ public class Main {
         commandButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                frame.setVisible(false);
+                frame.dispose();
                 OpenCommandMenu(tile);
             }
         });
@@ -1471,43 +1124,43 @@ public class Main {
 
             DefaultTableModel dm = new DefaultTableModel();
             if (Stark.isActive()) {
-                dm.setDataVector(new Object[][]{{"Swordmen", Stark.getMilitary("swordmen"), "true", "Mine", Stark.getBuilding("mine"), Stark.getResearch("mine")},
-                                {"Shieldmen", Stark.getMilitary("shieldmen"), "true", "Forge", Stark.getBuilding("forge"), Stark.getResearch("forge")},
-                                {"Spearmen", Stark.getMilitary("spearmen"), Stark.getResearch("spearmen"), "Lumber Mill", Stark.getBuilding("lumberMill"), Stark.getResearch("lumberMill")},
-                                {"Mounted Cavalry", Stark.getMilitary("mountedCalvalry"), Stark.getResearch("mountedCalvalry"), "Deforestation", Stark.getBuilding("deforestation"), Stark.getResearch("deforestation")},
-                                {"Archer", Stark.getMilitary("archer"), "true", "Farm", Stark.getBuilding("farm"), Stark.getResearch("farm")},
-                                {"Scout Raven", Stark.getMilitary("scoutRaven"), "true", "Plantation", Stark.getBuilding("plantation"), Stark.getResearch("plantation")},
-                                {"Transport Ship", Stark.getMilitary("transportShip"), "true", "School", Stark.getBuilding("school"), Stark.getResearch("school")},
-                                {"War Ship", Stark.getMilitary("warShip"), Stark.getResearch("warShip"), "College", Stark.getBuilding("college"), Stark.getResearch("college")},
-                                {"Wyvern", Stark.getMilitary("wyvern"), Stark.getResearch("wyvern"), "", "", ""},
-                                {"Dreadnought", Stark.getMilitary("dreadnought"), Stark.getResearch("dreadnought"), "", "", ""},
-                                {"Dragon", Stark.getMilitary("dragon"), Stark.getResearch("dragon"), "", "", ""}},
+                dm.setDataVector(new Object[][]{{"Swordmen", Stark.swordmen, "true", "Mine", Stark.mine, Stark.mineResearched},
+                                {"Shieldmen", Stark.shieldmen, "true", "Forge", Stark.forge, Stark.forgeResearched},
+                                {"Spearmen", Stark.spearmen, Stark.spearmenResearched, "Lumber Mill", Stark.lumberMill, Stark.lumberMillResearched},
+                                {"Mounted Cavalry", Stark.mountedCalvalry, Stark.mountedCalvalryResearched, "Deforestation", Stark.deforestation, Stark.deforestationResearched},
+                                {"Archer", Stark.archer, "true", "Farm", Stark.farm, Stark.farmResearched},
+                                {"Scout Raven", Stark.scoutRaven, "true", "Plantation", Stark.plantation, Stark.plantationResearched},
+                                {"Transport Ship", Stark.transportShip, "true", "School", Stark.school, Stark.schoolResearched},
+                                {"War Ship", Stark.warShip, Stark.warShipResearched, "College", Stark.college, Stark.collegeResearched},
+                                {"Wyvern", Stark.wyvern, Stark.wyvernResearched, "", "", ""},
+                                {"Dreadnought", Stark.dreadnought, Stark.dreadnoughtResearched, "", "", ""},
+                                {"Dragon", Stark.dragon, Stark.dragonResearched, "", "", ""}},
                         new Object[]{"", "Owned", "Unit Researched", "Building", "Owned", "Building Research"});
             } else if (Lannister.isActive()) {
-                dm.setDataVector(new Object[][]{{"Swordmen", Lannister.getMilitary("swordmen"), "True", "Mine", Lannister.getBuilding("mine"), Lannister.getResearch("mine")},
-                                {"Shieldmen", Lannister.getMilitary("shieldmen"), "True", "Forge", Lannister.getBuilding("forge"), Lannister.getResearch("forge")},
-                                {"Spearmen", Lannister.getMilitary("spearmen"), Lannister.getResearch("spearmen"), "Lumber Mill", Lannister.getBuilding("lumberMill"), Lannister.getResearch("lumberMill")},
-                                {"Mounted Cavalry", Lannister.getMilitary("mountedCalvalry"), Lannister.getResearch("mountedCalvalry"), "Deforestation", Lannister.getBuilding("deforestation"), Lannister.getResearch("deforestation")},
-                                {"Archer", Lannister.getMilitary("archer"), "True", "Farm", Lannister.getBuilding("farm"), Lannister.getResearch("farm")},
-                                {"Scout Raven", Lannister.getMilitary("scoutRaven"), "True", "Plantation", Lannister.getBuilding("plantation"), Lannister.getResearch("plantation")},
-                                {"Transport Ship", Lannister.getMilitary("transportShip"), "True", "School", Lannister.getBuilding("school"), Lannister.getResearch("school")},
-                                {"War Ship", Lannister.getMilitary("warShip"), Lannister.getResearch("warShip"), "College", Lannister.getBuilding("college"), Lannister.getResearch("college")},
-                                {"Wyvern", Lannister.getMilitary("wyvern"), Lannister.getResearch("wyvern"), "", "", ""},
-                                {"Dreadnought", Lannister.getMilitary("dreadnought"), Lannister.getResearch("dreadnought"), "", "", ""},
-                                {"Dragon", Lannister.getMilitary("dragon"), Lannister.getResearch("dragon"), "", "", ""}},
+                dm.setDataVector(new Object[][]{{"Swordmen", Lannister.swordmen, "True", "Mine", Lannister.mine, Lannister.mineResearched},
+                                {"Shieldmen", Lannister.shieldmen, "True", "Forge", Lannister.forge, Lannister.forgeResearched},
+                                {"Spearmen", Lannister.spearmen, Lannister.spearmenResearched, "Lumber Mill", Lannister.lumberMill, Lannister.lumberMillResearched},
+                                {"Mounted Cavalry", Lannister.mountedCalvalry, Lannister.mountedCalvalryResearched, "Deforestation", Lannister.deforestation, Lannister.deforestationResearched},
+                                {"Archer", Lannister.archer, "True", "Farm", Lannister.farm, Lannister.farmResearched},
+                                {"Scout Raven", Lannister.scoutRaven, "True", "Plantation", Lannister.plantation, Lannister.plantationResearched},
+                                {"Transport Ship", Lannister.transportShip, "True", "School", Lannister.school, Lannister.schoolResearched},
+                                {"War Ship", Lannister.warShip, Lannister.warShipResearched, "College", Lannister.college, Lannister.collegeResearched},
+                                {"Wyvern", Lannister.wyvern, Lannister.wyvernResearched, "", "", ""},
+                                {"Dreadnought", Lannister.dreadnought, Lannister.dreadnoughtResearched, "", "", ""},
+                                {"Dragon", Lannister.dragon, Lannister.dragonResearched, "", "", ""}},
                         new Object[]{"Unit", "Owned", "Unit Researched", "Building", "Owned", "Building Research"});
             } else if (Targaryen.isActive()) {
-                dm.setDataVector(new Object[][]{{"Swordmen", Targaryen.getMilitary("swordmen"), "True", "Mine", Targaryen.getBuilding("mine"), Targaryen.getResearch("mine")},
-                                {"Shieldmen", Targaryen.getMilitary("shieldmen"), "True", "Forge", Targaryen.getBuilding("forge"), Targaryen.getResearch("forge")},
-                                {"Spearmen", Targaryen.getMilitary("spearmen"), Targaryen.getResearch("spearmen"), "Lumber Mill", Targaryen.getBuilding("lumberMill"), Targaryen.getResearch("lumberMill")},
-                                {"Mounted Cavalry", Targaryen.getMilitary("mountedCalvalry"), Targaryen.getResearch("mountedCalvalry"), "Deforestation", Targaryen.getBuilding("deforestation"), Targaryen.getResearch("deforestation")},
-                                {"Archer", Targaryen.getMilitary("archer"), "True", "Farm", Targaryen.getBuilding("farm"), Targaryen.getResearch("farm")},
-                                {"Scout Raven", Targaryen.getMilitary("scoutRaven"), "True", "Plantation", Targaryen.getBuilding("plantation"), Targaryen.getResearch("plantation")},
-                                {"Transport Ship", Targaryen.getMilitary("transportShip"), "True", "School", Targaryen.getBuilding("school"), Targaryen.getResearch("school")},
-                                {"War Ship", Targaryen.getMilitary("warShip"), Targaryen.getResearch("warShip"), "College", Targaryen.getBuilding("college"), Targaryen.getResearch("college")},
-                                {"Wyvern", Targaryen.getMilitary("wyvern"), Targaryen.getResearch("wyvern"), "", "", ""},
-                                {"Dreadnought", Targaryen.getMilitary("dreadnought"), Targaryen.getResearch("dreadnought"), "", "", ""},
-                                {"Dragon", Targaryen.getMilitary("dragon"), Targaryen.getResearch("dragon"), "", "", ""}},
+                dm.setDataVector(new Object[][]{{"Swordmen", Targaryen.swordmen, "True", "Mine", Targaryen.mine, Targaryen.mineResearched},
+                                {"Shieldmen", Targaryen.shieldmen, "True", "Forge", Targaryen.forge, Targaryen.forgeResearched},
+                                {"Spearmen", Targaryen.spearmen, Targaryen.spearmenResearched, "Lumber Mill", Targaryen.lumberMill, Targaryen.lumberMillResearched},
+                                {"Mounted Cavalry", Targaryen.mountedCalvalry, Targaryen.mountedCalvalryResearched, "Deforestation", Targaryen.deforestation, Targaryen.deforestationResearched},
+                                {"Archer", Targaryen.archer, "True", "Farm", Targaryen.farm, Targaryen.farmResearched},
+                                {"Scout Raven", Targaryen.scoutRaven, "True", "Plantation", Targaryen.plantation, Targaryen.plantationResearched},
+                                {"Transport Ship", Targaryen.transportShip, "True", "School", Targaryen.school, Targaryen.schoolResearched},
+                                {"War Ship", Targaryen.warShip, Targaryen.warShipResearched, "College", Targaryen.college, Targaryen.collegeResearched},
+                                {"Wyvern", Targaryen.wyvern, Targaryen.wyvernResearched, "", "", ""},
+                                {"Dreadnought", Targaryen.dreadnought, Targaryen.dreadnoughtResearched, "", "", ""},
+                                {"Dragon", Targaryen.dragon, Targaryen.dragonResearched, "", "", ""}},
                         new Object[]{"Unit", "Owned", "Unit Researched", "Building", "Owned", "Building Research"});
             }
 
@@ -1563,12 +1216,14 @@ public class Main {
             @Override
             public void tableChanged(TableModelEvent e) {
                 String temp = "<html>";
+                movingUnits = new Vector<>();
                 for(int i=0;i<table.getModel().getRowCount();i++)
                 {
                     if ((Boolean) table.getModel().getValueAt(i,2))
                     {
-                        temp += table.getValueAt(i, 0) + " " + table.getValueAt(i,2) + "<br/>";
-//                        System.out.println(table.getValueAt(i, 0) + " " + table.getValueAt(i,2));
+                        temp += table.getValueAt(i, 0) + "<br/>";
+                        tile.setMilitary((String) table.getValueAt(i, 0), -1);
+                        movingUnits.add(0, new MilitaryUnit(currentNation, (String) table.getValueAt(i, 0)));
                     }
                 }
                 temp += "</html>";
@@ -1580,13 +1235,11 @@ public class Main {
         moveButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                frame.setVisible(false);
-//                OpenCommandMenu(tile);
+                frame.dispose();
             }
         });
 
         JPanel jPanel = new JPanel();
-//        jPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
         jPanel.setLayout(new BoxLayout(jPanel, BoxLayout.Y_AXIS));
         jPanel.setBackground(colorBackground);
         table.setBackground(colorBackground);
@@ -1640,7 +1293,6 @@ public class Main {
         table.setRowHeight(25);
         frame.setSize(1000, 300);
         frame.add(scroll);
-//            frame.pack();
         frame.setVisible(true);
     }
 
@@ -1839,7 +1491,6 @@ public class Main {
 
             //  Makes the ComboBox for choosing a nation
             JComboBox nationComboBox = new JComboBox<>(nations);
-//            nationComboBox.setSize(100, 50);
 
             //  Makes the TextArea to put a message with the trade
             JLabel messageL = new JLabel("Message:    ");
@@ -1891,7 +1542,7 @@ public class Main {
                     } else if (nationComboBox.getSelectedItem() == "Targaryen") {
                         Targaryen.inboxTabs.addTab((String) nationComboBox.getSelectedItem(), inboxMail);
                     }
-                    frame.setVisible(false);
+                    frame.dispose();
                 }
             });
 
@@ -2108,7 +1759,7 @@ public class Main {
                         Targaryen.inboxTabs.addTab((String) nationComboBox.getSelectedItem(), inboxMail);
                     }
                     backgroundDraw();
-                    frame.setVisible(false);
+                    frame.dispose();
                 }
             });
 
@@ -2160,11 +1811,9 @@ public class Main {
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
             if (isSelected) {
                 setForeground(table.getSelectionForeground());
-//                setBackground(table.getSelectionBackground());
                 setBackground(colorButton);
             } else {
                 setForeground(table.getForeground());
-//                setBackground(UIManager.getColor("Button.background"));
                 setBackground(colorButton);
             }
             setText((value == null) ? "" : value.toString());
@@ -2223,130 +1872,111 @@ public class Main {
         public Object getCellEditorValue() {
             if (isPushed) {
                 actionsTaken++;
-                if (actionsTaken > 10) {
+                if (actionsTaken > maxActions) {
                     actionsTaken--;
                     JOptionPane.showMessageDialog(button,"You are out of action points");
-                } else if (actionsTaken == 11) {
+                } else if (actionsTaken == maxActions + 1) {
                     actionsTaken--;
                     JOptionPane.showMessageDialog(button,"It is not your turn");
                 } else {
                     if (Stark.isActive()) {
-                        if (label == "Buy Swordmen" && Stark.getResource("metal") >= 10 && Stark.getResource("food") >= 10 && Stark.getResource("labor") >= 10) {
-//                        Stark.setMilitary("swordmen", 1);
-                            selectedTile.setMilitary("swordmen", 1);
+                        if (label == "Buy Swordmen" && Stark.metal >= 10 && Stark.food >= 10 && Stark.labor >= 10) {
+                            selectedTile.setMilitary("Swordmen", 1);
                             JOptionPane.showMessageDialog(button, "Swordmen Trained");
-                        } else if (label == "Buy Shieldmen" && Stark.getResource("metal") >= 10 && Stark.getResource("food") >= 10 && Stark.getResource("labor") >= 20) {
-//                        Stark.setMilitary("shieldmen", 1);
-                            selectedTile.setMilitary("shieldmen", 1);
+                        } else if (label == "Buy Shieldmen" && Stark.metal >= 10 && Stark.food >= 10 && Stark.labor >= 20) {
+                            selectedTile.setMilitary("Shieldmen", 1);
                             JOptionPane.showMessageDialog(button, "Shieldmen Trained");
-                        } else if (label == "Buy Spearmen" && Stark.getResearch("spearmen") && Stark.getResource("metal") >= 20 && Stark.getResource("food") >= 10 && Stark.getResource("labor") >= 10) {
-//                        Stark.setMilitary("spearmen", 1);
-                            selectedTile.setMilitary("spearmen", 1);
+                        } else if (label == "Buy Spearmen" && Stark.spearmenResearched && Stark.metal >= 20 && Stark.food >= 10 && Stark.labor >= 10) {
+                            selectedTile.setMilitary("Spearmen", 1);
                             JOptionPane.showMessageDialog(button, "Spearmen Trained");
-                        } else if (label == "Buy Mounted Calvalry" && Stark.getResearch("mountedCalvalry") && Stark.getResource("metal") >= 20 && Stark.getResource("food") >= 10 && Stark.getResource("labor") >= 20) {
-//                        Stark.setMilitary("mountedCavalry", 1);
-                            selectedTile.setMilitary("mountedCalvalry", 1);
+                        } else if (label == "Buy Mounted Calvalry" && Stark.mountedCalvalryResearched && Stark.metal >= 20 && Stark.food >= 10 && Stark.labor >= 20) {
+                            selectedTile.setMilitary("Mounted Calvalry", 1);
                             JOptionPane.showMessageDialog(button, "Mounted Calvalry Trained");
-                        } else if (label == "Buy Archer" && Stark.getResource("metal") >= 10 && Stark.getResource("food") >= 10 && Stark.getResource("labor") >= 10) {
-//                        Stark.setMilitary("archer", 1);
-                            selectedTile.setMilitary("archer", 1);
+                        } else if (label == "Buy Archer" && Stark.metal >= 10 && Stark.food >= 10 && Stark.labor >= 10) {
+                            selectedTile.setMilitary("Archer", 1);
                             JOptionPane.showMessageDialog(button, "Archer Trained");
-                        } else if (label == "Buy Scout Raven" && Stark.getResource("food") >= 10 && Stark.getResource("labor") >= 10) {
-//                        Stark.setMilitary("scoutRaven", 1);
-                            selectedTile.setMilitary("scoutRaven", 1);
+                        } else if (label == "Buy Scout Raven" && Stark.food >= 10 && Stark.labor >= 10) {
+                            selectedTile.setMilitary("Scout Raven", 1);
                             JOptionPane.showMessageDialog(button, "Scout Raven Trained");
-                        } else if (label == "Buy Transport Ship" && Stark.getResource("metal") >= 10 && Stark.getResource("wood") >= 20 && Stark.getResource("food") >= 10 && Stark.getResource("labor") >= 10) {
-//                        Stark.setMilitary("transportShip", 1);
-                            selectedTile.setMilitary("transportShip", 1);
+                        } else if (label == "Buy Transport Ship" && Stark.metal >= 10 && Stark.wood >= 20 && Stark.food >= 10 && Stark.labor >= 10) {
+                            selectedTile.setMilitary("Transport Ship", 1);
                             JOptionPane.showMessageDialog(button, "Transport Ship Built");
-                        } else if (label == "Buy War Ship" && Stark.getResearch("warShip") && Stark.getResource("metal") >= 20 && Stark.getResource("wood") >= 30 && Stark.getResource("food") >= 10 && Stark.getResource("labor") >= 10) {
-//                        Stark.setMilitary("warShip", 1);
-                            selectedTile.setMilitary("warShip", 1);
+                        } else if (label == "Buy War Ship" && Stark.warShipResearched && Stark.metal >= 20 && Stark.wood >= 30 && Stark.food >= 10 && Stark.labor >= 10) {
+                            selectedTile.setMilitary("War Ship", 1);
                             JOptionPane.showMessageDialog(button, "War Ship Built");
-                        } else if (label == "Buy Wyvern" && Stark.getResearch("wyvern") && Stark.getResource("food") >= 50 && Stark.getResource("labor") >= 25) {
-//                        Stark.setMilitary("wyvern", 1);
-                            selectedTile.setMilitary("wyvern", 1);
+                        } else if (label == "Buy Wyvern" && Stark.wyvernResearched && Stark.food >= 50 && Stark.labor >= 25) {
+                            selectedTile.setMilitary("Wyvern", 1);
                             JOptionPane.showMessageDialog(button, "Wyvern Trained");
-                        } else if (label == "Buy Dreadnought" && Stark.getResearch("dreadnought") && Stark.getResource("metal") >= 10 && Stark.getResource("wood") >= 100 && Stark.getResource("food") >= 10 && Stark.getResource("labor") >= 50) {
-//                        Stark.setMilitary("dreadnought", 1);
-                            selectedTile.setMilitary("dreadnought", 1);
+                        } else if (label == "Buy Dreadnought" && Stark.dreadnoughtResearched && Stark.metal >= 10 && Stark.wood >= 100 && Stark.food >= 10 && Stark.labor >= 50) {
+                            selectedTile.setMilitary("Dreadnought", 1);
                             JOptionPane.showMessageDialog(button, "Dreadnought Built");
-                        } else if (label == "Buy Dragon" && Stark.getResearch("dragon") && Stark.getResource("food") >= 100 && Stark.getResource("labor") >= 100) {
-//                        Stark.setMilitary("dragon", 1);
-                            selectedTile.setMilitary("dragon", 1);
+                        } else if (label == "Buy Dragon" && Stark.dragonResearched && Stark.food >= 100 && Stark.labor >= 100) {
+                            selectedTile.setMilitary("Dragon", 1);
                             JOptionPane.showMessageDialog(button, "Dragon Trained");
-                        } else if (label == "Buy Mine" && Stark.getResearch("mine") && Stark.getResource("metal") >= 10 && Stark.getResource("wood") >= 50 && Stark.getResource("food") >= 20 && Stark.getResource("labor") >= 20) {
-//                        Stark.setBuilding("mine", 1);
+                        } else if (label == "Buy Mine" && Stark.mineResearched && Stark.metal >= 10 && Stark.wood >= 50 && Stark.food >= 20 && Stark.labor >= 20) {
                             selectedTile.setBuilding("mine", 1);
                             JOptionPane.showMessageDialog(button, "Mine Built");
-                        } else if (label == "Buy Forge" && Stark.getResearch("forge") && Stark.getResource("metal") >= 50 && Stark.getResource("wood") >= 40 && Stark.getResource("food") >= 20 && Stark.getResource("labor") >= 20) {
-//                        Stark.setBuilding("forge", 1);
+                        } else if (label == "Buy Forge" && Stark.forgeResearched && Stark.metal >= 50 && Stark.wood >= 40 && Stark.food >= 20 && Stark.labor >= 20) {
                             selectedTile.setBuilding("forge", 1);
                             JOptionPane.showMessageDialog(button, "Forge Built");
-                        } else if (label == "Buy Lumber Mill" && Stark.getResearch("lumberMill") && Stark.getResource("metal") >= 50 && Stark.getResource("wood") >= 10 && Stark.getResource("food") >= 20 && Stark.getResource("labor") >= 20) {
-//                        Stark.setBuilding("lumberMill", 1);
+                        } else if (label == "Buy Lumber Mill" && Stark.lumberMillResearched && Stark.metal >= 50 && Stark.wood >= 10 && Stark.food >= 20 && Stark.labor >= 20) {
                             selectedTile.setBuilding("lumberMill", 1);
                             JOptionPane.showMessageDialog(button, "Lumber Mill Built");
-                        } else if (label == "Buy Deforestation" && Stark.getResearch("deforestation") && Stark.getResource("metal") >= 20 && Stark.getResource("wood") >= 40 && Stark.getResource("food") >= 50 && Stark.getResource("labor") >= 40) {
-//                        Stark.setBuilding("deforestation", 1);
+                        } else if (label == "Buy Deforestation" && Stark.deforestationResearched && Stark.metal >= 20 && Stark.wood >= 40 && Stark.food >= 50 && Stark.labor >= 40) {
                             selectedTile.setBuilding("deforestation", 1);
                             JOptionPane.showMessageDialog(button, "Deforestation Built");
-                        } else if (label == "Buy Farm" && Stark.getResearch("farm") && Stark.getResource("metal") >= 20 && Stark.getResource("wood") >= 40 && Stark.getResource("food") >= 20 && Stark.getResource("labor") >= 20) {
-//                        Stark.setBuilding("farm", 1);
+                        } else if (label == "Buy Farm" && Stark.farmResearched && Stark.metal >= 20 && Stark.wood >= 40 && Stark.food >= 20 && Stark.labor >= 20) {
                             selectedTile.setBuilding("farm", 1);
                             JOptionPane.showMessageDialog(button, "Farm Built");
-                        } else if (label == "Buy Plantation" && Stark.getResearch("plantation") && Stark.getResource("metal") >= 40 && Stark.getResource("wood") >= 50 && Stark.getResource("food") >= 20 && Stark.getResource("labor") >= 40) {
-//                        Stark.setBuilding("plantation", 1);
+                        } else if (label == "Buy Plantation" && Stark.plantationResearched && Stark.metal >= 40 && Stark.wood >= 50 && Stark.food >= 20 && Stark.labor >= 40) {
                             selectedTile.setBuilding("plantation", 1);
                             JOptionPane.showMessageDialog(button, "Plantation Built");
-                        } else if (label == "Buy School" && Stark.getResearch("school") && Stark.getResource("metal") >= 40 && Stark.getResource("wood") >= 20 && Stark.getResource("food") >= 20 && Stark.getResource("labor") >= 20) {
-//                        Stark.setBuilding("school", 1);
+                        } else if (label == "Buy School" && Stark.schoolResearched && Stark.metal >= 40 && Stark.wood >= 20 && Stark.food >= 20 && Stark.labor >= 20) {
                             selectedTile.setBuilding("school", 1);
                             JOptionPane.showMessageDialog(button, "School Built");
-                        } else if (label == "Buy College" && Stark.getResearch("college") && Stark.getResource("metal") >= 40 && Stark.getResource("wood") >= 40 && Stark.getResource("food") >= 30 && Stark.getResource("labor") >= 40) {
-//                        Stark.setBuilding("college", 1);
+                        } else if (label == "Buy College" && Stark.collegeResearched && Stark.metal >= 40 && Stark.wood >= 40 && Stark.food >= 30 && Stark.labor >= 40) {
                             selectedTile.setBuilding("college", 1);
                             JOptionPane.showMessageDialog(button, "College Built");
-                        } else if (label == "Buy Build Mines" && Stark.getResource("education") >= 50 && Stark.getResource("labor") >= 10) {
+                        } else if (label == "Buy Build Mines" && Stark.education >= 50 && Stark.labor >= 10) {
                             Stark.setResearch("mine", true);
                             JOptionPane.showMessageDialog(button, "Mines Researched");
-                        } else if (label == "Buy Build Forges" && Stark.getResource("education") >= 75 && Stark.getResource("labor") >= 25) {
+                        } else if (label == "Buy Build Forges" && Stark.education >= 75 && Stark.labor >= 25) {
                             Stark.setResearch("forge", true);
                             JOptionPane.showMessageDialog(button, "Forges Researched");
-                        } else if (label == "Buy Build Lumber Mills" && Stark.getResource("education") >= 50 && Stark.getResource("labor") >= 10) {
+                        } else if (label == "Buy Build Lumber Mills" && Stark.education >= 50 && Stark.labor >= 10) {
                             Stark.setResearch("lumberMill", true);
                             JOptionPane.showMessageDialog(button, "Lumber Mills Researched");
-                        } else if (label == "Buy Build Deforestation" && Stark.getResource("education") >= 75 && Stark.getResource("labor") >= 25) {
+                        } else if (label == "Buy Build Deforestation" && Stark.education >= 75 && Stark.labor >= 25) {
                             Stark.setResearch("deforestation", true);
                             JOptionPane.showMessageDialog(button, "Deforestation Researched");
-                        } else if (label == "Buy Build Farms" && Stark.getResource("education") >= 50 && Stark.getResource("labor") >= 10) {
+                        } else if (label == "Buy Build Farms" && Stark.education >= 50 && Stark.labor >= 10) {
                             Stark.setResearch("farm", true);
                             JOptionPane.showMessageDialog(button, "Farms Researched");
-                        } else if (label == "Buy Build Plantations" && Stark.getResource("education") >= 75 && Stark.getResource("labor") >= 25) {
+                        } else if (label == "Buy Build Plantations" && Stark.education >= 75 && Stark.labor >= 25) {
                             Stark.setResearch("plantation", true);
                             JOptionPane.showMessageDialog(button, "Plantations Researched");
-                        } else if (label == "Buy Build Schools" && Stark.getResource("education") >= 50 && Stark.getResource("labor") >= 10) {
+                        } else if (label == "Buy Build Schools" && Stark.education >= 50 && Stark.labor >= 10) {
                             Stark.setResearch("school", true);
                             JOptionPane.showMessageDialog(button, "Schools Researched");
-                        } else if (label == "Buy Build Colleges" && Stark.getResource("education") >= 75 && Stark.getResource("labor") >= 25) {
+                        } else if (label == "Buy Build Colleges" && Stark.education >= 75 && Stark.labor >= 25) {
                             Stark.setResearch("college", true);
                             JOptionPane.showMessageDialog(button, "Colleges Researched");
-                        } else if (label == "Buy Train Spearmen" && Stark.getResource("education") >= 50 && Stark.getResource("labor") >= 10) {
+                        } else if (label == "Buy Train Spearmen" && Stark.education >= 50 && Stark.labor >= 10) {
                             Stark.setResearch("spearmen", true);
                             JOptionPane.showMessageDialog(button, "Spearmen Researched");
-                        } else if (label == "Buy Train Mounted Calvalry" && Stark.getResource("education") >= 50 && Stark.getResource("labor") >= 10) {
+                        } else if (label == "Buy Train Mounted Calvalry" && Stark.education >= 50 && Stark.labor >= 10) {
                             Stark.setResearch("mountedCalvalry", true);
                             JOptionPane.showMessageDialog(button, "Mounted Calvalry Researched");
-                        } else if (label == "Buy Build War Ships" && Stark.getResource("education") >= 50 && Stark.getResource("labor") >= 10) {
+                        } else if (label == "Buy Build War Ships" && Stark.education >= 50 && Stark.labor >= 10) {
                             Stark.setResearch("warShip", true);
                             JOptionPane.showMessageDialog(button, "War Ships Researched");
-                        } else if (label == "Buy Tame Wyverns" && Stark.getResource("education") >= 50 && Stark.getResource("labor") >= 10) {
+                        } else if (label == "Buy Tame Wyverns" && Stark.education >= 50 && Stark.labor >= 10) {
                             Stark.setResearch("wyvern", true);
                             JOptionPane.showMessageDialog(button, "Wyverns Researched");
-                        } else if (label == "Buy Build Dreadnoughts" && Stark.getResource("education") >= 75 && Stark.getResource("labor") >= 25) {
+                        } else if (label == "Buy Build Dreadnoughts" && Stark.education >= 75 && Stark.labor >= 25) {
                             Stark.setResearch("dreadnought", true);
                             JOptionPane.showMessageDialog(button, "Dreadnoughts Researched");
-                        } else if (label == "Buy Tame Dragons" && Stark.getResource("education") >= 75 && Stark.getResource("labor") >= 25) {
+                        } else if (label == "Buy Tame Dragons" && Stark.education >= 75 && Stark.labor >= 25) {
                             Stark.setResearch("dragon", true);
                             JOptionPane.showMessageDialog(button, "Dragons Researched");
                         } else {
@@ -2354,122 +1984,103 @@ public class Main {
                             actionsTaken--;
                         }
                     } else if (Lannister.isActive()) {
-                        if (label == "Buy Swordmen" && Lannister.getResource("metal") >= 10 && Lannister.getResource("food") >= 10 && Lannister.getResource("labor") >= 10) {
-//                        Lannister.setMilitary("swordmen", 1);
-                            selectedTile.setMilitary("swordmen", 1);
+                        if (label == "Buy Swordmen" && Lannister.metal >= 10 && Lannister.food >= 10 && Lannister.labor >= 10) {
+                            selectedTile.setMilitary("Swordmen", 1);
                             JOptionPane.showMessageDialog(button, "Swordmen Trained");
-                        } else if (label == "Buy Shieldmen" && Lannister.getResource("metal") >= 10 && Lannister.getResource("food") >= 10 && Lannister.getResource("labor") >= 20) {
-//                        Lannister.setMilitary("shieldmen", 1);
-                            selectedTile.setMilitary("shieldmen", 1);
+                        } else if (label == "Buy Shieldmen" && Lannister.metal >= 10 && Lannister.food >= 10 && Lannister.labor >= 20) {
+                            selectedTile.setMilitary("Shieldmen", 1);
                             JOptionPane.showMessageDialog(button, "Shieldmen Trained");
-                        } else if (label == "Buy Spearmen" && Lannister.getResearch("spearmen") && Lannister.getResource("metal") >= 20 && Lannister.getResource("food") >= 10 && Lannister.getResource("labor") >= 10) {
-//                        Lannister.setMilitary("spearmen", 1);
-                            selectedTile.setMilitary("spearmen", 1);
+                        } else if (label == "Buy Spearmen" && Lannister.spearmenResearched && Lannister.metal >= 20 && Lannister.food >= 10 && Lannister.labor >= 10) {
+                            selectedTile.setMilitary("Spearmen", 1);
                             JOptionPane.showMessageDialog(button, "Spearmen Trained");
-                        } else if (label == "Buy Mounted Calvalry" && Lannister.getResearch("mountedCalvalry") && Lannister.getResource("metal") >= 20 && Lannister.getResource("food") >= 10 && Lannister.getResource("labor") >= 20) {
-//                        Lannister.setMilitary("mountedCavalry", 1);
-                            selectedTile.setMilitary("mountedCalvalry", 1);
+                        } else if (label == "Buy Mounted Calvalry" && Lannister.mountedCalvalryResearched && Lannister.metal >= 20 && Lannister.food >= 10 && Lannister.labor >= 20) {
+                            selectedTile.setMilitary("Mounted Calvalry", 1);
                             JOptionPane.showMessageDialog(button, "Mounted Calvalry Trained");
-                        } else if (label == "Buy Archer" && Lannister.getResource("metal") >= 10 && Lannister.getResource("food") >= 10 && Lannister.getResource("labor") >= 10) {
-//                        Lannister.setMilitary("archer", 1);
-                            selectedTile.setMilitary("archer", 1);
+                        } else if (label == "Buy Archer" && Lannister.metal >= 10 && Lannister.food >= 10 && Lannister.labor >= 10) {
+                            selectedTile.setMilitary("Archer", 1);
                             JOptionPane.showMessageDialog(button, "Archer Trained");
-                        } else if (label == "Buy Scout Raven" && Lannister.getResource("food") >= 10 && Lannister.getResource("labor") >= 10) {
-//                        Lannister.setMilitary("scoutRaven", 1);
-                            selectedTile.setMilitary("scoutRaven", 1);
+                        } else if (label == "Buy Scout Raven" && Lannister.food >= 10 && Lannister.labor >= 10) {
+                            selectedTile.setMilitary("Scout Raven", 1);
                             JOptionPane.showMessageDialog(button, "Scout Raven Trained");
-                        } else if (label == "Buy Transport Ship" && Lannister.getResource("metal") >= 10 && Lannister.getResource("wood") >= 20 && Lannister.getResource("food") >= 10 && Lannister.getResource("labor") >= 10) {
-//                        Lannister.setMilitary("transportShip", 1);
-                            selectedTile.setMilitary("transportShip", 1);
+                        } else if (label == "Buy Transport Ship" && Lannister.metal >= 10 && Lannister.wood >= 20 && Lannister.food >= 10 && Lannister.labor >= 10) {
+                            selectedTile.setMilitary("Transport Ship", 1);
                             JOptionPane.showMessageDialog(button, "Transport Ship Built");
-                        } else if (label == "Buy War Ship" && Lannister.getResearch("warShip") && Lannister.getResource("metal") >= 20 && Lannister.getResource("wood") >= 30 && Lannister.getResource("food") >= 10 && Lannister.getResource("labor") >= 10) {
-//                        Lannister.setMilitary("warShip", 1);
-                            selectedTile.setMilitary("warShip", 1);
+                        } else if (label == "Buy War Ship" && Lannister.warShipResearched && Lannister.metal >= 20 && Lannister.wood >= 30 && Lannister.food >= 10 && Lannister.labor >= 10) {
+                            selectedTile.setMilitary("War Ship", 1);
                             JOptionPane.showMessageDialog(button, "War Ship Built");
-                        } else if (label == "Buy Wyvern" && Lannister.getResearch("wyvern") && Lannister.getResource("food") >= 50 && Lannister.getResource("labor") >= 25) {
-//                        Lannister.setMilitary("wyvern", 1);
-                            selectedTile.setMilitary("wyvern", 1);
+                        } else if (label == "Buy Wyvern" && Lannister.wyvernResearched && Lannister.food >= 50 && Lannister.labor >= 25) {
+                            selectedTile.setMilitary("Wyvern", 1);
                             JOptionPane.showMessageDialog(button, "Wyvern Trained");
-                        } else if (label == "Buy Dreadnought" && Lannister.getResearch("dreadnought") && Lannister.getResource("metal") >= 10 && Lannister.getResource("wood") >= 100 && Lannister.getResource("food") >= 10 && Lannister.getResource("labor") >= 50) {
-//                        Lannister.setMilitary("dreadnought", 1);
-                            selectedTile.setMilitary("dreadnought", 1);
+                        } else if (label == "Buy Dreadnought" && Lannister.dreadnoughtResearched && Lannister.metal >= 10 && Lannister.wood >= 100 && Lannister.food >= 10 && Lannister.labor >= 50) {
+                            selectedTile.setMilitary("Dreadnought", 1);
                             JOptionPane.showMessageDialog(button, "Dreadnought Built");
-                        } else if (label == "Buy Dragon" && Lannister.getResearch("dragon") && Lannister.getResource("food") >= 100 && Lannister.getResource("labor") >= 100) {
-//                        Lannister.setMilitary("dragon", 1);
-                            selectedTile.setMilitary("dragon", 1);
+                        } else if (label == "Buy Dragon" && Lannister.dragonResearched && Lannister.food >= 100 && Lannister.labor >= 100) {
+                            selectedTile.setMilitary("Dragon", 1);
                             JOptionPane.showMessageDialog(button, "Dragon Trained");
-                        } else if (label == "Buy Mine" && Lannister.getResearch("mine") && Lannister.getResource("metal") >= 10 && Lannister.getResource("wood") >= 50 && Lannister.getResource("food") >= 20 && Lannister.getResource("labor") >= 20) {
-//                        Lannister.setBuilding("mine", 1);
+                        } else if (label == "Buy Mine" && Lannister.mineResearched && Lannister.metal >= 10 && Lannister.wood >= 50 && Lannister.food >= 20 && Lannister.labor >= 20) {
                             selectedTile.setBuilding("mine", 1);
                             JOptionPane.showMessageDialog(button, "Mine Built");
-                        } else if (label == "Buy Forge" && Lannister.getResearch("forge") && Lannister.getResource("metal") >= 50 && Lannister.getResource("wood") >= 40 && Lannister.getResource("food") >= 20 && Lannister.getResource("labor") >= 20) {
-//                        Lannister.setBuilding("forge", 1);
+                        } else if (label == "Buy Forge" && Lannister.forgeResearched && Lannister.metal >= 50 && Lannister.wood >= 40 && Lannister.food >= 20 && Lannister.labor >= 20) {
                             selectedTile.setBuilding("forge", 1);
                             JOptionPane.showMessageDialog(button, "Forge Built");
-                        } else if (label == "Buy Lumber Mill" && Lannister.getResearch("lumberMill") && Lannister.getResource("metal") >= 50 && Lannister.getResource("wood") >= 10 && Lannister.getResource("food") >= 20 && Lannister.getResource("labor") >= 20) {
-//                        Lannister.setBuilding("lumberMill", 1);
+                        } else if (label == "Buy Lumber Mill" && Lannister.lumberMillResearched && Lannister.metal >= 50 && Lannister.wood >= 10 && Lannister.food >= 20 && Lannister.labor >= 20) {
                             selectedTile.setBuilding("lumberMill", 1);
                             JOptionPane.showMessageDialog(button, "Lumber Mill Built");
-                        } else if (label == "Buy Deforestation" && Lannister.getResearch("deforestation") && Lannister.getResource("metal") >= 20 && Lannister.getResource("wood") >= 40 && Lannister.getResource("food") >= 50 && Lannister.getResource("labor") >= 40) {
-//                        Lannister.setBuilding("deforestation", 1);
+                        } else if (label == "Buy Deforestation" && Lannister.deforestationResearched && Lannister.metal >= 20 && Lannister.wood >= 40 && Lannister.food >= 50 && Lannister.labor >= 40) {
                             selectedTile.setBuilding("deforestation", 1);
                             JOptionPane.showMessageDialog(button, "Deforestation Built");
-                        } else if (label == "Buy Farm" && Lannister.getResearch("farm") && Lannister.getResource("metal") >= 20 && Lannister.getResource("wood") >= 40 && Lannister.getResource("food") >= 20 && Lannister.getResource("labor") >= 20) {
-//                        Lannister.setBuilding("farm", 1);
+                        } else if (label == "Buy Farm" && Lannister.farmResearched && Lannister.metal >= 20 && Lannister.wood >= 40 && Lannister.food >= 20 && Lannister.labor >= 20) {
                             selectedTile.setBuilding("farm", 1);
                             JOptionPane.showMessageDialog(button, "Farm Built");
-                        } else if (label == "Buy Plantation" && Lannister.getResearch("plantation") && Lannister.getResource("metal") >= 40 && Lannister.getResource("wood") >= 50 && Lannister.getResource("food") >= 20 && Lannister.getResource("labor") >= 40) {
-//                        Lannister.setBuilding("plantation", 1);
+                        } else if (label == "Buy Plantation" && Lannister.plantationResearched && Lannister.metal >= 40 && Lannister.wood >= 50 && Lannister.food >= 20 && Lannister.labor >= 40) {
                             selectedTile.setBuilding("plantation", 1);
                             JOptionPane.showMessageDialog(button, "Plantation Built");
-                        } else if (label == "Buy School" && Lannister.getResearch("school") && Lannister.getResource("metal") >= 40 && Lannister.getResource("wood") >= 20 && Lannister.getResource("food") >= 20 && Lannister.getResource("labor") >= 20) {
-//                        Lannister.setBuilding("school", 1);
+                        } else if (label == "Buy School" && Lannister.schoolResearched && Lannister.metal >= 40 && Lannister.wood >= 20 && Lannister.food >= 20 && Lannister.labor >= 20) {
                             selectedTile.setBuilding("school", 1);
                             JOptionPane.showMessageDialog(button, "School Built");
-                        } else if (label == "Buy College" && Lannister.getResearch("college") && Lannister.getResource("metal") >= 40 && Lannister.getResource("wood") >= 40 && Lannister.getResource("food") >= 30 && Lannister.getResource("labor") >= 40) {
-//                        Lannister.setBuilding("college", 1);
+                        } else if (label == "Buy College" && Lannister.collegeResearched && Lannister.metal >= 40 && Lannister.wood >= 40 && Lannister.food >= 30 && Lannister.labor >= 40) {
                             selectedTile.setBuilding("college", 1);
                             JOptionPane.showMessageDialog(button, "College Built");
-                        } else if (label == "Buy Build Mines" && Lannister.getResource("education") >= 50 && Lannister.getResource("labor") >= 10) {
+                        } else if (label == "Buy Build Mines" && Lannister.education >= 50 && Lannister.labor >= 10) {
                             Lannister.setResearch("mine", true);
                             JOptionPane.showMessageDialog(button, "Mines Researched");
-                        } else if (label == "Buy Build Forges" && Lannister.getResource("education") >= 75 && Lannister.getResource("labor") >= 25) {
+                        } else if (label == "Buy Build Forges" && Lannister.education >= 75 && Lannister.labor >= 25) {
                             Lannister.setResearch("forge", true);
                             JOptionPane.showMessageDialog(button, "Forges Researched");
-                        } else if (label == "Buy Build Lumber Mills" && Lannister.getResource("education") >= 50 && Lannister.getResource("labor") >= 10) {
+                        } else if (label == "Buy Build Lumber Mills" && Lannister.education >= 50 && Lannister.labor >= 10) {
                             Lannister.setResearch("lumberMill", true);
                             JOptionPane.showMessageDialog(button, "Lumber Mills Researched");
-                        } else if (label == "Buy Build Deforestation" && Lannister.getResource("education") >= 75 && Lannister.getResource("labor") >= 25) {
+                        } else if (label == "Buy Build Deforestation" && Lannister.education >= 75 && Lannister.labor >= 25) {
                             Lannister.setResearch("deforestation", true);
                             JOptionPane.showMessageDialog(button, "Deforestation Researched");
-                        } else if (label == "Buy Build Farms" && Lannister.getResource("education") >= 50 && Lannister.getResource("labor") >= 10) {
+                        } else if (label == "Buy Build Farms" && Lannister.education >= 50 && Lannister.labor >= 10) {
                             Lannister.setResearch("farm", true);
                             JOptionPane.showMessageDialog(button, "Farms Researched");
-                        } else if (label == "Buy Build Plantations" && Lannister.getResource("education") >= 75 && Lannister.getResource("labor") >= 25) {
+                        } else if (label == "Buy Build Plantations" && Lannister.education >= 75 && Lannister.labor >= 25) {
                             Lannister.setResearch("plantation", true);
                             JOptionPane.showMessageDialog(button, "Plantations Researched");
-                        } else if (label == "Buy Build Schools" && Lannister.getResource("education") >= 50 && Lannister.getResource("labor") >= 10) {
+                        } else if (label == "Buy Build Schools" && Lannister.education >= 50 && Lannister.labor >= 10) {
                             Lannister.setResearch("school", true);
                             JOptionPane.showMessageDialog(button, "Schools Researched");
-                        } else if (label == "Buy Build Colleges" && Lannister.getResource("education") >= 75 && Lannister.getResource("labor") >= 25) {
+                        } else if (label == "Buy Build Colleges" && Lannister.education >= 75 && Lannister.labor >= 25) {
                             Lannister.setResearch("college", true);
                             JOptionPane.showMessageDialog(button, "Colleges Researched");
-                        } else if (label == "Buy Train Spearmen" && Lannister.getResource("education") >= 50 && Lannister.getResource("labor") >= 10) {
+                        } else if (label == "Buy Train Spearmen" && Lannister.education >= 50 && Lannister.labor >= 10) {
                             Lannister.setResearch("spearmen", true);
                             JOptionPane.showMessageDialog(button, "Spearmen Researched");
-                        } else if (label == "Buy Train Mounted Calvalry" && Lannister.getResource("education") >= 50 && Lannister.getResource("labor") >= 10) {
+                        } else if (label == "Buy Train Mounted Calvalry" && Lannister.education >= 50 && Lannister.labor >= 10) {
                             Lannister.setResearch("mountedCalvalry", true);
                             JOptionPane.showMessageDialog(button, "Mounted Calvalry Researched");
-                        } else if (label == "Buy Build War Ships" && Lannister.getResource("education") >= 50 && Lannister.getResource("labor") >= 10) {
+                        } else if (label == "Buy Build War Ships" && Lannister.education >= 50 && Lannister.labor >= 10) {
                             Lannister.setResearch("warShip", true);
                             JOptionPane.showMessageDialog(button, "War Ships Researched");
-                        } else if (label == "Buy Tame Wyverns" && Lannister.getResource("education") >= 50 && Lannister.getResource("labor") >= 10) {
+                        } else if (label == "Buy Tame Wyverns" && Lannister.education >= 50 && Lannister.labor >= 10) {
                             Lannister.setResearch("wyvern", true);
                             JOptionPane.showMessageDialog(button, "Wyverns Researched");
-                        } else if (label == "Buy Build Dreadnoughts" && Lannister.getResource("education") >= 75 && Lannister.getResource("labor") >= 25) {
+                        } else if (label == "Buy Build Dreadnoughts" && Lannister.education >= 75 && Lannister.labor >= 25) {
                             Lannister.setResearch("dreadnought", true);
                             JOptionPane.showMessageDialog(button, "Dreadnoughts Researched");
-                        } else if (label == "Buy Tame Dragons" && Lannister.getResource("education") >= 75 && Lannister.getResource("labor") >= 25) {
+                        } else if (label == "Buy Tame Dragons" && Lannister.education >= 75 && Lannister.labor >= 25) {
                             Lannister.setResearch("dragon", true);
                             JOptionPane.showMessageDialog(button, "Dragons Researched");
                         } else {
@@ -2477,122 +2088,103 @@ public class Main {
                             actionsTaken--;
                         }
                     } else if (Targaryen.isActive()) {
-                        if (label == "Buy Swordmen" && Targaryen.getResource("metal") >= 10 && Targaryen.getResource("food") >= 10 && Targaryen.getResource("labor") >= 10) {
-//                        Targaryen.setMilitary("swordmen", 1);
-                            selectedTile.setMilitary("swordmen", 1);
+                        if (label == "Buy Swordmen" && Targaryen.metal >= 10 && Targaryen.food >= 10 && Targaryen.labor >= 10) {
+                            selectedTile.setMilitary("Swordmen", 1);
                             JOptionPane.showMessageDialog(button, "Swordmen Trained");
-                        } else if (label == "Buy Shieldmen" && Targaryen.getResource("metal") >= 10 && Targaryen.getResource("food") >= 10 && Targaryen.getResource("labor") >= 20) {
-//                        Targaryen.setMilitary("shieldmen", 1);
-                            selectedTile.setMilitary("shieldmen", 1);
+                        } else if (label == "Buy Shieldmen" && Targaryen.metal >= 10 && Targaryen.food >= 10 && Targaryen.labor >= 20) {
+                            selectedTile.setMilitary("Shieldmen", 1);
                             JOptionPane.showMessageDialog(button, "Shieldmen Trained");
-                        } else if (label == "Buy Spearmen" && Targaryen.getResearch("spearmen") && Targaryen.getResource("metal") >= 20 && Targaryen.getResource("food") >= 10 && Targaryen.getResource("labor") >= 10) {
-//                        Targaryen.setMilitary("spearmen", 1);
-                            selectedTile.setMilitary("spearmen", 1);
+                        } else if (label == "Buy Spearmen" && Targaryen.spearmenResearched && Targaryen.metal >= 20 && Targaryen.food >= 10 && Targaryen.labor >= 10) {
+                            selectedTile.setMilitary("Spearmen", 1);
                             JOptionPane.showMessageDialog(button, "Spearmen Trained");
-                        } else if (label == "Buy Mounted Calvalry" && Targaryen.getResearch("mountedCalvalry") && Targaryen.getResource("metal") >= 20 && Targaryen.getResource("food") >= 10 && Targaryen.getResource("labor") >= 20) {
-//                        Targaryen.setMilitary("mountedCavalry", 1);
-                            selectedTile.setMilitary("mountedCalvalry", 1);
+                        } else if (label == "Buy Mounted Calvalry" && Targaryen.mountedCalvalryResearched && Targaryen.metal >= 20 && Targaryen.food >= 10 && Targaryen.labor >= 20) {
+                            selectedTile.setMilitary("Mounted Calvalry", 1);
                             JOptionPane.showMessageDialog(button, "Mounted Calvalry Trained");
-                        } else if (label == "Buy Archer" && Targaryen.getResource("metal") >= 10 && Targaryen.getResource("food") >= 10 && Targaryen.getResource("labor") >= 10) {
-//                        Targaryen.setMilitary("archer", 1);
-                            selectedTile.setMilitary("archer", 1);
+                        } else if (label == "Buy Archer" && Targaryen.metal >= 10 && Targaryen.food >= 10 && Targaryen.labor >= 10) {
+                            selectedTile.setMilitary("Archer", 1);
                             JOptionPane.showMessageDialog(button, "Archer Trained");
-                        } else if (label == "Buy Scout Raven" && Targaryen.getResource("food") >= 10 && Targaryen.getResource("labor") >= 10) {
-//                        Targaryen.setMilitary("scoutRaven", 1);
-                            selectedTile.setMilitary("scoutRaven", 1);
+                        } else if (label == "Buy Scout Raven" && Targaryen.food >= 10 && Targaryen.labor >= 10) {
+                            selectedTile.setMilitary("Scout Raven", 1);
                             JOptionPane.showMessageDialog(button, "Scout Raven Trained");
-                        } else if (label == "Buy Transport Ship" && Targaryen.getResource("metal") >= 10 && Targaryen.getResource("wood") >= 20 && Targaryen.getResource("food") >= 10 && Targaryen.getResource("labor") >= 10) {
-//                        Targaryen.setMilitary("transportShip", 1);
-                            selectedTile.setMilitary("transportShip", 1);
+                        } else if (label == "Buy Transport Ship" && Targaryen.metal >= 10 && Targaryen.wood >= 20 && Targaryen.food >= 10 && Targaryen.labor >= 10) {
+                            selectedTile.setMilitary("Transport Ship", 1);
                             JOptionPane.showMessageDialog(button, "Transport Ship Built");
-                        } else if (label == "Buy War Ship" && Targaryen.getResearch("warShip") && Targaryen.getResource("metal") >= 20 && Targaryen.getResource("wood") >= 30 && Targaryen.getResource("food") >= 10 && Targaryen.getResource("labor") >= 10) {
-//                        Targaryen.setMilitary("warShip", 1);
-                            selectedTile.setMilitary("warShip", 1);
+                        } else if (label == "Buy War Ship" && Targaryen.warShipResearched && Targaryen.metal >= 20 && Targaryen.wood >= 30 && Targaryen.food >= 10 && Targaryen.labor >= 10) {
+                            selectedTile.setMilitary("War Ship", 1);
                             JOptionPane.showMessageDialog(button, "War Ship Built");
-                        } else if (label == "Buy Wyvern" && Targaryen.getResearch("wyvern") && Targaryen.getResource("food") >= 50 && Targaryen.getResource("labor") >= 25) {
-//                        Targaryen.setMilitary("wyvern", 1);
-                            selectedTile.setMilitary("wyvern", 1);
+                        } else if (label == "Buy Wyvern" && Targaryen.wyvernResearched && Targaryen.food >= 50 && Targaryen.labor >= 25) {
+                            selectedTile.setMilitary("Wyvern", 1);
                             JOptionPane.showMessageDialog(button, "Wyvern Trained");
-                        } else if (label == "Buy Dreadnought" && Targaryen.getResearch("dreadnought") && Targaryen.getResource("metal") >= 10 && Targaryen.getResource("wood") >= 100 && Targaryen.getResource("food") >= 10 && Targaryen.getResource("labor") >= 50) {
-//                        Targaryen.setMilitary("dreadnought", 1);
-                            selectedTile.setMilitary("dreadnought", 1);
+                        } else if (label == "Buy Dreadnought" && Targaryen.dreadnoughtResearched && Targaryen.metal >= 10 && Targaryen.wood >= 100 && Targaryen.food >= 10 && Targaryen.labor >= 50) {
+                            selectedTile.setMilitary("Dreadnought", 1);
                             JOptionPane.showMessageDialog(button, "Dreadnought Built");
-                        } else if (label == "Buy Dragon" && Targaryen.getResearch("dragon") && Targaryen.getResource("food") >= 100 && Targaryen.getResource("labor") >= 100) {
-//                        Targaryen.setMilitary("dragon", 1);
-                            selectedTile.setMilitary("dragon", 1);
+                        } else if (label == "Buy Dragon" && Targaryen.dragonResearched && Targaryen.food >= 100 && Targaryen.labor >= 100) {
+                            selectedTile.setMilitary("Dragon", 1);
                             JOptionPane.showMessageDialog(button, "Dragon Trained");
-                        } else if (label == "Buy Mine" && Targaryen.getResearch("mine") && Targaryen.getResource("metal") >= 10 && Targaryen.getResource("wood") >= 50 && Targaryen.getResource("food") >= 20 && Targaryen.getResource("labor") >= 20) {
-//                        Targaryen.setBuilding("mine", 1);
+                        } else if (label == "Buy Mine" && Targaryen.mineResearched && Targaryen.metal >= 10 && Targaryen.wood >= 50 && Targaryen.food >= 20 && Targaryen.labor >= 20) {
                             selectedTile.setBuilding("mine", 1);
                             JOptionPane.showMessageDialog(button, "Mine Built");
-                        } else if (label == "Buy Forge" && Targaryen.getResearch("forge") && Targaryen.getResource("metal") >= 50 && Targaryen.getResource("wood") >= 40 && Targaryen.getResource("food") >= 20 && Targaryen.getResource("labor") >= 20) {
-//                        Targaryen.setBuilding("forge", 1);
+                        } else if (label == "Buy Forge" && Targaryen.forgeResearched && Targaryen.metal >= 50 && Targaryen.wood >= 40 && Targaryen.food >= 20 && Targaryen.labor >= 20) {
                             selectedTile.setBuilding("forge", 1);
                             JOptionPane.showMessageDialog(button, "Forge Built");
-                        } else if (label == "Buy Lumber Mill" && Targaryen.getResearch("lumberMill") && Targaryen.getResource("metal") >= 50 && Targaryen.getResource("wood") >= 10 && Targaryen.getResource("food") >= 20 && Targaryen.getResource("labor") >= 20) {
-//                        Targaryen.setBuilding("lumberMill", 1);
+                        } else if (label == "Buy Lumber Mill" && Targaryen.lumberMillResearched && Targaryen.metal >= 50 && Targaryen.wood >= 10 && Targaryen.food >= 20 && Targaryen.labor >= 20) {
                             selectedTile.setBuilding("lumberMill", 1);
                             JOptionPane.showMessageDialog(button, "Lumber Mill Built");
-                        } else if (label == "Buy Deforestation" && Targaryen.getResearch("deforestation") && Targaryen.getResource("metal") >= 20 && Targaryen.getResource("wood") >= 40 && Targaryen.getResource("food") >= 50 && Targaryen.getResource("labor") >= 40) {
-//                        Targaryen.setBuilding("deforestation", 1);
+                        } else if (label == "Buy Deforestation" && Targaryen.deforestationResearched && Targaryen.metal >= 20 && Targaryen.wood >= 40 && Targaryen.food >= 50 && Targaryen.labor >= 40) {
                             selectedTile.setBuilding("deforestation", 1);
                             JOptionPane.showMessageDialog(button, "Deforestation Built");
-                        } else if (label == "Buy Farm" && Targaryen.getResearch("farm") && Targaryen.getResource("metal") >= 20 && Targaryen.getResource("wood") >= 40 && Targaryen.getResource("food") >= 20 && Targaryen.getResource("labor") >= 20) {
-//                        Targaryen.setBuilding("farm", 1);
+                        } else if (label == "Buy Farm" && Targaryen.farmResearched && Targaryen.metal >= 20 && Targaryen.wood >= 40 && Targaryen.food >= 20 && Targaryen.labor >= 20) {
                             selectedTile.setBuilding("farm", 1);
                             JOptionPane.showMessageDialog(button, "Farm Built");
-                        } else if (label == "Buy Plantation" && Targaryen.getResearch("plantation") && Targaryen.getResource("metal") >= 40 && Targaryen.getResource("wood") >= 50 && Targaryen.getResource("food") >= 20 && Targaryen.getResource("labor") >= 40) {
-//                        Targaryen.setBuilding("plantation", 1);
+                        } else if (label == "Buy Plantation" && Targaryen.plantationResearched && Targaryen.metal >= 40 && Targaryen.wood >= 50 && Targaryen.food >= 20 && Targaryen.labor >= 40) {
                             selectedTile.setBuilding("plantation", 1);
                             JOptionPane.showMessageDialog(button, "Plantation Built");
-                        } else if (label == "Buy School" && Targaryen.getResearch("school") && Targaryen.getResource("metal") >= 40 && Targaryen.getResource("wood") >= 20 && Targaryen.getResource("food") >= 20 && Targaryen.getResource("labor") >= 20) {
-//                        Targaryen.setBuilding("school", 1);
+                        } else if (label == "Buy School" && Targaryen.schoolResearched && Targaryen.metal >= 40 && Targaryen.wood >= 20 && Targaryen.food >= 20 && Targaryen.labor >= 20) {
                             selectedTile.setBuilding("school", 1);
                             JOptionPane.showMessageDialog(button, "School Built");
-                        } else if (label == "Buy College" && Targaryen.getResearch("college") && Targaryen.getResource("metal") >= 40 && Targaryen.getResource("wood") >= 40 && Targaryen.getResource("food") >= 30 && Targaryen.getResource("labor") >= 40) {
-//                        Targaryen.setBuilding("college", 1);
+                        } else if (label == "Buy College" && Targaryen.collegeResearched && Targaryen.metal >= 40 && Targaryen.wood >= 40 && Targaryen.food >= 30 && Targaryen.labor >= 40) {
                             selectedTile.setBuilding("college", 1);
                             JOptionPane.showMessageDialog(button, "College Built");
-                        } else if (label == "Buy Build Mines" && Targaryen.getResource("education") >= 50 && Targaryen.getResource("labor") >= 10) {
+                        } else if (label == "Buy Build Mines" && Targaryen.education >= 50 && Targaryen.labor >= 10) {
                             Targaryen.setResearch("mine", true);
                             JOptionPane.showMessageDialog(button, "Mines Researched");
-                        } else if (label == "Buy Build Forges" && Targaryen.getResource("education") >= 75 && Targaryen.getResource("labor") >= 25) {
+                        } else if (label == "Buy Build Forges" && Targaryen.education >= 75 && Targaryen.labor >= 25) {
                             Targaryen.setResearch("forge", true);
                             JOptionPane.showMessageDialog(button, "Forges Researched");
-                        } else if (label == "Buy Build Lumber Mills" && Targaryen.getResource("education") >= 50 && Targaryen.getResource("labor") >= 10) {
+                        } else if (label == "Buy Build Lumber Mills" && Targaryen.education >= 50 && Targaryen.labor >= 10) {
                             Targaryen.setResearch("lumberMill", true);
                             JOptionPane.showMessageDialog(button, "Lumber Mills Researched");
-                        } else if (label == "Buy Build Deforestation" && Targaryen.getResource("education") >= 75 && Targaryen.getResource("labor") >= 25) {
+                        } else if (label == "Buy Build Deforestation" && Targaryen.education >= 75 && Targaryen.labor >= 25) {
                             Targaryen.setResearch("deforestation", true);
                             JOptionPane.showMessageDialog(button, "Deforestation Researched");
-                        } else if (label == "Buy Build Farms" && Targaryen.getResource("education") >= 50 && Targaryen.getResource("labor") >= 10) {
+                        } else if (label == "Buy Build Farms" && Targaryen.education >= 50 && Targaryen.labor >= 10) {
                             Targaryen.setResearch("farm", true);
                             JOptionPane.showMessageDialog(button, "Farms Researched");
-                        } else if (label == "Buy Build Plantations" && Targaryen.getResource("education") >= 75 && Targaryen.getResource("labor") >= 25) {
+                        } else if (label == "Buy Build Plantations" && Targaryen.education >= 75 && Targaryen.labor >= 25) {
                             Targaryen.setResearch("plantation", true);
                             JOptionPane.showMessageDialog(button, "Plantations Researched");
-                        } else if (label == "Buy Build Schools" && Targaryen.getResource("education") >= 50 && Targaryen.getResource("labor") >= 10) {
+                        } else if (label == "Buy Build Schools" && Targaryen.education >= 50 && Targaryen.labor >= 10) {
                             Targaryen.setResearch("school", true);
                             JOptionPane.showMessageDialog(button, "Schools Researched");
-                        } else if (label == "Buy Build Colleges" && Targaryen.getResource("education") >= 75 && Targaryen.getResource("labor") >= 25) {
+                        } else if (label == "Buy Build Colleges" && Targaryen.education >= 75 && Targaryen.labor >= 25) {
                             Targaryen.setResearch("college", true);
                             JOptionPane.showMessageDialog(button, "Colleges Researched");
-                        } else if (label == "Buy Train Spearmen" && Targaryen.getResource("education") >= 50 && Targaryen.getResource("labor") >= 10) {
+                        } else if (label == "Buy Train Spearmen" && Targaryen.education >= 50 && Targaryen.labor >= 10) {
                             Targaryen.setResearch("spearmen", true);
                             JOptionPane.showMessageDialog(button, "Spearmen Researched");
-                        } else if (label == "Buy Train Mounted Calvalry" && Targaryen.getResource("education") >= 50 && Targaryen.getResource("labor") >= 10) {
+                        } else if (label == "Buy Train Mounted Calvalry" && Targaryen.education >= 50 && Targaryen.labor >= 10) {
                             Targaryen.setResearch("mountedCalvalry", true);
                             JOptionPane.showMessageDialog(button, "Mounted Calvalry Researched");
-                        } else if (label == "Buy Build War Ships" && Targaryen.getResource("education") >= 50 && Targaryen.getResource("labor") >= 10) {
+                        } else if (label == "Buy Build War Ships" && Targaryen.education >= 50 && Targaryen.labor >= 10) {
                             Targaryen.setResearch("warShip", true);
                             JOptionPane.showMessageDialog(button, "War Ships Researched");
-                        } else if (label == "Buy Tame Wyverns" && Targaryen.getResource("education") >= 50 && Targaryen.getResource("labor") >= 10) {
+                        } else if (label == "Buy Tame Wyverns" && Targaryen.education >= 50 && Targaryen.labor >= 10) {
                             Targaryen.setResearch("wyvern", true);
                             JOptionPane.showMessageDialog(button, "Wyverns Researched");
-                        } else if (label == "Buy Build Dreadnoughts" && Targaryen.getResource("education") >= 75 && Targaryen.getResource("labor") >= 25) {
+                        } else if (label == "Buy Build Dreadnoughts" && Targaryen.education >= 75 && Targaryen.labor >= 25) {
                             Targaryen.setResearch("dreadnought", true);
                             JOptionPane.showMessageDialog(button, "Dreadnoughts Researched");
-                        } else if (label == "Buy Tame Dragons" && Targaryen.getResource("education") >= 75 && Targaryen.getResource("labor") >= 25) {
+                        } else if (label == "Buy Tame Dragons" && Targaryen.education >= 75 && Targaryen.labor >= 25) {
                             Targaryen.setResearch("dragon", true);
                             JOptionPane.showMessageDialog(button, "Dragons Researched");
                         } else {
@@ -2728,108 +2320,64 @@ public class Main {
             backgroundDraw();
         }
 
-        public int getResource(String unit) {
-            if (unit == "metal") {
-                return metal;
-            } else if (unit == "wood") {
-                return wood;
-            } else if (unit == "food") {
-                return food;
-            } else if (unit == "labor") {
-                return labor;
-            } else if (unit == "education") {
-                return education;
-            } else {
-                return 0;
-            }
-        }
-
         public void setMilitary(String unit, int change) {
-            if (unit == "swordmen") {
+            if (unit == "Swordmen") {
                 swordmen += change;
                 metal -= 10 * change;
                 food -= 10 * change;
                 labor -= 10 * change;
-            } else if (unit == "shieldmen") {
+            } else if (unit == "Shieldmen") {
                 shieldmen += change;
                 metal -= 10 * change;
                 food -= 10 * change;
                 labor -= 20 * change;
-            } else if (unit == "spearmen") {
+            } else if (unit == "Spearmen") {
                 spearmen += change;
                 metal -= 20 * change;
                 food -= 10 * change;
                 labor -= 10 * change;
-            } else if (unit == "mountedCavalry") {
+            } else if (unit == "Mounted Cavalry") {
                 mountedCalvalry += change;
                 metal -= 20 * change;
                 food -= 10 * change;
                 labor -= 20 * change;
-            } else if (unit == "archer") {
+            } else if (unit == "Archer") {
                 archer += change;
                 metal -= 10 * change;
                 food -= 10 * change;
                 labor -= 10 * change;
-            } else if (unit == "scoutRaven") {
+            } else if (unit == "Scout Raven") {
                 scoutRaven += change;
                 food -= 10 * change;
                 labor -= 10 * change;
-            } else if (unit == "transportShip") {
+            } else if (unit == "Transport Ship") {
                 transportShip += change;
                 metal -= 10 * change;
                 wood -= 20 * change;
                 food -= 10 * change;
                 labor -= 10 * change;
-            } else if (unit == "warShip") {
+            } else if (unit == "War Ship") {
                 warShip += change;
                 metal -= 20 * change;
                 wood -= 30 * change;
                 food -= 10 * change;
                 labor -= 10 * change;
-            } else if (unit == "wyvern") {
+            } else if (unit == "Wyvern") {
                 wyvern += change;
                 food -= 50 * change;
                 labor -= 25 * change;
-            } else if (unit == "dreadnought") {
+            } else if (unit == "Dreadnought") {
                 dreadnought += change;
                 metal -= 10 * change;
                 wood -= 100 * change;
                 food -= 10 * change;
                 labor -= 50 * change;
-            } else if (unit == "dragon") {
+            } else if (unit == "Dragon") {
                 dragon += change;
                 food -= 100 * change;
                 labor -= 100 * change;
             }
             backgroundDraw();
-        }
-
-        public int getMilitary(String unit) {
-            if (unit == "swordmen") {
-                return swordmen;
-            } else if (unit == "shieldmen") {
-                return shieldmen;
-            } else if (unit == "spearmen") {
-                return spearmen;
-            } else if (unit == "mountedCavalry") {
-                return mountedCalvalry;
-            } else if (unit == "archer") {
-                return archer;
-            } else if (unit == "scoutRaven") {
-                return scoutRaven;
-            } else if (unit == "transportShip") {
-                return transportShip;
-            } else if (unit == "warShip") {
-                return warShip;
-            } else if (unit == "wyvern") {
-                return wyvern;
-            } else if (unit == "dreadnought") {
-                return dreadnought;
-            } else if (unit == "dragon") {
-                return dragon;
-            } else {
-                return 0;
-            }
         }
 
         public void setBuilding(String unit, int change) {
@@ -2883,28 +2431,6 @@ public class Main {
                 labor -= 40 * change;
             }
             backgroundDraw();
-        }
-
-        public int getBuilding(String unit) {
-            if (unit == "mine") {
-                return mine;
-            } else if (unit == "forge") {
-                return forge;
-            } else if (unit == "lumberMill") {
-                return lumberMill;
-            } else if (unit == "deforestation") {
-                return deforestation;
-            } else if (unit == "farm") {
-                return farm;
-            } else if (unit == "plantation") {
-                return plantation;
-            } else if (unit == "school") {
-                return school;
-            } else if (unit == "college") {
-                return college;
-            } else {
-                return 0;
-            }
         }
 
         public void setResearch(String unit, boolean change) {
@@ -2967,40 +2493,6 @@ public class Main {
             }
             backgroundDraw();
         }
-
-        public boolean getResearch(String unit) {
-            if (unit == "mine") {
-                return mineResearched;
-            } else if (unit == "forge") {
-                return forgeResearched;
-            } else if (unit == "lumberMill") {
-                return lumberMillResearched;
-            } else if (unit == "deforestation") {
-                return deforestationResearched;
-            } else if (unit == "farm") {
-                return farmResearched;
-            } else if (unit == "plantation") {
-                return plantationResearched;
-            } else if (unit == "school") {
-                return schoolResearched;
-            } else if (unit == "college") {
-                return collegeResearched;
-            } else if (unit == "spearmen") {
-                return spearmenResearched;
-            } else if (unit == "mountedCalvalry") {
-                return mountedCalvalryResearched;
-            } else if (unit == "warShip") {
-                return warShipResearched;
-            } else if (unit == "wyvern") {
-                return wyvernResearched;
-            } else if (unit == "dreadnought") {
-                return dreadnoughtResearched;
-            } else if (unit == "dragon") {
-                return dragonResearched;
-            } else {
-                return false;
-            }
-        }
     }
 
     //  Potential class for handing military unit info?
@@ -3016,77 +2508,77 @@ public class Main {
 
         public MilitaryUnit(String unitOwner, String unit) {
             owner = unitOwner;
-            if (unit == "swordmen") {
+            if (unit == "Swordmen") {
                 unitName = "Swordmen";
                 type = unitType.ground;
                 health = 5;
                 ground = 10;
                 air = 0;
                 sea = 0;
-            } else if (unit == "shieldmen") {
+            } else if (unit == "Shieldmen") {
                 unitName = "Shieldmen";
                 type = unitType.ground;
                 health = 10;
                 ground = 8;
                 air = 0;
                 sea = 0;
-            } else if (unit == "spearmen") {
+            } else if (unit == "Spearmen") {
                 unitName = "Spearmen";
                 type = unitType.ground;
                 health = 5;
                 ground = 12;
                 air = 0;
                 sea = 0;
-            } else if (unit == "mountedCalvalry") {
+            } else if (unit == "Mounted Calvalry") {
                 unitName = "Mounted Calvalry";
                 type = unitType.ground;
                 health = 10;
                 ground = 12;
                 air = 0;
                 sea = 0;
-            } else if (unit == "archer") {
+            } else if (unit == "Archer") {
                 unitName = "Archer";
                 type = unitType.ground;
                 health = 5;
                 ground = 5;
                 air = 10;
                 sea = 0;
-            } else if (unit == "scoutRaven") {
+            } else if (unit == "Scout Raven") {
                 unitName = "Scout Raven";
                 type = unitType.air;
                 health = 1;
                 ground = 0;
                 air = 0;
                 sea = 0;
-            } else if (unit == "transportShip") {
+            } else if (unit == "Transport Ship") {
                 unitName = "Transport Ship";
                 type = unitType.sea;
                 health = 10;
                 ground = 0;
                 air = 0;
                 sea = 0;
-            } else if (unit == "warShip") {
+            } else if (unit == "War Ship") {
                 unitName = "War Ship";
                 type = unitType.sea;
                 health = 20;
                 ground = 8;
                 air = 8;
                 sea = 10;
-            } else if (unit == "wyvern") {
+            } else if (unit == "Wyvern") {
                 unitName = "Wyvern";
                 type = unitType.air;
                 health = 5;
                 ground = 10;
                 air = 10;
                 sea = 8;
-            } else if (unit == "dreadnought") {
+            } else if (unit == "Dreadnought") {
                 unitName = "Dreadnought";
                 type = unitType.sea;
                 health = 50;
                 ground = 15;
                 air = 15;
                 sea = 20;
-            } else if (unit == "dragon") {
+            } else if (unit == "Dragon") {
                 unitName = "Dragon";
                 type = unitType.air;
                 health = 50;
@@ -3509,14 +3001,38 @@ public class Main {
 
         public void setMilitary(String unit, int change) {
             if (owner == "Stark") {
-                occupyingUnits.add(0, new MilitaryUnit(owner, unit));
-                Stark.setMilitary(unit, change);
+                if (change < 0) {
+                    for (int i = 0; i < occupyingUnits.size(); i++) {
+                        if (occupyingUnits.get(i).unitName == unit) {
+                            occupyingUnits.remove(i);
+                        }
+                    }
+                } else {
+                    occupyingUnits.add(0, new MilitaryUnit(owner, unit));
+                    Stark.setMilitary(unit, change);
+                }
             } else if (owner == "Lannister") {
-                occupyingUnits.add(0, new MilitaryUnit(owner, unit));
-                Lannister.setMilitary(unit, change);
+                if (change < 0) {
+                    for (int i = 0; i < occupyingUnits.size(); i++) {
+                        if (occupyingUnits.get(i).unitName == unit) {
+                            occupyingUnits.remove(i);
+                        }
+                    }
+                } else {
+                    occupyingUnits.add(0, new MilitaryUnit(owner, unit));
+                    Lannister.setMilitary(unit, change);
+                }
             } else if (owner == "Targaryen") {
-                occupyingUnits.add(0, new MilitaryUnit(owner, unit));
-                Stark.setMilitary(unit, change);
+                if (change < 0) {
+                    for (int i = 0; i < occupyingUnits.size(); i++) {
+                        if (occupyingUnits.get(i).unitName == unit) {
+                            occupyingUnits.remove(i);
+                        }
+                    }
+                } else {
+                    occupyingUnits.add(0, new MilitaryUnit(owner, unit));
+                    Targaryen.setMilitary(unit, change);
+                }
             }
             backgroundDraw();
         }
@@ -3606,14 +3122,6 @@ public class Main {
         }
     }
 
-    private static void bindKey(JPanel myPanel, String input) {
-        myPanel.getInputMap(IFW).put(KeyStroke.getKeyStroke("pressed " + input), input + " pressed");
-        myPanel.getActionMap().put(input + " pressed", new KeyPressed(input));
-
-        myPanel.getInputMap(IFW).put(KeyStroke.getKeyStroke("released " + input), input + " released");
-        myPanel.getActionMap().put(input + " released", new KeyReleased(input));
-    }
-
     public static void main(String[] args) {
         setup();
         appFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -3659,15 +3167,8 @@ public class Main {
         jMenuBar.add(educationLabel);
         jMenuBar.add(actionLabel);
 
-        //  Don't even know if we need keys?
-//        bindKey(myPanel, "UP");
-//        bindKey(myPanel, "DOWN");
-//        bindKey(myPanel, "LEFT");
-//        bindKey(myPanel, "RIGHT");
         board = new MouseTrackerPanel();
-
         appFrame.getContentPane().add(board);
-
         openStartScreen();
     }
 }

@@ -1,0 +1,334 @@
+private static double pi = 3.14159265358979;
+private static Boolean upPressed;
+private static Boolean downPressed;
+private static Boolean leftPressed;
+private static Boolean rightPressed;
+private static Long audiolifetime = 78000L; // 78 seconds for KI.WAV, was new Long(78000)
+private static Long lastAudioStart = System.currentTimeMillis();
+private static Clip clip;
+
+//    private static class EnemyMover implements Runnable {
+//        private double bluepigvelocitystep;
+//        private double bluepigvelocity;
+//
+//        public EnemyMover() {
+//            bluepigvelocitystep = 2;
+//        }
+//
+//        public void run() {
+//            Random randomNumbers = new Random(LocalTime.now().getNano());
+//            while (endgame == false) {
+//                try {
+//                    Thread.sleep(10);
+//                } catch (InterruptedException e) {
+//                    // NOP
+//                }
+//
+//                // TODO
+//                try {
+//                    for (int i = 0; i < bluepigEnemies.size(); i++) {
+//                        int state = randomNumbers.nextInt(1000);
+//                        if (state < 5) {
+//                            bluepigvelocity = bluepigvelocitystep;
+//                            bluepigEnemies.elementAt(i).setInternalAngle(0);
+//                        } else if (state < 10) {
+//                            bluepigvelocity = bluepigvelocitystep;
+//                            bluepigEnemies.elementAt(i).setInternalAngle(halfPi);
+//                        } else if (state < 15) {
+//                            bluepigvelocity = bluepigvelocitystep;
+//                            bluepigEnemies.elementAt(i).setInternalAngle(pi);
+//                        } else if (state < 20) {
+//                            bluepigvelocity = bluepigvelocitystep;
+//                            bluepigEnemies.elementAt(i).setInternalAngle(threehavlesPi);
+//                        } else if (state < 250) {
+//                            bluepigvelocity = bluepigvelocitystep;
+//                        } else {
+//                            bluepigvelocity = 0;
+//                        }
+//
+//                        bluepigEnemies.elementAt(i).updateBounce();
+//                        bluepigEnemies.elementAt(i).move(bluepigvelocity *
+//                                        Math.cos(bluepigEnemies.elementAt(i).getInternalAngle()),
+//                                bluepigvelocity * Math.sin(bluepigEnemies.elementAt(i).getInternalAngle()));
+//                    }
+//
+//                    for (int i = 0; i < bubblebossEnemies.size(); i++) {
+//
+//                    }
+//                } catch (java.lang.NullPointerException jlnpe) {
+//                    // NOP
+//                }
+//            }
+//        }
+//    }
+
+//    private static void playerDraw() {
+//        Graphics g = appFrame.getGraphics();
+//        Graphics2D g2D = (Graphics2D) g;
+//        p1.setMaxFrames(10);
+//
+//        if (upPressed || downPressed || leftPressed || rightPressed) {
+//            if (upPressed == true) {
+//                if (p1.getCurrentFrame() < 5) {
+////                    g2D.drawImage(rotateImageObject(p1).filter(link[0], null),
+//                    g2D.drawImage(link[0],
+//                            (int) (p1.getX() + 0.5), (int)(p1.getY() + 0.5), null);
+//                } else if (p1.getCurrentFrame() > 5) {
+////                    g2D.drawImage(rotateImageObject(p1).filter(link[1], null),
+//                    g2D.drawImage(link[1],
+//                            (int)(p1.getX() + 0.5), (int)(p1.getY() + 0.5), null);
+//                }
+//                p1.updateCurrentFrame();
+//            }
+//            if (downPressed == true) {
+//                if (p1.getCurrentFrame() < 5) {
+////                    g2D.drawImage(rotateImageObject(p1).filter(link[2], null),
+//                    g2D.drawImage(link[2],
+//                            (int)(p1.getX() + 0.5), (int) (p1.getY() + 0.5), null);
+//                } else if (p1.getCurrentFrame() > 5) {
+////                    g2D.drawImage(rotateImageObject(p1).filter(link[3], null),
+//                    g2D.drawImage(link[3],
+//                            (int)(p1.getX() + 0.5), (int)(p1.getY() + 0.5), null);
+//                }
+//                p1.updateCurrentFrame();
+//            }
+//            if (leftPressed == true) {
+//                if (p1.getCurrentFrame() < 5) {
+//
+////                    g2D.drawImage(rotateImageObject(p1).filter(link[4], null),
+//                    g2D.drawImage(link[4],
+//                            (int)(p1.getX() + 0.5), (int)(p1.getY() + 0.5), null);
+//                } else if (p1.getCurrentFrame() > 5) {
+////                    g2D.drawImage(rotateImageObject(p1).filter(link[5], null),
+//                    g2D.drawImage(link[5],
+//                            (int)(p1.getX() + 0.5), (int)(p1.getY() + 0.5), null);
+//                }
+//                p1.updateCurrentFrame();
+//            }
+//            if (rightPressed == true) {
+//                if (p1.getCurrentFrame() < 5) {
+////                    g2D.drawImage(rotateImageObject(p1).filter(link[6], null),
+//                    g2D.drawImage(link[6],
+//                            (int)(p1.getX() + 0.5), (int)(p1.getY() + 0.5), null);
+//                } else if (p1.getCurrentFrame() > 5) {
+////                    g2D.drawImage(rotateImageObject(p1).filter(link[7], null),
+//                    g2D.drawImage(link[7],
+//                            (int)(p1.getX() + 0.5), (int)(p1.getY() + 0.5), null);
+//                }
+//                p1.updateCurrentFrame();
+//            }
+//        } else {
+//            if (Math.abs(lastPressed - 90.0) < 1.0) {
+////                g2D.drawImage(rotateImageObject(p1).filter(link[0], null),
+//                g2D.drawImage(link[0],
+//                        (int)(p1.getX() + 0.5), (int)(p1.getY() + 0.5), null);
+//            }
+//            if (Math.abs(lastPressed - 270.0) < 1.0) {
+////                g2D.drawImage(rotateImageObject(p1).filter(link[2], null),
+//                g2D.drawImage(link[2],
+//                        (int)(p1.getX() + 0.5), (int)(p1.getY() + 0.5), null);
+//            }
+//            if (Math.abs(lastPressed - 0.0) < 1.0) {
+////                g2D.drawImage(rotateImageObject(p1).filter(link[6], null),
+//                g2D.drawImage(link[6],
+//                        (int)(p1.getX() + 0.5), (int)(p1.getY() + 0.5), null);
+//            }
+//            if (Math.abs(lastPressed - 180.0) < 1.0) {
+////                g2D.drawImage(rotateImageObject(p1).filter(link[4], null),
+//                g2D.drawImage(link[4],
+//                        (int)(p1.getX() + 0.5), (int)(p1.getY() + 0.5), null);
+//            }
+//        }
+//
+//        // g2D.drawImage(rotateImageObject(p1).filter(player, null), (int)(p1.getX() + 0.5), (int)(p1.getY() + 0.5), null);
+//    }
+//
+//    private static void healthDraw() {
+//        Graphics g = appFrame.getGraphics();
+//        Graphics2D g2D = (Graphics2D) g;
+//
+//        int leftscale = 10;
+//        int leftoffset = 10;
+//        int rightoffset = 9;
+//        int interioroffset = 2;
+//        int halfinterioroffset = 1;
+//        for (int i = 0; i < p1.getMaxLife(); i++) {
+//            if (i % 2 == 0) {
+//                g2D.drawImage(leftHeartOutline, leftscale * i + leftoffset + XOFFSET, YOFFSET, null);
+////                g2D.drawImage(rotateImageObject(p1).filter(leftHeartOutline, null),
+////                        leftscale * i + leftoffset + XOFFSET, YOFFSET, null);
+//            } else {
+//                g2D.drawImage(rightHeartOutline, leftscale * i + rightoffset + XOFFSET, YOFFSET, null);
+////                g2D.drawImage(rotateImageObject(p1).filter(rightHeartOutline, null),
+////                        leftscale * i + rightoffset + XOFFSET, YOFFSET, null);
+//            }
+//        }
+//
+//        for (int i = 0; i < p1.getLife(); i++) {
+//            if (i % 2 == 0) {
+//                g2D.drawImage(leftHeart, leftscale * i + leftoffset + interioroffset + XOFFSET,
+//                        interioroffset + YOFFSET, null);
+////                g2D.drawImage(rotateImageObject(p1).filter(leftHeart, null),
+////                        leftscale * i + leftoffset + interioroffset + XOFFSET, interioroffset + YOFFSET, null);
+//            } else {
+//                g2D.drawImage(rightHeart, leftscale * i + leftoffset - halfinterioroffset + XOFFSET,
+//                        interioroffset + YOFFSET, null);
+////                g2D.drawImage(rotateImageObject(p1).filter(rightHeart, null),
+////                        leftscale * i + leftoffset - halfinterioroffset + XOFFSET, interioroffset + YOFFSET, null);
+//            }
+//        }
+//    }
+//
+//    private static void enemiesDraw() {
+//        Graphics g = appFrame.getGraphics();
+//        Graphics2D g2D = (Graphics2D) g;
+//
+//        for (int i = 0; i < bluepigEnemies.size(); i++) {
+//            if (Math.abs(bluepigEnemies.elementAt(i).getInternalAngle() - 0.0) < 1.0) {
+//                if (bluepigEnemies.elementAt(i).getCurrentFrame() < bluepigEnemies.elementAt(i).getMaxFrames() / 2) {
+//                    g2D.drawImage(rotateImageObject(bluepigEnemies.elementAt(i)).filter(bluepigEnemy.elementAt(6), null),
+//                            (int)(bluepigEnemies.elementAt(i).getX() + 0.5),
+//                            (int)(bluepigEnemies.elementAt(i).getY() + 0.5), null);
+//                } else {
+//                    g2D.drawImage(rotateImageObject(bluepigEnemies.elementAt(i)).filter(bluepigEnemy.elementAt(7), null),
+//                            (int)(bluepigEnemies.elementAt(i).getX() + 0.5),
+//                            (int)(bluepigEnemies.elementAt(i).getY() + 0.5), null);
+//                }
+//                bluepigEnemies.elementAt(i).updateCurrentFrame();;
+//            }
+//            if(Math.abs(bluepigEnemies.elementAt(i).getInternalAngle() - pi) < 1.0) {
+//                if (bluepigEnemies.elementAt(i).getCurrentFrame() < bluepigEnemies.elementAt(i).getMaxFrames() / 2) {
+//                    g2D.drawImage(rotateImageObject(bluepigEnemies.elementAt(i)).filter(bluepigEnemy.elementAt(4), null),
+//                            (int)(bluepigEnemies.elementAt(i).getX() + 0.5),
+//                            (int)(bluepigEnemies.elementAt(i).getY() + 0.5), null);
+//                } else {
+//                    g2D.drawImage(rotateImageObject(bluepigEnemies.elementAt(i)).filter(bluepigEnemy.elementAt(5), null),
+//                            (int)(bluepigEnemies.elementAt(i).getX() + 0.5),
+//                            (int)(bluepigEnemies.elementAt(i).getY() + 0.5), null);
+//                }
+//                bluepigEnemies.elementAt(i).updateCurrentFrame();
+//            }
+//            if (Math.abs(bluepigEnemies.elementAt(i).getInternalAngle() - halfPi) < 1.0) {
+//                if (bluepigEnemies.elementAt(i).getCurrentFrame() < bluepigEnemies.elementAt(i).getMaxFrames() / 2) {
+//                    g2D.drawImage(rotateImageObject(bluepigEnemies.elementAt(i)).filter(bluepigEnemy.elementAt(2), null),
+//                            (int)(bluepigEnemies.elementAt(i).getX() + 0.5),
+//                            (int)(bluepigEnemies.elementAt(i).getY() + 0.5), null);
+//                } else {
+//                    g2D.drawImage(rotateImageObject(bluepigEnemies.elementAt(i)).filter(bluepigEnemy.elementAt(3), null),
+//                            (int)(bluepigEnemies.elementAt(i).getX() + 0.5),
+//                            (int)(bluepigEnemies.elementAt(i).getY() + 0.5), null);
+//                }
+//                bluepigEnemies.elementAt(i).updateCurrentFrame();
+//            }
+//            if (Math.abs(bluepigEnemies.elementAt(i).getInternalAngle() - threehavlesPi) < 1.0) {
+//                if (bluepigEnemies.elementAt(i).getCurrentFrame() < bluepigEnemies.elementAt(i).getMaxFrames() / 2) {
+//                    g2D.drawImage(rotateImageObject(bluepigEnemies.elementAt(i)).filter(bluepigEnemy.elementAt(0), null),
+//                            (int)(bluepigEnemies.elementAt(i).getX() + 0.5),
+//                            (int)(bluepigEnemies.elementAt(i).getY() + 0.5), null);
+//                } else {
+//                    g2D.drawImage(rotateImageObject(bluepigEnemies.elementAt(i)).filter(bluepigEnemy.elementAt(1), null),
+//                            (int)(bluepigEnemies.elementAt(i).getX() + 0.5),
+//                            (int)(bluepigEnemies.elementAt(i).getY() + 0.5), null);
+//                }
+//                bluepigEnemies.elementAt(i).updateCurrentFrame();
+//            }
+//        }
+//    }
+
+private static class AudioLooper implements Runnable {
+    public void run() {
+        while (endgame == false) {
+            Long currTime = Long.valueOf(System.currentTimeMillis()); // was new Long(System.currentTimeMillis()
+//                if (currTime - lastAudioStart > audiolifetime) {
+//                    playAudio(backgroundState);
+//                }
+        }
+    }
+}
+
+private static void playAudio(String backgroundState) {
+    try {
+        clip.stop();
+    } catch (Exception e) {
+        // NOP
+    }
+
+    try {
+        if (backgroundState.substring(0, 2).equals("KI")) {
+            AudioInputStream ais = AudioSystem.getAudioInputStream(new File("audio\\TitleKI.wav").getAbsoluteFile());
+            clip = AudioSystem.getClip();
+            clip.open(ais);
+            clip.start();
+            lastAudioStart = System.currentTimeMillis();
+            audiolifetime = Long.valueOf(78000); // was new Long(78000)
+        } else if (backgroundState.substring(0, 2).equals("TC")) {
+            AudioInputStream ais = AudioSystem.getAudioInputStream(new File("audio\\TC.wav").getAbsoluteFile());
+            clip = AudioSystem.getClip();
+            clip.open(ais);
+            clip.start();
+            lastAudioStart = System.currentTimeMillis();
+            audiolifetime = Long.valueOf(219000); // was new Long(191000)
+        }
+    } catch (Exception e) {
+        // NOP
+    }
+}
+
+private static class KeyPressed extends AbstractAction {
+    private String action;
+
+    public KeyPressed() { action = ""; }
+    public KeyPressed(String input) { action = input; }
+
+    public void actionPerformed(ActionEvent e) {
+        if (action.equals("UP")) {
+            upPressed = true;
+        }
+        if (action.equals("DOWN")) {
+            downPressed = true;
+        }
+        if (action.equals("LEFT")) {
+            leftPressed = true;
+        }
+        if (action.equals("RIGHT")) {
+            rightPressed = true;
+        }
+    }
+}
+
+private static class KeyReleased extends AbstractAction {
+    private String action;
+
+    public KeyReleased() { action = ""; }
+    public KeyReleased(String input) { action = input; }
+
+    public void actionPerformed(ActionEvent e) {
+        if(action.equals("UP")) {
+            upPressed = false;
+        }
+        if (action.equals("DOWN")) {
+            downPressed = false;
+        }
+        if (action.equals("LEFT")) {
+            leftPressed = false;
+        }
+        if (action.equals("RIGHT")) {
+            rightPressed = false;
+        }
+    }
+}
+
+private static void bindKey(JPanel myPanel, String input) {
+    myPanel.getInputMap(IFW).put(KeyStroke.getKeyStroke("pressed " + input), input + " pressed");
+    myPanel.getActionMap().put(input + " pressed", new KeyPressed(input));
+
+    myPanel.getInputMap(IFW).put(KeyStroke.getKeyStroke("released " + input), input + " released");
+    myPanel.getActionMap().put(input + " released", new KeyReleased(input));
+}
+
+Main {
+//        bindKey(myPanel, "UP");
+//        bindKey(myPanel, "DOWN");
+//        bindKey(myPanel, "LEFT");
+//        bindKey(myPanel, "RIGHT");
+}

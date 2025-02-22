@@ -1129,53 +1129,56 @@ public class Main {
             JLabel nationTeam = new JLabel("Team: ");
             JLabel nationMilitary = new JLabel("error");
             if (Stark.isActive()) {
-                nationMilitary = new JLabel("Military Strength: " + (Stark.swordmen + Stark.shieldmen + Stark.spearmen + Stark.mountedCalvalry + Stark.archer + Stark.scoutRaven + Stark.transportShip + Stark.warShip + Stark.wyvern + Stark.dreadnought + Stark.dragon));
+                nationMilitary = new JLabel("Military Strength: " + (Stark.swordmen + Stark.shieldmen + Stark.spearmen + Stark.mountedCalvalry + Stark.javelinmen + Stark.archer + Stark.crossbowmen + Stark.mountedArcher + Stark.siegeTower + Stark.catapult + Stark.ballista + Stark.trebuchet));
             } else if (Lannister.isActive()) {
-                nationMilitary = new JLabel("Military Strength: " + (Lannister.swordmen + Lannister.shieldmen + Lannister.spearmen + Lannister.mountedCalvalry + Lannister.archer + Lannister.scoutRaven + Lannister.transportShip + Lannister.warShip + Lannister.wyvern + Lannister.dreadnought + Lannister.dragon));
+                nationMilitary = new JLabel("Military Strength: " + (Lannister.swordmen + Lannister.shieldmen + Lannister.spearmen + Lannister.mountedCalvalry + Lannister.javelinmen + Lannister.archer + Lannister.crossbowmen + Lannister.mountedArcher + Lannister.siegeTower + Lannister.catapult + Lannister.ballista + Lannister.trebuchet));
             } else if (Targaryen.isActive()) {
-                nationMilitary = new JLabel("Military Strength: " + (Targaryen.swordmen + Targaryen.shieldmen + Targaryen.spearmen + Targaryen.mountedCalvalry + Targaryen.archer + Targaryen.scoutRaven + Targaryen.transportShip + Targaryen.warShip + Targaryen.wyvern + Targaryen.dreadnought + Targaryen.dragon));
+                nationMilitary = new JLabel("Military Strength: " + (Targaryen.swordmen + Targaryen.shieldmen + Targaryen.spearmen + Targaryen.mountedCalvalry + Targaryen.javelinmen + Targaryen.archer + Targaryen.crossbowmen + Targaryen.mountedArcher + Targaryen.siegeTower + Targaryen.catapult + Targaryen.ballista + Targaryen.trebuchet));
             }
             JLabel nationLand = new JLabel("Total Land: ");
 
             DefaultTableModel dm = new DefaultTableModel();
             if (Stark.isActive()) {
-                dm.setDataVector(new Object[][]{{"Swordmen", Stark.swordmen, "true", "Mine", Stark.mine, Stark.mineResearched},
-                                {"Shieldmen", Stark.shieldmen, "true", "Forge", Stark.forge, Stark.forgeResearched},
+                dm.setDataVector(new Object[][]{{"Swordmen", Stark.swordmen, Stark.swordmenResearched, "Mine", Stark.mine, Stark.mineResearched},
+                                {"Shieldmen", Stark.shieldmen, Stark.shieldmenResearched, "Forge", Stark.forge, Stark.forgeResearched},
                                 {"Spearmen", Stark.spearmen, Stark.spearmenResearched, "Lumber Mill", Stark.lumberMill, Stark.lumberMillResearched},
                                 {"Mounted Cavalry", Stark.mountedCalvalry, Stark.mountedCalvalryResearched, "Deforestation", Stark.deforestation, Stark.deforestationResearched},
-                                {"Archer", Stark.archer, "true", "Farm", Stark.farm, Stark.farmResearched},
-                                {"Scout Raven", Stark.scoutRaven, "true", "Plantation", Stark.plantation, Stark.plantationResearched},
-                                {"Transport Ship", Stark.transportShip, "true", "School", Stark.school, Stark.schoolResearched},
-                                {"War Ship", Stark.warShip, Stark.warShipResearched, "College", Stark.college, Stark.collegeResearched},
-                                {"Wyvern", Stark.wyvern, Stark.wyvernResearched, "", "", ""},
-                                {"Dreadnought", Stark.dreadnought, Stark.dreadnoughtResearched, "", "", ""},
-                                {"Dragon", Stark.dragon, Stark.dragonResearched, "", "", ""}},
+                                {"Javelinmen", Stark.javelinmen, Stark.javelinmenResearched, "Farm", Stark.farm, Stark.farmResearched},
+                                {"Archer", Stark.archer, Stark.archerResearched, "Plantation", Stark.plantation, Stark.plantationResearched},
+                                {"Crossbowmen", Stark.crossbowmen, Stark.crossbowmenResearched, "School", Stark.school, Stark.schoolResearched},
+                                {"Mounted Archer", Stark.mountedArcher, Stark.mountedArcher, "College", Stark.college, Stark.collegeResearched},
+                                {"Siege Tower", Stark.siegeTower, Stark.siegeTowerResearched, "", "", ""},
+                                {"Catapult", Stark.catapult, Stark.catapultResearched, "", "", ""},
+                                {"Ballista", Stark.ballista, Stark.ballistaResearched, "", "", ""},
+                                {"Trebuchet", Stark.trebuchet, Stark.trebuchetResearched, "", "", ""}},
                         new Object[]{"", "Owned", "Unit Researched", "Building", "Owned", "Building Research"});
             } else if (Lannister.isActive()) {
-                dm.setDataVector(new Object[][]{{"Swordmen", Lannister.swordmen, "True", "Mine", Lannister.mine, Lannister.mineResearched},
-                                {"Shieldmen", Lannister.shieldmen, "True", "Forge", Lannister.forge, Lannister.forgeResearched},
+                dm.setDataVector(new Object[][]{{"Swordmen", Lannister.swordmen, Lannister.swordmenResearched, "Mine", Lannister.mine, Lannister.mineResearched},
+                                {"Shieldmen", Lannister.shieldmen, Lannister.shieldmenResearched, "Forge", Lannister.forge, Lannister.forgeResearched},
                                 {"Spearmen", Lannister.spearmen, Lannister.spearmenResearched, "Lumber Mill", Lannister.lumberMill, Lannister.lumberMillResearched},
                                 {"Mounted Cavalry", Lannister.mountedCalvalry, Lannister.mountedCalvalryResearched, "Deforestation", Lannister.deforestation, Lannister.deforestationResearched},
-                                {"Archer", Lannister.archer, "True", "Farm", Lannister.farm, Lannister.farmResearched},
-                                {"Scout Raven", Lannister.scoutRaven, "True", "Plantation", Lannister.plantation, Lannister.plantationResearched},
-                                {"Transport Ship", Lannister.transportShip, "True", "School", Lannister.school, Lannister.schoolResearched},
-                                {"War Ship", Lannister.warShip, Lannister.warShipResearched, "College", Lannister.college, Lannister.collegeResearched},
-                                {"Wyvern", Lannister.wyvern, Lannister.wyvernResearched, "", "", ""},
-                                {"Dreadnought", Lannister.dreadnought, Lannister.dreadnoughtResearched, "", "", ""},
-                                {"Dragon", Lannister.dragon, Lannister.dragonResearched, "", "", ""}},
+                                {"Javelinmen", Lannister.javelinmen, Lannister.javelinmenResearched, "Farm", Lannister.farm, Lannister.farmResearched},
+                                {"Archer", Lannister.archer, Lannister.archerResearched, "Plantation", Lannister.plantation, Lannister.plantationResearched},
+                                {"Crossbowmen", Lannister.crossbowmen, Lannister.crossbowmenResearched, "School", Lannister.school, Lannister.schoolResearched},
+                                {"Mounted Archer", Lannister.mountedArcher, Lannister.mountedArcherResearched, "College", Lannister.college, Lannister.collegeResearched},
+                                {"Siege Tower", Lannister.siegeTower, Lannister.siegeTowerResearched, "", "", ""},
+                                {"Catapult", Lannister.catapult, Lannister.catapultResearched, "", "", ""},
+                                {"Ballista", Lannister.ballista, Lannister.ballistaResearched, "", "", ""},
+                                {"Trebuchet", Lannister.trebuchet, Lannister.trebuchetResearched, "", "", ""}},
                         new Object[]{"Unit", "Owned", "Unit Researched", "Building", "Owned", "Building Research"});
             } else if (Targaryen.isActive()) {
-                dm.setDataVector(new Object[][]{{"Swordmen", Targaryen.swordmen, "True", "Mine", Targaryen.mine, Targaryen.mineResearched},
-                                {"Shieldmen", Targaryen.shieldmen, "True", "Forge", Targaryen.forge, Targaryen.forgeResearched},
+                dm.setDataVector(new Object[][]{{"Swordmen", Targaryen.swordmen, Targaryen.swordmenResearched, "Mine", Targaryen.mine, Targaryen.mineResearched},
+                                {"Shieldmen", Targaryen.shieldmen, Targaryen.shieldmenResearched, "Forge", Targaryen.forge, Targaryen.forgeResearched},
                                 {"Spearmen", Targaryen.spearmen, Targaryen.spearmenResearched, "Lumber Mill", Targaryen.lumberMill, Targaryen.lumberMillResearched},
                                 {"Mounted Cavalry", Targaryen.mountedCalvalry, Targaryen.mountedCalvalryResearched, "Deforestation", Targaryen.deforestation, Targaryen.deforestationResearched},
-                                {"Archer", Targaryen.archer, "True", "Farm", Targaryen.farm, Targaryen.farmResearched},
-                                {"Scout Raven", Targaryen.scoutRaven, "True", "Plantation", Targaryen.plantation, Targaryen.plantationResearched},
-                                {"Transport Ship", Targaryen.transportShip, "True", "School", Targaryen.school, Targaryen.schoolResearched},
-                                {"War Ship", Targaryen.warShip, Targaryen.warShipResearched, "College", Targaryen.college, Targaryen.collegeResearched},
-                                {"Wyvern", Targaryen.wyvern, Targaryen.wyvernResearched, "", "", ""},
-                                {"Dreadnought", Targaryen.dreadnought, Targaryen.dreadnoughtResearched, "", "", ""},
-                                {"Dragon", Targaryen.dragon, Targaryen.dragonResearched, "", "", ""}},
+                                {"Javelinmen", Targaryen.javelinmen, Targaryen.javelinmenResearched, "Farm", Targaryen.farm, Targaryen.farmResearched},
+                                {"Archer", Targaryen.archer, Targaryen.archerResearched, "Plantation", Targaryen.plantation, Targaryen.plantationResearched},
+                                {"Crossbowmen", Targaryen.crossbowmen, Targaryen.crossbowmenResearched, "School", Targaryen.school, Targaryen.schoolResearched},
+                                {"Mounted Archer", Targaryen.mountedArcher, Targaryen.mountedArcherResearched, "College", Targaryen.college, Targaryen.collegeResearched},
+                                {"Siege Tower", Targaryen.siegeTower, Targaryen.siegeTowerResearched, "", "", ""},
+                                {"Catapult", Targaryen.catapult, Targaryen.catapultResearched, "", "", ""},
+                                {"Ballista", Targaryen.ballista, Targaryen.ballistaResearched, "", "", ""},
+                                {"Trebuchet", Targaryen.trebuchet, Targaryen.trebuchetResearched, "", "", ""}},
                         new Object[]{"Unit", "Owned", "Unit Researched", "Building", "Owned", "Building Research"});
             }
 
@@ -1313,63 +1316,97 @@ public class Main {
             }
         }
 
-        int starkPower = 0;
-        int lannisterPower = 0;
-        int targaryenPower = 0;
+        double starkMeleePower = 0;
+        double starkRangePower = 0;
+        double starkSiegePower = 0;
+        double starkMeleeHealth = 0;
+        double starkRangeHealth = 0;
+        double starkSiegeHealth = 0;
+
+        double lannisterMeleePower = 0;
+        double lannisterRangePower = 0;
+        double lannisterSiegePower = 0;
+        double lannisterMeleeHealth = 0;
+        double lannisterRangeHealth = 0;
+        double lannisterSiegeHealth = 0;
+
+//        int targaryenMeleePower = 0;
+//        int targaryenRangePower = 0;
+//        int targaryenAirPower = 0;
+//        int targaryenMeleeHealth = 0;
+//        int targaryenRangeHealth = 0;
+//        int targaryenAirHealth = 0;
         for (int i = 0; i < starkUnits.size(); i++) {
-            starkPower += starkUnits.get(i).ground;
+            starkMeleePower += starkUnits.get(i).melee;
+            starkRangePower += starkUnits.get(i).range;
+            starkSiegePower += starkUnits.get(i).siege;
+            if (starkUnits.get(i).type == MilitaryUnit.unitType.melee) {
+                starkMeleeHealth += starkUnits.get(i).health;
+            } else if (starkUnits.get(i).type == MilitaryUnit.unitType.range) {
+                starkRangeHealth += starkUnits.get(i).health;
+            } else if (starkUnits.get(i).type == MilitaryUnit.unitType.siege) {
+                starkSiegeHealth += starkUnits.get(i).health;
+            }
         }
         for (int i = 0; i < lannisterUnits.size(); i++) {
-            lannisterPower += lannisterUnits.get(i).ground;
+            lannisterMeleePower += starkUnits.get(i).melee;
+            lannisterRangePower += starkUnits.get(i).range;
+            lannisterSiegePower += lannisterUnits.get(i).siege;
+            if (lannisterUnits.get(i).type == MilitaryUnit.unitType.melee) {
+                lannisterMeleeHealth += lannisterUnits.get(i).health;
+            } else if (lannisterUnits.get(i).type == MilitaryUnit.unitType.range) {
+                lannisterRangeHealth += lannisterUnits.get(i).health;
+            } else if (lannisterUnits.get(i).type == MilitaryUnit.unitType.siege) {
+                lannisterSiegeHealth += lannisterUnits.get(i).health;
+            }
         }
-        for (int i = 0; i < targaryenUnits.size(); i++) {
-            targaryenPower += targaryenUnits.get(i).ground;
-        }
+//        for (int i = 0; i < targaryenUnits.size(); i++) {
+//            targaryenMeleePower += starkUnits.get(i).melee;
+//            targaryenRangePower += starkUnits.get(i).range;
+//            targaryenAirPower += targaryenUnits.get(i).air;
+//            if (targaryenUnits.get(i).type == MilitaryUnit.unitType.melee) {
+//                targaryenMeleeHealth += targaryenUnits.get(i).health;
+//            } else if (targaryenUnits.get(i).type == MilitaryUnit.unitType.range) {
+//                targaryenRangeHealth += targaryenUnits.get(i).health;
+//            } else if (targaryenUnits.get(i).type == MilitaryUnit.unitType.air) {
+//                targaryenAirHealth += targaryenUnits.get(i).health;
+//            }
+//        }
+
+        starkMeleeHealth -= (lannisterMeleePower * 0.5) + (lannisterRangePower * 0.25) + (lannisterSiegePower * 1.0);
+        starkRangeHealth -= (lannisterMeleePower * 1.0) + (lannisterRangePower * 0.5) + (lannisterSiegePower * 0.25);
+        starkSiegeHealth -= (lannisterMeleePower * 0.25) + (lannisterRangePower * 1.0) + (lannisterSiegePower * 0.5);
+        double starkHealth = starkMeleeHealth + starkRangeHealth + starkSiegeHealth;
+        lannisterMeleeHealth -= (starkMeleePower * 0.5) + (starkRangePower * 0.25) + (starkSiegePower * 1.0);
+        lannisterRangeHealth -= (starkMeleePower * 1.0) + (starkRangePower * 0.5) + (starkSiegePower * 0.25);
+        lannisterSiegeHealth -= (starkMeleePower * 0.25) + (starkRangePower * 1.0) + (starkSiegePower * 0.5);
+        double lannisterHealth = lannisterMeleeHealth + lannisterRangeHealth + lannisterSiegeHealth;
+
         String winner = "";
-        if (starkPower > lannisterPower && starkPower > targaryenPower) {
+        if (starkHealth > lannisterHealth) {
             winner = "Stark Wins";
             for (int i = 0; i < lannisterUnits.size(); i++) {
                 tile.setMilitary(lannisterUnits.get(i).unitName, -1, "Lannister");
                 Lannister.setMilitary(lannisterUnits.get(i).unitName, -1);
             }
-            for (int i = 0; i < targaryenUnits.size(); i++) {
-                tile.setMilitary(targaryenUnits.get(i).unitName, -1, "Targaryen");
-                Targaryen.setMilitary(targaryenUnits.get(i).unitName, -1);
-            }
-        } else if (lannisterPower > starkPower && lannisterPower > targaryenPower) {
+        } else if (lannisterHealth > starkHealth) {
             winner = "Lannister Wins";
             for (int i = 0; i < starkUnits.size(); i++) {
                 tile.setMilitary(starkUnits.get(i).unitName, -1, "Stark");
                 Stark.setMilitary(starkUnits.get(i).unitName, -1);
             }
-            for (int i = 0; i < targaryenUnits.size(); i++) {
-                tile.setMilitary(targaryenUnits.get(i).unitName, -1, "Targaryen");
-                Targaryen.setMilitary(targaryenUnits.get(i).unitName, -1);
-            }
-        } else if (targaryenPower > starkPower && targaryenPower > lannisterPower) {
-            winner = "Targaryen Wins";
-            for (int i = 0; i < starkUnits.size(); i++) {
-                tile.setMilitary(starkUnits.get(i).unitName, -1, "Stark");
-                Stark.setMilitary(starkUnits.get(i).unitName, -1);
-            }
-            for (int i = 0; i < lannisterUnits.size(); i++) {
-                tile.setMilitary(lannisterUnits.get(i).unitName, -1, "Lannister");
-                Lannister.setMilitary(lannisterUnits.get(i).unitName, -1);
-            }
         }
-        JLabel starkPowerT = new JLabel("Stark Power: " + starkPower);
-        JLabel lannisterPowerT = new JLabel("Lannister Power: " + lannisterPower);
-        JLabel targaryenPowerT = new JLabel("TArgaryen Power: " + targaryenPower);
-        JLabel winnerT = new JLabel(winner);
+        JLabel starkL = new JLabel("[STARK] Melee: " + starkMeleePower + " Range: " + starkRangePower + " Siege: " + starkSiegePower + " Health: " + starkHealth);
+        JLabel lannisterL = new JLabel("[LANNISTER] Melee: " + lannisterMeleePower + " Range: " + lannisterRangePower + " Siege: " + lannisterSiegePower + " Health: " + lannisterHealth);
+        JLabel winnerL = new JLabel(winner);
 
         JPanel jPanel = new JPanel();
         jPanel.setLayout(new BoxLayout(jPanel, BoxLayout.Y_AXIS));
         jPanel.setBackground(colorBackground);
         frame.setBackground(colorBackground);
-        jPanel.add(starkPowerT);
-        jPanel.add(lannisterPowerT);
-        jPanel.add(targaryenPowerT);
-        jPanel.add(winnerT);
+        jPanel.add(starkL);
+        jPanel.add(lannisterL);
+        jPanel.add(winnerL);
 
         frame.add(jPanel);
         frame.setSize(1000, 300);
@@ -1460,17 +1497,18 @@ public class Main {
         frame.setLocation(300, 200);
 
         DefaultTableModel dm = new DefaultTableModel();
-        dm.setDataVector(new Object[][]{{"Swordmen", "Foot soldiers armed with swords.", "M:10  F:10  L:10", "Buy Swordmen"},
-                        {"Shieldmen", "Foot soldiers armed with shields.", "M:10  F:10  L:20", "Buy Shieldmen"},
-                        {"Spearmen", "Foot soldiers armed with spears.", "M:20  F:10  L:10", "Buy Spearmen"},
-                        {"Mounted Cavalry", "Soldiers mounted on horseback.", "M:20  F:10  L:20", "Buy Mounted Calvalry"},
-                        {"Archer", "Foot soldiers armed with bows and arrows.", "M:10  F:10  L:10", "Buy Archer"},
-                        {"Scout Raven", "Air unit used for zone reconnaissance.", "F:10  L:10", "Buy Scout Raven"},
-                        {"Transport Ship", "Ship used for transporting ground units across water.", "M:10  W:20  F:10  L:10", "Buy Transport Ship"},
-                        {"War Ship", "Ship used for battle and naval combat.", "M:20  W:30  F:10  L:10", "Buy War Ship"},
-                        {"Wyvern", "Air unit used for attack ground units.", "F:50  L:25", "Buy Wyvern"},
-                        {"Dreadnought", "Large Ship which excels in naval combat.", "M:10  W:100  F:10  L:50", "Buy Dreadnought"},
-                        {"Dragon", "Ground and air unit which excels in ground combat.", "F:100  L:100", "Buy Dragon"}},
+        dm.setDataVector(new Object[][]{{"Swordmen", "Tier 1 melee unit", "M:10  W:10  F:0  L:10", "Buy Swordmen"},
+                        {"Shieldmen", "Tier 2 melee unit", "M:25  W:10  F:10  L:10", "Buy Shieldmen"},
+                        {"Spearmen", "Tier 3 melee unit", "M:30  W:15  F:15  L:15", "Buy Spearmen"},
+                        {"Mounted Cavalry", "Tier 4 melee unit", "M:35  W:20  F:15  L:20", "Buy Mounted Calvalry"},
+                        {"Javelinmen", "Tier 1 range unit", "M:10  W:0  F:10  L:10", "Buy Javelinmen"},
+                        {"Archer", "Tier 2 range unit", "M:10  W:10  F:25  L:10", "Buy Archer"},
+                        {"Crossbowmen", "Tier 3 range unit", "M:15  W:15  F:30  L:15", "Buy Crossbowmen"},
+                        {"Mounted Archer", "Tier 4 range unit", "M:20  W:15  F:35  L:20", "Buy Mounted Archer"},
+                        {"Siege Tower", "Tier 1 siege unit", "M:0  W:10  F:10  L:10", "Buy Siege Tower"},
+                        {"Catapult", "Tier 2 siege unit", "M:10  W:25  F:10  L:10", "Buy Catapult"},
+                        {"Ballista", "Tier 3 siege unit", "M:15  W:30  F:15  L:15", "Buy Ballista"},
+                        {"Trebuchet", "Tier 4 siege unit", "M:15  W:35  F:20  L:20", "Buy Trebuchet"}},
                 new Object[]{"Name", "Description", "Price", ""});
 
         JTable table = new JTable(dm);
@@ -1550,12 +1588,18 @@ public class Main {
                             {"Build Plantations", "Unlocks construction of Plantations.", "E:75  L:25", "Buy Build Plantations"},
                             {"Build Schools", "Unlocks construction of Schools.", "E:50  L:10", "Buy Build Schools"},
                             {"Build Colleges", "Unlocks construction of Colleges.", "E:75  L:25", "Buy Build Colleges"},
-                            {"Train Spearmen", "Unlocks training of Spearmen.", "E:50  L:10", "Buy Train Spearmen"},
-                            {"Train Mounted Cavalry", "Unlocks training of Mounted Calvalry.", "E:50  L:10", "Buy Train Mounted Cavalry"},
-                            {"Build War Ships", "Unlocks construction of War Ships.", "E:50  L:10", "Buy Build War Ships"},
-                            {"Tame Wyverns", "Unlocks taming of Wyverns.", "E:50  L:10", "Buy Tame Wyverns"},
-                            {"Build Dreadnoughts", "Unlocks construction of Dreadnoughts.", "E:100  L:50", "Buy Build Dreadnoughts"},
-                            {"Tame Dragons", "Unlocks taming of Dragons.", "E:100  L:50", "Buy Tame Dragons"}},
+                            {"Train Swordmen", "Unlocks training of Swordmen.", "E:50  L:10", "Buy Train Swordmen"},
+                            {"Train Shieldmen", "Unlocks training of Shieldmen.", "E:50  L:10", "Buy Train Shieldmen"},
+                            {"Train Spearmen", "Unlocks training of Spearmen.", "E:75  L:25", "Buy Train Spearmen"},
+                            {"Train Mounted Cavalry", "Unlocks training of Mounted Calvalry.", "E:100  L:50", "Buy Train Mounted Cavalry"},
+                            {"Train Javelinmen", "Unlocks training of Javelinmen.", "E:50  L:10", "Buy Train Javelinmen"},
+                            {"Train Archer", "Unlocks training of Archer.", "E:50  L:10", "Buy Train Archer"},
+                            {"Train Crossbowmen", "Unlocks training of Crossbowmen.", "E:75  L:25", "Buy Train Crossbowmen"},
+                            {"Train Mounted Archers", "Unlocks training of Mounted Archers.", "E:100  L:50", "Buy Train Mounted Archers"},
+                            {"Build Siege Towers", "Unlocks construction of Siege Towers.", "E:50  L:10", "Buy Build Siege Towers"},
+                            {"Build Catapults", "Unlocks construction of Catapults.", "E:50  L:10", "Buy Build Catapults"},
+                            {"Build Ballistas", "Unlocks construction of Ballistas.", "E:75  L:25", "Buy Build Ballistas"},
+                            {"Build Trebuchets", "Unlocks construction of Trebuchets.", "E:100  L:50", "Buy Build Trebuchets"}},
                     new Object[]{"Name", "Description", "Price", ""});
 
             JTable table = new JTable(dm);
@@ -1590,43 +1634,46 @@ public class Main {
 
             DefaultTableModel dm = new DefaultTableModel();
             if (Stark.isActive()) {
-                dm.setDataVector(new Object[][]{{"Swordmen", Stark.swordmen, "H:5", "G:5-10", "A:0", "S:0"},
-                                {"Shieldmen", Stark.shieldmen, "H:10", "G:3-8", "A:0", "S:0"},
-                                {"Spearmen", Stark.spearmen, "H:5", "G:7-12", "A:0", "S:0"},
-                                {"Mounted Cavalry", Stark.mountedCalvalry, "H:10", "G:7-12", "A:0", "S:0"},
-                                {"Archer", Stark.archer, "H:5", "G:0-5", "A:5-10", "S:0"},
-                                {"Scout Raven", Stark.scoutRaven, "H:1", "G:0", "A:0", "S:0"},
-                                {"Transport Ship", Stark.transportShip, "H:10", "G:0", "A:0", "S:0"},
-                                {"War Ship", Stark.warShip, "H:20", "G:3-8", "A:3-8", "S:5-10"},
-                                {"Wyvern", Stark.wyvern, "H:5", "G:5-10", "A:5-10", "S:3-8"},
-                                {"Dreadnought", Stark.dreadnought, "H:50", "G:10-15", "A:10-15", "S:15-20"},
-                                {"Dragon", Stark.dragon, "H:50", "G:15-20", "A:10-20", "S:5-10"}},
-                        new Object[]{"Unit", "Quantity", "Health", "Ground", "Air", "Sea"});
+                dm.setDataVector(new Object[][]{{"Swordmen", Stark.swordmen, "H:5", "M:5", "R:5", "S:0"},
+                                {"Shieldmen", Stark.shieldmen, "H:10", "M:5", "R:15", "S:0"},
+                                {"Spearmen", Stark.spearmen, "H:15", "M:10", "R:20", "S:0"},
+                                {"Mounted Cavalry", Stark.mountedCalvalry, "H:20", "M:15", "R:25", "S:0"},
+                                {"Javelinmen", Stark.javelinmen, "H:5", "M:0", "R:5", "S:5"},
+                                {"Archer", Stark.archer, "H:10", "M:0", "R:5", "S:15"},
+                                {"Crossbowmen", Stark.crossbowmen, "H:15", "M:0", "R:10", "S:20"},
+                                {"Mounted Archer", Stark.mountedArcher, "H:20", "M:0", "R:15", "S:25"},
+                                {"Siege Tower", Stark.siegeTower, "H:5", "M:5", "R:0", "S:5"},
+                                {"Catapult", Stark.catapult, "H:10", "M:15", "R:0", "S:5"},
+                                {"Ballista", Stark.ballista, "H:15", "M:20", "R:0", "S:10"},
+                                {"Trebuchet", Stark.trebuchet, "H:20", "M:25", "R:0", "S:15"}},
+                        new Object[]{"Unit", "Quantity", "Health", "Melee", "Range", "Siege"});
             } else if (Lannister.isActive()) {
-                dm.setDataVector(new Object[][]{{"Swordmen", Lannister.swordmen, "H:5", "G:5-10", "A:0", "S:0"},
-                                {"Shieldmen", Lannister.shieldmen, "H:10", "G:3-8", "A:0", "S:0"},
-                                {"Spearmen", Lannister.spearmen, "H:5", "G:7-12", "A:0", "S:0"},
-                                {"Mounted Cavalry", Lannister.mountedCalvalry, "H:10", "G:7-12", "A:0", "S:0"},
-                                {"Archer", Lannister.archer, "H:5", "G:0-5", "A:5-10", "S:0"},
-                                {"Scout Raven", Lannister.scoutRaven, "H:1", "G:0", "A:0", "S:0"},
-                                {"Transport Ship", Lannister.transportShip, "H:10", "G:0", "A:0", "S:0"},
-                                {"War Ship", Lannister.warShip, "H:20", "G:3-8", "A:3-8", "S:5-10"},
-                                {"Wyvern", Lannister.wyvern, "H:5", "G:5-10", "A:5-10", "S:3-8"},
-                                {"Dreadnought", Lannister.dreadnought, "H:50", "G:10-15", "A:10-15", "S:15-20"},
-                                {"Dragon", Lannister.dragon, "H:50", "G:15-20", "A:10-20", "S:5-10"}},
+                dm.setDataVector(new Object[][]{{"Swordmen", Lannister.swordmen, "H:5", "M:5", "R:5", "S:0"},
+                                {"Shieldmen", Lannister.shieldmen, "H:10", "M:5", "R:15", "S:0"},
+                                {"Spearmen", Lannister.spearmen, "H:15", "M:10", "R:20", "S:0"},
+                                {"Mounted Cavalry", Lannister.mountedCalvalry, "H:20", "M:15", "R:25", "S:0"},
+                                {"Javelinmen", Lannister.javelinmen, "H:5", "M:0", "R:5", "S:5"},
+                                {"Archer", Lannister.archer, "H:10", "M:0", "R:5", "S:15"},
+                                {"Crossbowmen", Lannister.crossbowmen, "H:15", "M:0", "R:10", "S:20"},
+                                {"Mounted Archer", Lannister.mountedArcher, "H:20", "M:0", "R:15", "S:25"},
+                                {"Siege Tower", Lannister.siegeTower, "H:5", "M:5", "R:0", "S:5"},
+                                {"Catapult", Lannister.catapult, "H:10", "M:15", "R:0", "S:5"},
+                                {"Ballista", Lannister.ballista, "H:15", "M:20", "R:0", "S:10"},
+                                {"Trebuchet", Lannister.trebuchet, "H:20", "M:25", "R:0", "S:15"}},
                         new Object[]{"Unit", "Quantity", "Health", "Ground", "Air", "Sea"});
             } else if (Targaryen.isActive()) {
-                dm.setDataVector(new Object[][]{{"Swordmen", Targaryen.swordmen, "H:5", "G:5-10", "A:0", "S:0"},
-                                {"Shieldmen", Targaryen.shieldmen, "H:10", "G:3-8", "A:0", "S:0"},
-                                {"Spearmen", Targaryen.spearmen, "H:5", "G:7-12", "A:0", "S:0"},
-                                {"Mounted Cavalry", Targaryen.mountedCalvalry, "H:10", "G:7-12", "A:0", "S:0"},
-                                {"Archer", Targaryen.archer, "H:5", "G:0-5", "A:5-10", "S:0"},
-                                {"Scout Raven", Targaryen.scoutRaven, "H:1", "G:0", "A:0", "S:0"},
-                                {"Transport Ship", Targaryen.transportShip, "H:10", "G:0", "A:0", "S:0"},
-                                {"War Ship", Targaryen.warShip, "H:20", "G:3-8", "A:3-8", "S:5-10"},
-                                {"Wyvern", Targaryen.wyvern, "H:5", "G:5-10", "A:5-10", "S:3-8"},
-                                {"Dreadnought", Targaryen.dreadnought, "H:50", "G:10-15", "A:10-15", "S:15-20"},
-                                {"Dragon", Targaryen.dragon, "H:50", "G:15-20", "A:10-20", "S:5-10"}},
+                dm.setDataVector(new Object[][]{{"Swordmen", Targaryen.swordmen, "H:5", "M:5", "R:5", "S:0"},
+                                {"Shieldmen", Targaryen.shieldmen, "H:10", "M:5", "R:15", "S:0"},
+                                {"Spearmen", Targaryen.spearmen, "H:15", "M:10", "R:20", "S:0"},
+                                {"Mounted Cavalry", Targaryen.mountedCalvalry, "H:20", "M:15", "R:25", "S:0"},
+                                {"Javelinmen", Targaryen.javelinmen, "H:5", "M:0", "R:5", "S:5"},
+                                {"Archer", Targaryen.archer, "H:10", "M:0", "R:5", "S:15"},
+                                {"Crossbowmen", Targaryen.crossbowmen, "H:15", "M:0", "R:10", "S:20"},
+                                {"Mounted Archer", Targaryen.mountedArcher, "H:20", "M:0", "R:15", "S:25"},
+                                {"Siege Tower", Targaryen.siegeTower, "H:5", "M:5", "R:0", "S:5"},
+                                {"Catapult", Targaryen.catapult, "H:10", "M:15", "R:0", "S:5"},
+                                {"Ballista", Targaryen.ballista, "H:15", "M:20", "R:0", "S:10"},
+                                {"Trebuchet", Targaryen.trebuchet, "H:20", "M:25", "R:0", "S:15"}},
                         new Object[]{"Unit", "Quantity", "Health", "Ground", "Air", "Sea"});
             }
 
@@ -2080,39 +2127,42 @@ public class Main {
                     JOptionPane.showMessageDialog(button,"It is not your turn");
                 } else {
                     if (Stark.isActive()) {
-                        if (label == "Buy Swordmen" && Stark.metal >= 10 && Stark.food >= 10 && Stark.labor >= 10) {
+                        if (label == "Buy Swordmen" && Stark.swordmenResearched && Stark.metal >= 10 && Stark.wood >= 10 && Stark.food >= 0 && Stark.labor >= 10) {
                             selectedTile.setMilitary("Swordmen", 1, "Stark");
                             JOptionPane.showMessageDialog(button, "Swordmen Trained");
-                        } else if (label == "Buy Shieldmen" && Stark.metal >= 10 && Stark.food >= 10 && Stark.labor >= 20) {
+                        } else if (label == "Buy Shieldmen" && Stark.shieldmenResearched && Stark.metal >= 25 && Stark.wood >= 10 && Stark.food >= 10 && Stark.labor >= 10) {
                             selectedTile.setMilitary("Shieldmen", 1, "Stark");
                             JOptionPane.showMessageDialog(button, "Shieldmen Trained");
-                        } else if (label == "Buy Spearmen" && Stark.spearmenResearched && Stark.metal >= 20 && Stark.food >= 10 && Stark.labor >= 10) {
+                        } else if (label == "Buy Spearmen" && Stark.spearmenResearched && Stark.metal >= 35 && Stark.wood >= 15 && Stark.food >= 15 && Stark.labor >= 15) {
                             selectedTile.setMilitary("Spearmen", 1, "Stark");
                             JOptionPane.showMessageDialog(button, "Spearmen Trained");
-                        } else if (label == "Buy Mounted Calvalry" && Stark.mountedCalvalryResearched && Stark.metal >= 20 && Stark.food >= 10 && Stark.labor >= 20) {
+                        } else if (label == "Buy Mounted Calvalry" && Stark.mountedCalvalryResearched && Stark.metal >= 35 && Stark.wood >= 20 && Stark.food >= 15 && Stark.labor >= 20) {
                             selectedTile.setMilitary("Mounted Calvalry", 1, "Stark");
                             JOptionPane.showMessageDialog(button, "Mounted Calvalry Trained");
-                        } else if (label == "Buy Archer" && Stark.metal >= 10 && Stark.food >= 10 && Stark.labor >= 10) {
+                        } else if (label == "Buy Javelinmen" && Stark.javelinmenResearched && Stark.metal >= 10 && Stark.wood >= 0 && Stark.food >= 10 && Stark.labor >= 10) {
+                            selectedTile.setMilitary("Javelinmen", 1, "Stark");
+                            JOptionPane.showMessageDialog(button, "Javelinmen Trained");
+                        } else if (label == "Buy Archer" && Stark.archerResearched && Stark.metal >= 10 && Stark.wood >= 10 && Stark.food >= 25 && Stark.labor >= 10) {
                             selectedTile.setMilitary("Archer", 1, "Stark");
                             JOptionPane.showMessageDialog(button, "Archer Trained");
-                        } else if (label == "Buy Scout Raven" && Stark.food >= 10 && Stark.labor >= 10) {
-                            selectedTile.setMilitary("Scout Raven", 1, "Stark");
-                            JOptionPane.showMessageDialog(button, "Scout Raven Trained");
-                        } else if (label == "Buy Transport Ship" && Stark.metal >= 10 && Stark.wood >= 20 && Stark.food >= 10 && Stark.labor >= 10) {
-                            selectedTile.setMilitary("Transport Ship", 1, "Stark");
-                            JOptionPane.showMessageDialog(button, "Transport Ship Built");
-                        } else if (label == "Buy War Ship" && Stark.warShipResearched && Stark.metal >= 20 && Stark.wood >= 30 && Stark.food >= 10 && Stark.labor >= 10) {
-                            selectedTile.setMilitary("War Ship", 1, "Stark");
-                            JOptionPane.showMessageDialog(button, "War Ship Built");
-                        } else if (label == "Buy Wyvern" && Stark.wyvernResearched && Stark.food >= 50 && Stark.labor >= 25) {
-                            selectedTile.setMilitary("Wyvern", 1, "Stark");
-                            JOptionPane.showMessageDialog(button, "Wyvern Trained");
-                        } else if (label == "Buy Dreadnought" && Stark.dreadnoughtResearched && Stark.metal >= 10 && Stark.wood >= 100 && Stark.food >= 10 && Stark.labor >= 50) {
-                            selectedTile.setMilitary("Dreadnought", 1, "Stark");
-                            JOptionPane.showMessageDialog(button, "Dreadnought Built");
-                        } else if (label == "Buy Dragon" && Stark.dragonResearched && Stark.food >= 100 && Stark.labor >= 100) {
-                            selectedTile.setMilitary("Dragon", 1, "Stark");
-                            JOptionPane.showMessageDialog(button, "Dragon Trained");
+                        } else if (label == "Buy Crossbowmen" && Stark.crossbowmenResearched && Stark.metal >= 15 && Stark.wood >= 15 && Stark.food >= 30 && Stark.labor >= 15) {
+                            selectedTile.setMilitary("Crossbowmen", 1, "Stark");
+                            JOptionPane.showMessageDialog(button, "Crossbowmen Built");
+                        } else if (label == "Buy Mounted Archer" && Stark.mountedArcherResearched && Stark.metal >= 20 && Stark.wood >= 15 && Stark.food >= 35 && Stark.labor >= 20) {
+                            selectedTile.setMilitary("Mounted Archer", 1, "Stark");
+                            JOptionPane.showMessageDialog(button, "Mounted Archer Built");
+                        } else if (label == "Buy Siege Tower" && Stark.siegeTowerResearched && Stark.metal >= 0 && Stark.wood >= 10 && Stark.food >= 10 && Stark.labor >= 10) {
+                            selectedTile.setMilitary("Siege Tower", 1, "Stark");
+                            JOptionPane.showMessageDialog(button, "Siege Tower Trained");
+                        } else if (label == "Buy Catapult" && Stark.catapultResearched && Stark.metal >= 10 && Stark.wood >= 25 && Stark.food >= 10 && Stark.labor >= 10) {
+                            selectedTile.setMilitary("Catapult", 1, "Stark");
+                            JOptionPane.showMessageDialog(button, "Catapult Built");
+                        } else if (label == "Buy Ballista" && Stark.ballistaResearched && Stark.metal >= 15 && Stark.wood >= 30 && Stark.food >= 15 && Stark.labor >= 15) {
+                            selectedTile.setMilitary("Ballista", 1, "Stark");
+                            JOptionPane.showMessageDialog(button, "Ballista Trained");
+                        } else if (label == "Buy Trebuchet" && Stark.trebuchetResearched && Stark.metal >= 15 && Stark.wood >= 35 && Stark.food >= 20 && Stark.labor >= 20) {
+                            selectedTile.setMilitary("Trebuchet", 1, "Stark");
+                            JOptionPane.showMessageDialog(button, "Trebuchet Trained");
                         } else if (label == "Buy Mine" && Stark.mineResearched && Stark.metal >= 10 && Stark.wood >= 50 && Stark.food >= 20 && Stark.labor >= 20) {
                             selectedTile.setBuilding("mine", 1);
                             JOptionPane.showMessageDialog(button, "Mine Built");
@@ -2161,62 +2211,83 @@ public class Main {
                         } else if (label == "Buy Build Colleges" && Stark.education >= 75 && Stark.labor >= 25) {
                             Stark.setResearch("college", true);
                             JOptionPane.showMessageDialog(button, "Colleges Researched");
-                        } else if (label == "Buy Train Spearmen" && Stark.education >= 50 && Stark.labor >= 10) {
+                        } else if (label == "Buy Train Swordmen" && Stark.education >= 50 && Stark.labor >= 10) {
+                            Stark.setResearch("swordmen", true);
+                            JOptionPane.showMessageDialog(button, "Swordmen Researched");
+                        } else if (label == "Buy Train Shieldmen" && Stark.education >= 50 && Stark.labor >= 10) {
+                            Stark.setResearch("shieldmen", true);
+                            JOptionPane.showMessageDialog(button, "Shieldmen Researched");
+                        } else if (label == "Buy Train Spearmen" && Stark.education >= 75 && Stark.labor >= 25) {
                             Stark.setResearch("spearmen", true);
                             JOptionPane.showMessageDialog(button, "Spearmen Researched");
-                        } else if (label == "Buy Train Mounted Calvalry" && Stark.education >= 50 && Stark.labor >= 10) {
+                        } else if (label == "Buy Train Mounted Calvalry" && Stark.education >= 100 && Stark.labor >= 50) {
                             Stark.setResearch("mountedCalvalry", true);
                             JOptionPane.showMessageDialog(button, "Mounted Calvalry Researched");
-                        } else if (label == "Buy Build War Ships" && Stark.education >= 50 && Stark.labor >= 10) {
-                            Stark.setResearch("warShip", true);
-                            JOptionPane.showMessageDialog(button, "War Ships Researched");
-                        } else if (label == "Buy Tame Wyverns" && Stark.education >= 50 && Stark.labor >= 10) {
-                            Stark.setResearch("wyvern", true);
-                            JOptionPane.showMessageDialog(button, "Wyverns Researched");
-                        } else if (label == "Buy Build Dreadnoughts" && Stark.education >= 75 && Stark.labor >= 25) {
-                            Stark.setResearch("dreadnought", true);
-                            JOptionPane.showMessageDialog(button, "Dreadnoughts Researched");
-                        } else if (label == "Buy Tame Dragons" && Stark.education >= 75 && Stark.labor >= 25) {
-                            Stark.setResearch("dragon", true);
-                            JOptionPane.showMessageDialog(button, "Dragons Researched");
+                        } else if (label == "Buy Train Javelinmen" && Stark.education >= 50 && Stark.labor >= 10) {
+                            Stark.setResearch("javelinmen", true);
+                            JOptionPane.showMessageDialog(button, "Javelinmen Researched");
+                        } else if (label == "Buy Train Archer" && Stark.education >= 50 && Stark.labor >= 10) {
+                            Stark.setResearch("crcher", true);
+                            JOptionPane.showMessageDialog(button, "Archer Researched");
+                        } else if (label == "Buy Train Crossbowmen" && Stark.education >= 75 && Stark.labor >= 25) {
+                            Stark.setResearch("crossbowmen", true);
+                            JOptionPane.showMessageDialog(button, "Crossbowmen Researched");
+                        } else if (label == "Buy Train Mounted Archers" && Stark.education >= 100 && Stark.labor >= 50) {
+                            Stark.setResearch("mountedArcher", true);
+                            JOptionPane.showMessageDialog(button, "Mounted Archers Researched");
+                        } else if (label == "Buy Build Siege Towers" && Stark.education >= 50 && Stark.labor >= 10) {
+                            Stark.setResearch("siegeTower", true);
+                            JOptionPane.showMessageDialog(button, "Siege Towers Researched");
+                        } else if (label == "Buy Build Catapults" && Stark.education >= 50 && Stark.labor >= 10) {
+                            Stark.setResearch("catapult", true);
+                            JOptionPane.showMessageDialog(button, "Catapults Researched");
+                        } else if (label == "Buy Build Ballistas" && Stark.education >= 75 && Stark.labor >= 25) {
+                            Stark.setResearch("ballista", true);
+                            JOptionPane.showMessageDialog(button, "Ballistas Researched");
+                        } else if (label == "Buy Build Trebuchets" && Stark.education >= 100 && Stark.labor >= 50) {
+                            Stark.setResearch("trebuchet", true);
+                            JOptionPane.showMessageDialog(button, "Trebuchets Researched");
                         } else {
                             JOptionPane.showMessageDialog(button, "Unable to Buy");
                             actionsTaken--;
                         }
                     } else if (Lannister.isActive()) {
-                        if (label == "Buy Swordmen" && Lannister.metal >= 10 && Lannister.food >= 10 && Lannister.labor >= 10) {
+                        if (label == "Buy Swordmen" && Lannister.swordmenResearched && Lannister.metal >= 10 && Lannister.wood >= 10 && Lannister.food >= 0 && Lannister.labor >= 10) {
                             selectedTile.setMilitary("Swordmen", 1, "Lannister");
                             JOptionPane.showMessageDialog(button, "Swordmen Trained");
-                        } else if (label == "Buy Shieldmen" && Lannister.metal >= 10 && Lannister.food >= 10 && Lannister.labor >= 20) {
+                        } else if (label == "Buy Shieldmen" && Lannister.shieldmenResearched && Lannister.metal >= 25 && Lannister.wood >= 10 && Lannister.food >= 10 && Lannister.labor >= 10) {
                             selectedTile.setMilitary("Shieldmen", 1, "Lannister");
                             JOptionPane.showMessageDialog(button, "Shieldmen Trained");
-                        } else if (label == "Buy Spearmen" && Lannister.spearmenResearched && Lannister.metal >= 20 && Lannister.food >= 10 && Lannister.labor >= 10) {
+                        } else if (label == "Buy Spearmen" && Lannister.spearmenResearched && Lannister.metal >= 30 && Lannister.wood >= 15 && Lannister.food >= 15 && Lannister.labor >= 15) {
                             selectedTile.setMilitary("Spearmen", 1, "Lannister");
                             JOptionPane.showMessageDialog(button, "Spearmen Trained");
-                        } else if (label == "Buy Mounted Calvalry" && Lannister.mountedCalvalryResearched && Lannister.metal >= 20 && Lannister.food >= 10 && Lannister.labor >= 20) {
+                        } else if (label == "Buy Mounted Calvalry" && Lannister.mountedCalvalryResearched && Lannister.metal >= 35 && Lannister.wood >= 20 && Lannister.food >= 15 && Lannister.labor >= 20) {
                             selectedTile.setMilitary("Mounted Calvalry", 1, "Lannister");
                             JOptionPane.showMessageDialog(button, "Mounted Calvalry Trained");
-                        } else if (label == "Buy Archer" && Lannister.metal >= 10 && Lannister.food >= 10 && Lannister.labor >= 10) {
+                        } else if (label == "Buy Javelinmen" && Lannister.javelinmenResearched && Lannister.metal >= 10 && Lannister.wood >= 0 && Lannister.food >= 10 && Lannister.labor >= 10) {
+                            selectedTile.setMilitary("Javelinmen", 1, "Lannister");
+                            JOptionPane.showMessageDialog(button, "Javelinmen Trained");
+                        } else if (label == "Buy Archer" && Lannister.archerResearched && Lannister.metal >= 10 && Lannister.wood >= 10 && Lannister.food >= 25 && Lannister.labor >= 10) {
                             selectedTile.setMilitary("Archer", 1, "Lannister");
                             JOptionPane.showMessageDialog(button, "Archer Trained");
-                        } else if (label == "Buy Scout Raven" && Lannister.food >= 10 && Lannister.labor >= 10) {
-                            selectedTile.setMilitary("Scout Raven", 1, "Lannister");
-                            JOptionPane.showMessageDialog(button, "Scout Raven Trained");
-                        } else if (label == "Buy Transport Ship" && Lannister.metal >= 10 && Lannister.wood >= 20 && Lannister.food >= 10 && Lannister.labor >= 10) {
-                            selectedTile.setMilitary("Transport Ship", 1, "Lannister");
-                            JOptionPane.showMessageDialog(button, "Transport Ship Built");
-                        } else if (label == "Buy War Ship" && Lannister.warShipResearched && Lannister.metal >= 20 && Lannister.wood >= 30 && Lannister.food >= 10 && Lannister.labor >= 10) {
-                            selectedTile.setMilitary("War Ship", 1, "Lannister");
-                            JOptionPane.showMessageDialog(button, "War Ship Built");
-                        } else if (label == "Buy Wyvern" && Lannister.wyvernResearched && Lannister.food >= 50 && Lannister.labor >= 25) {
-                            selectedTile.setMilitary("Wyvern", 1, "Lannister");
-                            JOptionPane.showMessageDialog(button, "Wyvern Trained");
-                        } else if (label == "Buy Dreadnought" && Lannister.dreadnoughtResearched && Lannister.metal >= 10 && Lannister.wood >= 100 && Lannister.food >= 10 && Lannister.labor >= 50) {
-                            selectedTile.setMilitary("Dreadnought", 1, "Lannister");
-                            JOptionPane.showMessageDialog(button, "Dreadnought Built");
-                        } else if (label == "Buy Dragon" && Lannister.dragonResearched && Lannister.food >= 100 && Lannister.labor >= 100) {
-                            selectedTile.setMilitary("Dragon", 1, "Lannister");
-                            JOptionPane.showMessageDialog(button, "Dragon Trained");
+                        } else if (label == "Buy Crossbowmen" && Lannister.crossbowmenResearched && Lannister.metal >= 15 && Lannister.wood >= 15 && Lannister.food >= 30 && Lannister.labor >= 15) {
+                            selectedTile.setMilitary("Crossbowmen", 1, "Lannister");
+                            JOptionPane.showMessageDialog(button, "Crossbowmen Built");
+                        } else if (label == "Buy Mounted Archer" && Lannister.mountedArcherResearched && Lannister.metal >= 20 && Lannister.wood >= 15 && Lannister.food >= 35 && Lannister.labor >= 20) {
+                            selectedTile.setMilitary("Mounted Archer", 1, "Lannister");
+                            JOptionPane.showMessageDialog(button, "Mounted Archer Built");
+                        } else if (label == "Buy Siege Tower" && Lannister.siegeTowerResearched && Lannister.metal >= 0 && Lannister.wood >= 10 && Lannister.food >= 10 && Lannister.labor >= 10) {
+                            selectedTile.setMilitary("Siege Tower", 1, "Lannister");
+                            JOptionPane.showMessageDialog(button, "Siege Tower Trained");
+                        } else if (label == "Buy Catapult" && Lannister.catapultResearched && Lannister.metal >= 10 && Lannister.wood >= 25 && Lannister.food >= 10 && Lannister.labor >= 10) {
+                            selectedTile.setMilitary("Catapult", 1, "Lannister");
+                            JOptionPane.showMessageDialog(button, "Catapult Built");
+                        } else if (label == "Buy Ballista" && Lannister.ballistaResearched && Lannister.metal >= 15 && Lannister.wood >= 30 && Lannister.food >= 15 && Lannister.labor >= 15) {
+                            selectedTile.setMilitary("Ballista", 1, "Lannister");
+                            JOptionPane.showMessageDialog(button, "Ballista Trained");
+                        } else if (label == "Buy Trebuchet" && Lannister.trebuchetResearched && Lannister.metal >= 15 && Lannister.wood >= 35 && Lannister.food >= 20 && Lannister.labor >= 20) {
+                            selectedTile.setMilitary("Trebuchet", 1, "Lannister");
+                            JOptionPane.showMessageDialog(button, "Trebuchet Trained");
                         } else if (label == "Buy Mine" && Lannister.mineResearched && Lannister.metal >= 10 && Lannister.wood >= 50 && Lannister.food >= 20 && Lannister.labor >= 20) {
                             selectedTile.setBuilding("mine", 1);
                             JOptionPane.showMessageDialog(button, "Mine Built");
@@ -2265,62 +2336,83 @@ public class Main {
                         } else if (label == "Buy Build Colleges" && Lannister.education >= 75 && Lannister.labor >= 25) {
                             Lannister.setResearch("college", true);
                             JOptionPane.showMessageDialog(button, "Colleges Researched");
-                        } else if (label == "Buy Train Spearmen" && Lannister.education >= 50 && Lannister.labor >= 10) {
+                        } else if (label == "Buy Train Swordmen" && Lannister.education >= 50 && Lannister.labor >= 10) {
+                            Lannister.setResearch("swordmen", true);
+                            JOptionPane.showMessageDialog(button, "Swordmen Researched");
+                        } else if (label == "Buy Train Shieldmen" && Lannister.education >= 50 && Lannister.labor >= 10) {
+                            Lannister.setResearch("shieldmen", true);
+                            JOptionPane.showMessageDialog(button, "Shieldmen Researched");
+                        } else if (label == "Buy Train Spearmen" && Lannister.education >= 75 && Lannister.labor >= 25) {
                             Lannister.setResearch("spearmen", true);
                             JOptionPane.showMessageDialog(button, "Spearmen Researched");
-                        } else if (label == "Buy Train Mounted Calvalry" && Lannister.education >= 50 && Lannister.labor >= 10) {
+                        } else if (label == "Buy Train Mounted Calvalry" && Lannister.education >= 100 && Lannister.labor >= 50) {
                             Lannister.setResearch("mountedCalvalry", true);
                             JOptionPane.showMessageDialog(button, "Mounted Calvalry Researched");
-                        } else if (label == "Buy Build War Ships" && Lannister.education >= 50 && Lannister.labor >= 10) {
-                            Lannister.setResearch("warShip", true);
-                            JOptionPane.showMessageDialog(button, "War Ships Researched");
-                        } else if (label == "Buy Tame Wyverns" && Lannister.education >= 50 && Lannister.labor >= 10) {
-                            Lannister.setResearch("wyvern", true);
-                            JOptionPane.showMessageDialog(button, "Wyverns Researched");
-                        } else if (label == "Buy Build Dreadnoughts" && Lannister.education >= 75 && Lannister.labor >= 25) {
-                            Lannister.setResearch("dreadnought", true);
-                            JOptionPane.showMessageDialog(button, "Dreadnoughts Researched");
-                        } else if (label == "Buy Tame Dragons" && Lannister.education >= 75 && Lannister.labor >= 25) {
-                            Lannister.setResearch("dragon", true);
-                            JOptionPane.showMessageDialog(button, "Dragons Researched");
+                        } else if (label == "Buy Train Javelinmen" && Lannister.education >= 50 && Lannister.labor >= 10) {
+                            Lannister.setResearch("javelinmen", true);
+                            JOptionPane.showMessageDialog(button, "Javelinmen Researched");
+                        } else if (label == "Buy Train Archer" && Lannister.education >= 50 && Lannister.labor >= 10) {
+                            Lannister.setResearch("crcher", true);
+                            JOptionPane.showMessageDialog(button, "Archer Researched");
+                        } else if (label == "Buy Train Crossbowmen" && Lannister.education >= 75 && Lannister.labor >= 25) {
+                            Lannister.setResearch("crossbowmen", true);
+                            JOptionPane.showMessageDialog(button, "Crossbowmen Researched");
+                        } else if (label == "Buy Train Mounted Archers" && Lannister.education >= 100 && Lannister.labor >= 50) {
+                            Lannister.setResearch("mountedArcher", true);
+                            JOptionPane.showMessageDialog(button, "Mounted Archers Researched");
+                        } else if (label == "Buy Build Siege Towers" && Lannister.education >= 50 && Lannister.labor >= 10) {
+                            Lannister.setResearch("siegeTower", true);
+                            JOptionPane.showMessageDialog(button, "Siege Towers Researched");
+                        } else if (label == "Buy Build Catapults" && Lannister.education >= 50 && Lannister.labor >= 10) {
+                            Lannister.setResearch("catapult", true);
+                            JOptionPane.showMessageDialog(button, "Catapults Researched");
+                        } else if (label == "Buy Build Ballistas" && Lannister.education >= 75 && Lannister.labor >= 25) {
+                            Lannister.setResearch("ballista", true);
+                            JOptionPane.showMessageDialog(button, "Ballistas Researched");
+                        } else if (label == "Buy Build Trebuchets" && Lannister.education >= 100 && Lannister.labor >= 50) {
+                            Lannister.setResearch("trebuchet", true);
+                            JOptionPane.showMessageDialog(button, "Trebuchets Researched");
                         } else {
                             JOptionPane.showMessageDialog(button, "Unable to Buy");
                             actionsTaken--;
                         }
                     } else if (Targaryen.isActive()) {
-                        if (label == "Buy Swordmen" && Targaryen.metal >= 10 && Targaryen.food >= 10 && Targaryen.labor >= 10) {
+                        if (label == "Buy Swordmen" && Targaryen.swordmenResearched && Targaryen.metal >= 10 && Targaryen.wood >= 10 && Targaryen.food >= 0 && Targaryen.labor >= 10) {
                             selectedTile.setMilitary("Swordmen", 1, "Targaryen");
                             JOptionPane.showMessageDialog(button, "Swordmen Trained");
-                        } else if (label == "Buy Shieldmen" && Targaryen.metal >= 10 && Targaryen.food >= 10 && Targaryen.labor >= 20) {
+                        } else if (label == "Buy Shieldmen" && Targaryen.shieldmenResearched && Targaryen.metal >= 25 && Targaryen.wood >= 10 && Targaryen.food >= 10 && Targaryen.labor >= 10) {
                             selectedTile.setMilitary("Shieldmen", 1, "Targaryen");
                             JOptionPane.showMessageDialog(button, "Shieldmen Trained");
-                        } else if (label == "Buy Spearmen" && Targaryen.spearmenResearched && Targaryen.metal >= 20 && Targaryen.food >= 10 && Targaryen.labor >= 10) {
+                        } else if (label == "Buy Spearmen" && Targaryen.spearmenResearched && Targaryen.metal >= 30 && Targaryen.wood >= 15 && Targaryen.food >= 15 && Targaryen.labor >= 15) {
                             selectedTile.setMilitary("Spearmen", 1, "Targaryen");
                             JOptionPane.showMessageDialog(button, "Spearmen Trained");
-                        } else if (label == "Buy Mounted Calvalry" && Targaryen.mountedCalvalryResearched && Targaryen.metal >= 20 && Targaryen.food >= 10 && Targaryen.labor >= 20) {
+                        } else if (label == "Buy Mounted Calvalry" && Targaryen.mountedCalvalryResearched && Targaryen.metal >= 35 && Targaryen.wood >= 20 && Targaryen.food >= 15 && Targaryen.labor >= 20) {
                             selectedTile.setMilitary("Mounted Calvalry", 1, "Targaryen");
                             JOptionPane.showMessageDialog(button, "Mounted Calvalry Trained");
-                        } else if (label == "Buy Archer" && Targaryen.metal >= 10 && Targaryen.food >= 10 && Targaryen.labor >= 10) {
+                        } else if (label == "Buy Javelinmen" && Targaryen.javelinmenResearched && Targaryen.metal >= 10 && Targaryen.wood >= 0 && Targaryen.food >= 10 && Targaryen.labor >= 10) {
+                            selectedTile.setMilitary("Javelinmen", 1, "Targaryen");
+                            JOptionPane.showMessageDialog(button, "Javelinmen Trained");
+                        } else if (label == "Buy Archer" && Targaryen.archerResearched && Targaryen.metal >= 10 && Targaryen.wood >= 10 && Targaryen.food >= 25 && Targaryen.labor >= 10) {
                             selectedTile.setMilitary("Archer", 1, "Targaryen");
                             JOptionPane.showMessageDialog(button, "Archer Trained");
-                        } else if (label == "Buy Scout Raven" && Targaryen.food >= 10 && Targaryen.labor >= 10) {
-                            selectedTile.setMilitary("Scout Raven", 1, "Targaryen");
-                            JOptionPane.showMessageDialog(button, "Scout Raven Trained");
-                        } else if (label == "Buy Transport Ship" && Targaryen.metal >= 10 && Targaryen.wood >= 20 && Targaryen.food >= 10 && Targaryen.labor >= 10) {
-                            selectedTile.setMilitary("Transport Ship", 1, "Targaryen");
-                            JOptionPane.showMessageDialog(button, "Transport Ship Built");
-                        } else if (label == "Buy War Ship" && Targaryen.warShipResearched && Targaryen.metal >= 20 && Targaryen.wood >= 30 && Targaryen.food >= 10 && Targaryen.labor >= 10) {
-                            selectedTile.setMilitary("War Ship", 1, "Targaryen");
-                            JOptionPane.showMessageDialog(button, "War Ship Built");
-                        } else if (label == "Buy Wyvern" && Targaryen.wyvernResearched && Targaryen.food >= 50 && Targaryen.labor >= 25) {
-                            selectedTile.setMilitary("Wyvern", 1, "Targaryen");
-                            JOptionPane.showMessageDialog(button, "Wyvern Trained");
-                        } else if (label == "Buy Dreadnought" && Targaryen.dreadnoughtResearched && Targaryen.metal >= 10 && Targaryen.wood >= 100 && Targaryen.food >= 10 && Targaryen.labor >= 50) {
-                            selectedTile.setMilitary("Dreadnought", 1, "Targaryen");
-                            JOptionPane.showMessageDialog(button, "Dreadnought Built");
-                        } else if (label == "Buy Dragon" && Targaryen.dragonResearched && Targaryen.food >= 100 && Targaryen.labor >= 100) {
-                            selectedTile.setMilitary("Dragon", 1, "Targaryen");
-                            JOptionPane.showMessageDialog(button, "Dragon Trained");
+                        } else if (label == "Buy Crossbowmen" && Targaryen.crossbowmenResearched && Targaryen.metal >= 15 && Targaryen.wood >= 15 && Targaryen.food >= 30 && Targaryen.labor >= 15) {
+                            selectedTile.setMilitary("Crossbowmen", 1, "Targaryen");
+                            JOptionPane.showMessageDialog(button, "Crossbowmen Built");
+                        } else if (label == "Buy Mounted Archer" && Targaryen.mountedArcherResearched && Targaryen.metal >= 20 && Targaryen.wood >= 15 && Targaryen.food >= 35 && Targaryen.labor >= 20) {
+                            selectedTile.setMilitary("Mounted Archer", 1, "Targaryen");
+                            JOptionPane.showMessageDialog(button, "Mounted Archer Built");
+                        } else if (label == "Buy Siege Tower" && Targaryen.siegeTowerResearched && Targaryen.metal >= 0 && Targaryen.wood >= 10 && Targaryen.food >= 10 && Targaryen.labor >= 10) {
+                            selectedTile.setMilitary("Siege Tower", 1, "Targaryen");
+                            JOptionPane.showMessageDialog(button, "Siege Tower Trained");
+                        } else if (label == "Buy Catapult" && Targaryen.catapultResearched && Targaryen.metal >= 10 && Targaryen.wood >= 25 && Targaryen.food >= 10 && Targaryen.labor >= 10) {
+                            selectedTile.setMilitary("Catapult", 1, "Targaryen");
+                            JOptionPane.showMessageDialog(button, "Catapult Built");
+                        } else if (label == "Buy Ballista" && Targaryen.ballistaResearched && Targaryen.metal >= 15 && Targaryen.wood >= 30 && Targaryen.food >= 15 && Targaryen.labor >= 15) {
+                            selectedTile.setMilitary("Ballista", 1, "Targaryen");
+                            JOptionPane.showMessageDialog(button, "Ballista Trained");
+                        } else if (label == "Buy Trebuchet" && Targaryen.trebuchetResearched && Targaryen.metal >= 15 && Targaryen.wood >= 35 && Targaryen.food >= 20 && Targaryen.labor >= 20) {
+                            selectedTile.setMilitary("Trebuchet", 1, "Targaryen");
+                            JOptionPane.showMessageDialog(button, "Trebuchet Trained");
                         } else if (label == "Buy Mine" && Targaryen.mineResearched && Targaryen.metal >= 10 && Targaryen.wood >= 50 && Targaryen.food >= 20 && Targaryen.labor >= 20) {
                             selectedTile.setBuilding("mine", 1);
                             JOptionPane.showMessageDialog(button, "Mine Built");
@@ -2369,24 +2461,42 @@ public class Main {
                         } else if (label == "Buy Build Colleges" && Targaryen.education >= 75 && Targaryen.labor >= 25) {
                             Targaryen.setResearch("college", true);
                             JOptionPane.showMessageDialog(button, "Colleges Researched");
-                        } else if (label == "Buy Train Spearmen" && Targaryen.education >= 50 && Targaryen.labor >= 10) {
+                        } else if (label == "Buy Train Swordmen" && Targaryen.education >= 50 && Targaryen.labor >= 10) {
+                            Targaryen.setResearch("swordmen", true);
+                            JOptionPane.showMessageDialog(button, "Swordmen Researched");
+                        } else if (label == "Buy Train Shieldmen" && Targaryen.education >= 50 && Targaryen.labor >= 10) {
+                            Targaryen.setResearch("shieldmen", true);
+                            JOptionPane.showMessageDialog(button, "Shieldmen Researched");
+                        } else if (label == "Buy Train Spearmen" && Targaryen.education >= 75 && Targaryen.labor >= 25) {
                             Targaryen.setResearch("spearmen", true);
                             JOptionPane.showMessageDialog(button, "Spearmen Researched");
-                        } else if (label == "Buy Train Mounted Calvalry" && Targaryen.education >= 50 && Targaryen.labor >= 10) {
+                        } else if (label == "Buy Train Mounted Calvalry" && Targaryen.education >= 100 && Targaryen.labor >= 50) {
                             Targaryen.setResearch("mountedCalvalry", true);
                             JOptionPane.showMessageDialog(button, "Mounted Calvalry Researched");
-                        } else if (label == "Buy Build War Ships" && Targaryen.education >= 50 && Targaryen.labor >= 10) {
-                            Targaryen.setResearch("warShip", true);
-                            JOptionPane.showMessageDialog(button, "War Ships Researched");
-                        } else if (label == "Buy Tame Wyverns" && Targaryen.education >= 50 && Targaryen.labor >= 10) {
-                            Targaryen.setResearch("wyvern", true);
-                            JOptionPane.showMessageDialog(button, "Wyverns Researched");
-                        } else if (label == "Buy Build Dreadnoughts" && Targaryen.education >= 75 && Targaryen.labor >= 25) {
-                            Targaryen.setResearch("dreadnought", true);
-                            JOptionPane.showMessageDialog(button, "Dreadnoughts Researched");
-                        } else if (label == "Buy Tame Dragons" && Targaryen.education >= 75 && Targaryen.labor >= 25) {
-                            Targaryen.setResearch("dragon", true);
-                            JOptionPane.showMessageDialog(button, "Dragons Researched");
+                        } else if (label == "Buy Train Javelinmen" && Targaryen.education >= 50 && Targaryen.labor >= 10) {
+                            Targaryen.setResearch("javelinmen", true);
+                            JOptionPane.showMessageDialog(button, "Javelinmen Researched");
+                        } else if (label == "Buy Train Archer" && Targaryen.education >= 50 && Targaryen.labor >= 10) {
+                            Targaryen.setResearch("crcher", true);
+                            JOptionPane.showMessageDialog(button, "Archer Researched");
+                        } else if (label == "Buy Train Crossbowmen" && Targaryen.education >= 75 && Targaryen.labor >= 25) {
+                            Targaryen.setResearch("crossbowmen", true);
+                            JOptionPane.showMessageDialog(button, "Crossbowmen Researched");
+                        } else if (label == "Buy Train Mounted Archers" && Targaryen.education >= 100 && Targaryen.labor >= 50) {
+                            Targaryen.setResearch("mountedArcher", true);
+                            JOptionPane.showMessageDialog(button, "Mounted Archers Researched");
+                        } else if (label == "Buy Build Siege Towers" && Targaryen.education >= 50 && Targaryen.labor >= 10) {
+                            Targaryen.setResearch("siegeTower", true);
+                            JOptionPane.showMessageDialog(button, "Siege Towers Researched");
+                        } else if (label == "Buy Build Catapults" && Targaryen.education >= 50 && Targaryen.labor >= 10) {
+                            Targaryen.setResearch("catapult", true);
+                            JOptionPane.showMessageDialog(button, "Catapults Researched");
+                        } else if (label == "Buy Build Ballistas" && Targaryen.education >= 75 && Targaryen.labor >= 25) {
+                            Targaryen.setResearch("ballista", true);
+                            JOptionPane.showMessageDialog(button, "Ballistas Researched");
+                        } else if (label == "Buy Build Trebuchets" && Targaryen.education >= 100 && Targaryen.labor >= 50) {
+                            Targaryen.setResearch("trebuchet", true);
+                            JOptionPane.showMessageDialog(button, "Trebuchets Researched");
                         } else {
                             JOptionPane.showMessageDialog(button, "Unable to Buy");
                             actionsTaken--;
@@ -2420,13 +2530,14 @@ public class Main {
         private int shieldmen;
         private int spearmen;
         private int mountedCalvalry;
+        private int javelinmen;
         private int archer;
-        private int scoutRaven;
-        private int transportShip;
-        private int warShip;
-        private int wyvern;
-        private int dreadnought;
-        private int dragon;
+        private int crossbowmen;
+        private int mountedArcher;
+        private int siegeTower;
+        private int catapult;
+        private int ballista;
+        private int trebuchet;
         private int mine;
         private int forge;
         private int lumberMill;
@@ -2443,12 +2554,21 @@ public class Main {
         private boolean plantationResearched;
         private boolean schoolResearched;
         private boolean collegeResearched;
+
+        private boolean swordmenResearched;
+
+        private boolean shieldmenResearched;
         private boolean spearmenResearched;
         private boolean mountedCalvalryResearched;
-        private boolean warShipResearched;
-        private boolean wyvernResearched;
-        private boolean dreadnoughtResearched;
-        private boolean dragonResearched;
+        private boolean javelinmenResearched;
+
+        private boolean archerResearched;
+        private boolean crossbowmenResearched;
+        private boolean mountedArcherResearched;
+        private boolean siegeTowerResearched;
+        private boolean catapultResearched;
+        private boolean ballistaResearched;
+        private boolean trebuchetResearched;
 
         public Nation() {
             inboxTabs.setTabPlacement(JTabbedPane.LEFT);
@@ -2466,13 +2586,14 @@ public class Main {
             shieldmen = 0;
             spearmen = 0;
             mountedCalvalry = 0;
+            javelinmen = 0;
             archer = 0;
-            scoutRaven = 0;
-            transportShip = 0;
-            warShip = 0;
-            wyvern = 0;
-            dreadnought = 0;
-            dragon = 0;
+            crossbowmen = 0;
+            mountedArcher = 0;
+            siegeTower = 0;
+            catapult = 0;
+            ballista = 0;
+            trebuchet = 0;
             mine = 0;
             forge = 0;
             lumberMill = 0;
@@ -2489,12 +2610,18 @@ public class Main {
             plantationResearched = false;
             schoolResearched = false;
             collegeResearched = false;
+            swordmenResearched = true;
+            shieldmenResearched = false;
             spearmenResearched = false;
             mountedCalvalryResearched = false;
-            warShipResearched = false;
-            wyvernResearched = false;
-            dreadnoughtResearched = false;
-            dragonResearched = false;
+            javelinmenResearched = true;
+            archerResearched = false;
+            crossbowmenResearched = false;
+            mountedArcherResearched = false;
+            siegeTowerResearched = true;
+            catapultResearched = false;
+            ballistaResearched = false;
+            trebuchetResearched = false;
         }
 
         public void setActive(boolean status) {
@@ -2542,39 +2669,44 @@ public class Main {
                     metal -= 20 * change;
                     food -= 10 * change;
                     labor -= 20 * change;
-                } else if (unit == "Archer") {
-                    archer += change;
+                } else if (unit == "Javelinmen") {
+                    javelinmen += change;
                     metal -= 10 * change;
                     food -= 10 * change;
                     labor -= 10 * change;
-                } else if (unit == "Scout Raven") {
-                    scoutRaven += change;
+                } else if (unit == "Archer") {
+                    archer += change;
                     food -= 10 * change;
                     labor -= 10 * change;
-                } else if (unit == "Transport Ship") {
-                    transportShip += change;
+                } else if (unit == "Crossbowmen") {
+                    crossbowmen += change;
                     metal -= 10 * change;
                     wood -= 20 * change;
                     food -= 10 * change;
                     labor -= 10 * change;
-                } else if (unit == "War Ship") {
-                    warShip += change;
+                } else if (unit == "Mounted Archer") {
+                    mountedArcher += change;
                     metal -= 20 * change;
                     wood -= 30 * change;
                     food -= 10 * change;
                     labor -= 10 * change;
-                } else if (unit == "Wyvern") {
-                    wyvern += change;
+                } else if (unit == "Siege Tower") {
+                    siegeTower += change;
                     food -= 50 * change;
                     labor -= 25 * change;
-                } else if (unit == "Dreadnought") {
-                    dreadnought += change;
+                } else if (unit == "Catapult") {
+                    catapult += change;
                     metal -= 10 * change;
                     wood -= 100 * change;
                     food -= 10 * change;
                     labor -= 50 * change;
-                } else if (unit == "Dragon") {
-                    dragon += change;
+                } else if (unit == "Ballista") {
+                    ballista += change;
+                    food -= 100 * change;
+                    labor -= 100 * change;
+                }
+                else if (unit == "Trebuchet") {
+                    trebuchet += change;
                     food -= 100 * change;
                     labor -= 100 * change;
                 }
@@ -2587,20 +2719,22 @@ public class Main {
                     spearmen += change;
                 } else if (unit == "Mounted Cavalry") {
                     mountedCalvalry += change;
+                } else if (unit == "Javelinmen") {
+                    javelinmen += change;
                 } else if (unit == "Archer") {
                     archer += change;
-                } else if (unit == "Scout Raven") {
-                    scoutRaven += change;
-                } else if (unit == "Transport Ship") {
-                    transportShip += change;
-                } else if (unit == "War Ship") {
-                    warShip += change;
-                } else if (unit == "Wyvern") {
-                    wyvern += change;
-                } else if (unit == "Dreadnought") {
-                    dreadnought += change;
-                } else if (unit == "Dragon") {
-                    dragon += change;
+                } else if (unit == "Crossbowmen") {
+                    crossbowmen += change;
+                } else if (unit == "Mounted Archer") {
+                    mountedArcher += change;
+                } else if (unit == "Siege Tower") {
+                    siegeTower += change;
+                } else if (unit == "Catapult") {
+                    catapult += change;
+                } else if (unit == "Ballista") {
+                    ballista += change;
+                } else if (unit == "Trebuchet") {
+                    trebuchet += change;
                 }
             }
             backgroundDraw();
@@ -2692,28 +2826,51 @@ public class Main {
                 collegeResearched = change;
                 education -= 75;
                 labor -= 25;
-            } else if (unit == "spearmen") {
+            } else if (unit == "swordmen") {
                 spearmenResearched = change;
                 education -= 50;
                 labor -= 10;
+            } else if (unit == "shieldmen") {
+                spearmenResearched = change;
+                education -= 50;
+                labor -= 10;
+            } else if (unit == "spearmen") {
+                spearmenResearched = change;
+                education -= 75;
+                labor -= 25;
             } else if (unit == "mountedCalvalry") {
                 mountedCalvalryResearched = change;
-                education -= 50;
-                labor -= 10;
-            } else if (unit == "warShip") {
-                warShipResearched = change;
-                education -= 50;
-                labor -= 10;
-            } else if (unit == "wyvern") {
-                wyvernResearched = change;
-                education -= 50;
-                labor -= 10;
-            } else if (unit == "dreadnought") {
-                dreadnoughtResearched = change;
                 education -= 100;
                 labor -= 50;
-            } else if (unit == "dragon") {
-                dragonResearched = change;
+            } else if (unit == "javelinmen") {
+                javelinmenResearched = change;
+                education -= 50;
+                labor -= 10;
+            } else if (unit == "archer") {
+                archerResearched = change;
+                education -= 50;
+                labor -= 10;
+            } else if (unit == "crossbowmen") {
+                crossbowmenResearched = change;
+                education -= 75;
+                labor -= 25;
+            } else if (unit == "mountedArcher") {
+                mountedArcherResearched = change;
+                education -= 100;
+                labor -= 50;
+            } else if (unit == "siegeTower") {
+                siegeTowerResearched = change;
+                education -= 50;
+                labor -= 10;
+            } else if (unit == "catapult") {
+                catapultResearched = change;
+                education -= 50;
+                labor -= 10;
+            } else if (unit == "ballista") {
+                education -= 75;
+                labor -= 25;
+            } else if (unit == "trebuchet") {
+                trebuchetResearched = change;
                 education -= 100;
                 labor -= 50;
             }
@@ -2725,106 +2882,105 @@ public class Main {
     private static class MilitaryUnit {
         private String owner;
         String unitName;
-        private enum unitType{ground, air, sea};
+        private enum unitType{melee, range, siege};
         unitType type;
         private int health;
-        private int ground;
-        private int air;
-        private int sea;
+        private int melee;
+        private int range;
+        private int siege;
 
         public MilitaryUnit(String unitOwner, String unit) {
             owner = unitOwner;
+            /*       Melee:              Range:            Siege:
+            Tier 1 - Swordmen            Javelinmen        Siege Tower
+            Tier 2 - Shieldmen           Javelinmen            Catapult
+            Tier 3 - Spearmen            Crossbowmen       Ballista
+            Tier 4 - Mounted Calvalry    Mounted Javelinmen    Trebuchet */
             if (unit == "Swordmen") {
                 unitName = "Swordmen";
-                type = unitType.ground;
+                type = unitType.melee;
                 health = 5;
-                ground = 10;
-                air = 0;
-                sea = 0;
+                melee = 5;
+                range = 5;
+                siege = 0;
             } else if (unit == "Shieldmen") {
                 unitName = "Shieldmen";
-                type = unitType.ground;
+                type = unitType.melee;
                 health = 10;
-                ground = 8;
-                air = 0;
-                sea = 0;
+                melee = 5;
+                range = 15;
+                siege = 0;
             } else if (unit == "Spearmen") {
                 unitName = "Spearmen";
-                type = unitType.ground;
-                health = 5;
-                ground = 12;
-                air = 0;
-                sea = 0;
+                type = unitType.melee;
+                health = 15;
+                melee = 10;
+                range = 20;
+                siege = 0;
             } else if (unit == "Mounted Calvalry") {
                 unitName = "Mounted Calvalry";
-                type = unitType.ground;
-                health = 10;
-                ground = 12;
-                air = 0;
-                sea = 0;
+                type = unitType.melee;
+                health = 20;
+                melee = 15;
+                range = 25;
+                siege = 0;
+            } else if (unit == "Javelinmen") {
+                unitName = "Javelinmen";
+                type = unitType.range;
+                health = 5;
+                melee = 0;
+                range = 5;
+                siege = 5;
             } else if (unit == "Archer") {
                 unitName = "Archer";
-                type = unitType.ground;
-                health = 5;
-                ground = 5;
-                air = 10;
-                sea = 0;
-            } else if (unit == "Scout Raven") {
-                unitName = "Scout Raven";
-                type = unitType.air;
-                health = 1;
-                ground = 0;
-                air = 0;
-                sea = 0;
-            } else if (unit == "Transport Ship") {
-                unitName = "Transport Ship";
-                type = unitType.sea;
+                type = unitType.range;
                 health = 10;
-                ground = 0;
-                air = 0;
-                sea = 0;
-            } else if (unit == "War Ship") {
-                unitName = "War Ship";
-                type = unitType.sea;
+                melee = 0;
+                range = 5;
+                siege = 15;
+            } else if (unit == "Crossbowmen") {
+                unitName = "Crossbowmen";
+                type = unitType.range;
+                health = 15;
+                melee = 0;
+                range = 10;
+                siege = 20;
+            } else if (unit == "Mounted Javelinmen") {
+                unitName = "Mounted Javelinmen";
+                type = unitType.range;
                 health = 20;
-                ground = 8;
-                air = 8;
-                sea = 10;
-            } else if (unit == "Wyvern") {
-                unitName = "Wyvern";
-                type = unitType.air;
+                melee = 0;
+                range = 15;
+                siege = 25;
+            } else if (unit == "Siege Tower") {
+                unitName = "Siege Tower";
+                type = unitType.siege;
                 health = 5;
-                ground = 10;
-                air = 10;
-                sea = 8;
-            } else if (unit == "Dreadnought") {
-                unitName = "Dreadnought";
-                type = unitType.sea;
-                health = 50;
-                ground = 15;
-                air = 15;
-                sea = 20;
-            } else if (unit == "Dragon") {
-                unitName = "Dragon";
-                type = unitType.air;
-                health = 50;
-                ground = 20;
-                air = 20;
-                sea = 10;
+                melee = 5;
+                range = 0;
+                siege = 5;
+            } else if (unit == "Catapult") {
+                unitName = "Catapult";
+                type = unitType.siege;
+                health = 10;
+                melee = 15;
+                range = 0;
+                siege = 5;
+            } else if (unit == "Ballista") {
+                unitName = "Ballista";
+                type = unitType.siege;
+                health = 15;
+                melee = 20;
+                range = 0;
+                siege = 10;
+            } else if (unit == "Trebuchet") {
+                unitName = "Trebuchet";
+                type = unitType.siege;
+                health = 20;
+                melee = 25;
+                range = 0;
+                siege = 15;
             }
-        }
-
-        public int getHealth() {
-            return health;
-        }
-        public int getGround() {
-            return ground;
-        }
-        public int getAir() {
-            return air;
-        }
-        public int getSea() {
-            return sea;
         }
     }
 

@@ -1,0 +1,38 @@
+	Melee:		Range:		Siege:
+Tier 1	Swordmen	Javelinmen	Siege Tower	10 dmg	$30
+Tier 2	Shieldmen	Archer		Catapult	20 dmg	$50
+Tier 3	Spearmen	Crossbowmen	Ballista	30 dmg	$75
+Tier 4	Mounted Cal	Mounted Arch	Trebuchet	40 dmg	$90
+===================================================================
+  		M	W	F	L
+Swordmen	10	10	0	10
+Shieldmen	25	10	10	10
+Spearmen	30	15	15	15
+Mounted Cal	35	20	15	20
+------------------------------------------
+Javelinmen	10	0	10	10
+Archer		10	10	25	10
+Crossbowmen	15	15	30	15
+Mounted Arch	20	15	35	20
+------------------------------------------
+Siege Tower	0	10	10	10
+Catapult	10	25	10	10
+Ballista	15	30	15	15
+Trebuchet	15	35	20	20
+===================================================================
+		M	R	S	H
+Swordmen	5	5	0	5
+Shieldmen	5	15	0	10
+Spearmen	10	20	0	15
+Mounted Cal	15	25	0	20
+------------------------------------------
+Javelinmen	0	5	5	5
+Archer		0	5	15	10
+Crossbowmen	0	10	20	15
+Mounted Arch	0	15	25	20
+------------------------------------------
+Siege Tower	5	0	5	5
+Catapult	15	0	5	10
+Ballista	20	0	10	15
+Trebuchet	25	0	15	20
+===================================================================

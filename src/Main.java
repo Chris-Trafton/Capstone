@@ -93,7 +93,7 @@ public class Main {
     private static Color colorBackground = Color.decode("#dec590");
     private static Color colorButton = Color.decode("#bda46f");
     private static Vector<MilitaryUnit> movingUnits = new Vector<>();
-    private static int maxActions = 100;
+    private static int maxActions = 10;
 
     public static class MouseTrackerPanel extends JPanel {
 
@@ -721,7 +721,7 @@ public class Main {
                         String[] parts = move.split("\\|");
                         playerName = parts[0];
                         System.out.println("Server: received move from " + playerName);
-                        ServerRunner.sendBoard(playerName,parts[1]);
+                        ServerRunner.sendBoard(playerName,parts[1].substring(5));
                     } else if (message.startsWith("JOIN:")) {
                         playerName = message.substring(6);
                         ServerRunner.addPlayer(playerName, this);
@@ -833,13 +833,13 @@ public class Main {
     private static Vector<Tile> CreateBoard(String board) {
         Vector<Tile> tiles = new Vector<>();
         board = board.substring(6);
-        System.out.println(board);
+//        System.out.println(board);
         String[] tileArr = board.split("\\(");
         for (String tile: tileArr) {
             if (tile.equals(tileArr[0])) continue;
             String[] items = tile.split(",");
             items[items.length-1] = items[items.length-1].substring(0,1);
-            System.out.println(tileArr[1]);
+//            System.out.println(tileArr[1]);
             Tile current = new Tile(items[0],Double.parseDouble(items[1]),Double.parseDouble(items[2]),tile_small.getWidth(),tile_small.getHeight(),0,items[3],Integer.parseInt(items[4]),Integer.parseInt(items[5]),Integer.parseInt(items[6]),Integer.parseInt(items[7]),Integer.parseInt(items[8]),Integer.parseInt(items[9]),Integer.parseInt(items[10]),Integer.parseInt(items[11]),Arrays.copyOfRange(items,12,items.length));
             tiles.add(current);
         }
@@ -1240,17 +1240,19 @@ public class Main {
         allyTable.getModel().addTableModelListener(new TableModelListener() {
             @Override
             public void tableChanged(TableModelEvent e) {
-                String temp = "<html>";
-                movingUnits = new Vector<>();
-                for(int i = 0; i < allyTable.getModel().getRowCount(); i++) {
-                    if ((Boolean) allyTable.getModel().getValueAt(i,2)) {
-                        temp += allyTable.getValueAt(i, 0) + "<br/>";
-                        tile.setMilitary((String) allyTable.getValueAt(i, 0), -1, currentNation);
-                        movingUnits.add(0, new MilitaryUnit(currentNation, (String) allyTable.getValueAt(i, 0)));
+                if (actionsTaken < 10) {
+                    String temp = "<html>";
+                    movingUnits = new Vector<>();
+                    for(int i = 0; i < allyTable.getModel().getRowCount(); i++) {
+                        if ((Boolean) allyTable.getModel().getValueAt(i,2)) {
+                            temp += allyTable.getValueAt(i, 0) + "<br/>";
+                            tile.setMilitary((String) allyTable.getValueAt(i, 0), -1, currentNation);
+                            movingUnits.add(0, new MilitaryUnit(currentNation, (String) allyTable.getValueAt(i, 0)));
+                        }
                     }
+                    temp += "</html>";
+                    selectedUnits.setText(temp);
                 }
-                temp += "</html>";
-                selectedUnits.setText(temp);
             }
         });
 
@@ -1294,9 +1296,11 @@ public class Main {
         jPanel.add(allyTable);
         jPanel.add(enemyTable);
         jPanel.add(selectedUnits);
-        jPanel.add(moveButton);
         if (hasEnemies) {
             jPanel.add(attackButton);
+        }
+        if (actionsTaken < 10) {
+            jPanel.add(moveButton);
         }
 
         frame.add(jPanel);
@@ -1452,7 +1456,7 @@ public class Main {
             PathItem current = fringe.remove();
             Tile node = current.node;
             Vector<Tile> path = current.path;
-            System.out.println(fringe.size());
+//            System.out.println(fringe.size());
             int totalCost = current.cost;
             if (node.equals(b)) {
                 path.add(node);

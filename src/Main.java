@@ -820,7 +820,11 @@ public class Main {
         String gameState = "BOARD[";
         for (Tile tile: tiles) {
             biome biomeEnum = tile.getBiome();
-            gameState = gameState + "(" + tile.owner + "," + tile.getX() + "," + tile.getY() + "," + biomeEnum.name() + "," + tile.mine + "," + tile.forge + "," + tile.lumberMill + "," + tile.deforestation + "," + tile.farm + "," + tile.plantation + "," + tile.school + "," + tile.college + ")";
+            gameState = gameState + "(" + tile.owner + "," + tile.getX() + "," + tile.getY() + "," + biomeEnum.name() + "," + tile.mine + "," + tile.forge + "," + tile.lumberMill + "," + tile.deforestation + "," + tile.farm + "," + tile.plantation + "," + tile.school + "," + tile.college;
+            for (int i = 0; i < tile.occupyingUnits.size(); i++) {
+                gameState += "," + tile.occupyingUnits.get(i).unitName + "," + tile.occupyingUnits.get(i).owner;
+            }
+            gameState += ")";
         }
         gameState = gameState + "]";
         return gameState;
@@ -834,15 +838,16 @@ public class Main {
         for (String tile: tileArr) {
             if (tile.equals(tileArr[0])) continue;
             String[] items = tile.split(",");
-            items[11] = items[11].substring(0,1);
+            items[items.length-1] = items[items.length-1].substring(0,1);
             System.out.println(tileArr[1]);
-            Tile current = new Tile(items[0],Double.parseDouble(items[1]),Double.parseDouble(items[2]),tile_small.getWidth(),tile_small.getHeight(),0,items[3],Integer.parseInt(items[4]),Integer.parseInt(items[5]),Integer.parseInt(items[6]),Integer.parseInt(items[7]),Integer.parseInt(items[8]),Integer.parseInt(items[9]),Integer.parseInt(items[10]),Integer.parseInt(items[11]));
+            Tile current = new Tile(items[0],Double.parseDouble(items[1]),Double.parseDouble(items[2]),tile_small.getWidth(),tile_small.getHeight(),0,items[3],Integer.parseInt(items[4]),Integer.parseInt(items[5]),Integer.parseInt(items[6]),Integer.parseInt(items[7]),Integer.parseInt(items[8]),Integer.parseInt(items[9]),Integer.parseInt(items[10]),Integer.parseInt(items[11]),Arrays.copyOfRange(items,12,items.length));
             tiles.add(current);
         }
         for (Tile tile: tiles) {
             tile.findNeighbors(tiles);
             tile.isWaterSide();
             tile.setResourceRates();
+            tile.addResources();
         }
         return tiles;
     }
@@ -895,6 +900,7 @@ public class Main {
             tiles.get(i).isWaterSide();
             tiles.get(i).setResourceRates();
             tiles.get(i).setOwner(i);
+            tiles.get(i).addResources();
         }
         return tiles;
     }
@@ -3213,7 +3219,7 @@ public class Main {
             college = 0;
         }
 
-        public Tile(String owner, double xinput, double yinput, double width, double height, double angle, String myBiome, int mine, int forge, int lumberMill, int deforestation, int farm, int plantation, int school, int college) {
+        public Tile(String owner, double xinput, double yinput, double width, double height, double angle, String myBiome, int mine, int forge, int lumberMill, int deforestation, int farm, int plantation, int school, int college, String[] military) {
             super(xinput,yinput,width,height,angle);
             neighbors = new Vector<>();
             resourceRates = new Vector<>();
@@ -3232,6 +3238,9 @@ public class Main {
             this.plantation = plantation;
             this.school = school;
             this.college = college;
+            for (int i = 0; i < military.length-1; i+=2) {
+                this.setMilitary(military[i],1,military[i+1]);
+            }
         }
         public String toString() {
             return owner + "- Labor: " + resourceRates.get(0) + " Wood: " + resourceRates.get(1) + " Metal: " + resourceRates.get(2) + " Food: " + resourceRates.get(3) + " Research: " + resourceRates.get(4);
@@ -3485,6 +3494,27 @@ public class Main {
                 Targaryen.setBuilding(unit, change);
             }
             backgroundDraw();
+        }
+        public void addResources() {
+            if (owner.equals("Stark")) {
+                Stark.setResource("labor",resourceRates.get(0));
+                Stark.setResource("wood",resourceRates.get(1));
+                Stark.setResource("metal",resourceRates.get(2));
+                Stark.setResource("food",resourceRates.get(3));
+                Stark.setResource("education",resourceRates.get(4));
+            } else if (owner.equals("Lannister")) {
+                Lannister.setResource("labor",resourceRates.get(0));
+                Lannister.setResource("wood",resourceRates.get(1));
+                Lannister.setResource("metal",resourceRates.get(2));
+                Lannister.setResource("food",resourceRates.get(3));
+                Lannister.setResource("education",resourceRates.get(4));
+            } else if (owner.equals("Targaryen")) {
+                Targaryen.setResource("labor",resourceRates.get(0));
+                Targaryen.setResource("wood",resourceRates.get(1));
+                Targaryen.setResource("metal",resourceRates.get(2));
+                Targaryen.setResource("food",resourceRates.get(3));
+                Targaryen.setResource("education",resourceRates.get(4));
+            }
         }
     }
 

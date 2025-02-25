@@ -94,6 +94,8 @@ public class Main {
     private static Color colorButton = Color.decode("#bda46f");
     private static Vector<MilitaryUnit> movingUnits = new Vector<>();
     private static int maxActions = 10;
+    private static boolean attacking = false;
+    private static Tile pathBeginning;
 
     public static class MouseTrackerPanel extends JPanel {
 
@@ -280,7 +282,9 @@ public class Main {
             } else if (current.owner.equals("")) {
                 if (current.mouseHover) {
 //                    System.out.println((current.x + current.getWidth() / 2) + " " + (current.y - current.getHeight() / 2) + "\n" + board.mouseX + " " + board.mouseY);
-                    drawPath(g2d,current);
+                    if (!movingUnits.isEmpty()) {
+                        drawPath(g2d,current);
+                    }
                     try {
                         Thread.sleep(300);
                     } catch (InterruptedException ie) {}
@@ -334,7 +338,7 @@ public class Main {
     }
 
     private static void drawPath(Graphics2D g2d, Tile current) {
-        Vector<Tile> path = getPath(tiles.get(0),current);
+        Vector<Tile> path = getPath(pathBeginning,current);
         for (int i = 0; i < path.size()-1; i++) {
             g2d.drawLine((int)path.get(i).getCenter().getX(),(int)path.get(i).getCenter().getY(),(int)path.get(i+1).getCenter().getX(),(int)path.get(i+1).getCenter().getY());
         }
@@ -806,6 +810,8 @@ public class Main {
                         System.out.println("Client: Sending moves");
                         actionsTaken = maxActions + 1;
                         out.println("MOVE: " + currentNation + "|" + getGameState());
+                    } else if (attacking) {
+                        out.println("ATTACK");
                     }
                 }
             } catch (IOException e) {
@@ -1272,6 +1278,7 @@ public class Main {
         moveButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                pathBeginning = tile;
                 frame.dispose();
             }
         });
@@ -1281,6 +1288,7 @@ public class Main {
             @Override
             public void actionPerformed(ActionEvent e) {
                 OpenAttackMenu(tile);
+                attacking = true;
                 frame.dispose();
             }
         });

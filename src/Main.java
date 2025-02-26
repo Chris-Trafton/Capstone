@@ -1,5 +1,3 @@
-// Zelda.java Copyright (C) 2020 Ben Sanders
-//import java.lang.invoke.DelegatingMethodHandle$Holder;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.AffineTransform;
@@ -12,14 +10,10 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.*;
-
 import javax.swing.*;
-
 import javax.imageio.ImageIO;
-
 import java.awt.image.BufferedImage;
 import java.util.concurrent.ConcurrentHashMap;
-
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
@@ -29,7 +23,8 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 
 public class Main {
-    // global variables for the game
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //TODO: Global Variables
     private static MouseTrackerPanel board;
     private static String ip;
     private static BufferedImage tile;
@@ -97,253 +92,949 @@ public class Main {
     private static boolean attacking = false;
     private static Tile pathBeginning;
 
-    public static class MouseTrackerPanel extends JPanel {
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //TODO: Custom Classes
+    private static class ImageObject {
+        protected double x;
+        protected double y;
+        protected double xwidth;
+        protected double yheight;
+        protected double angle;
+        protected double internalangle;
+        protected Vector<Double> coords;
+        protected Vector<Double> triangles;
+        protected double comX;
+        protected double comY;
+        protected boolean mouseHover;
 
-        private double mouseX = 0;
-        private double mouseY = 0;
-        private Point lastPosition;
-        private double deltaX = 0;
-        private double deltaY = 0;
-
-        public MouseTrackerPanel() {
-            // Add the MouseMotionListener to track mouse movement
-            addMouseMotionListener(new MouseMotionListener() {
-                @Override
-                public void mouseMoved(MouseEvent e) {
-                    // Update the coordinates whenever the mouse moves
-                    mouseX = e.getX();
-                    mouseY = e.getY();
-                }
-
-                @Override
-                public void mouseDragged(MouseEvent e) {
-                    if (lastPosition != null) {
-                        mousePressed = false;
-                        deltaX = e.getX() - lastPosition.getX();
-                        deltaY = e.getY() - lastPosition.getY();
-                        if (deltaX != 0 || deltaY != 0) {
-                            for (int i = 0; i < tiles.size(); i++) {
-                                if (deltaX <= 0 && deltaY <= 0) {
-                                    tiles.get(i).move(Math.max(deltaX,-5),Math.max(deltaY,-5));
-                                } else if (deltaX <= 0 && deltaY >= 0) {
-                                    tiles.get(i).move(Math.max(deltaX,-5),Math.min(deltaY,5));
-                                } else if (deltaX >= 0 && deltaY <= 0) {
-                                    tiles.get(i).move(Math.min(deltaX,5),Math.max(deltaY,-5));
-                                } else {
-                                    tiles.get(i).move(Math.min(deltaX,5),Math.min(deltaY,5));
-                                }
-                            }
-                        }
-                        backgroundDraw();
-                        lastPosition = e.getPoint();
-                    }
-                }
-            });
-            addMouseListener(new MouseAdapter() {
-                @Override
-                public void mousePressed(MouseEvent e) {
-                    lastPosition = e.getPoint();
-                    mousePressed = true;
-                }
-
-                @Override
-                public void mouseReleased(MouseEvent e) {
-                    try {
-                        Thread.sleep(100);
-                    } catch (InterruptedException ie) {}
-                    lastPosition = null;
-                    mousePressed = false;
-                    deltaX = 0;
-                    deltaY = 0;
-                }
-            });
+        public ImageObject() {}
+        public ImageObject(double xinput, double yinput, double xwidthinput, double yheightinput, double angleinput) {
+            x = xinput;
+            y = yinput;
+            xwidth = xwidthinput;
+            yheight = yheightinput;
+            angle = angleinput;
+            internalangle = 0.0;
+            coords = new Vector<Double>();
+            mouseHover = false;
         }
-
-        public double getMouseX() {return mouseX;}
-        public double getMouseY() {return mouseY;}
-
-    }
-
-    public static void setup() {
-        appFrame = new JFrame("Capstone");
-        twoPi = 2.0 * 3.14159265358979;
-        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        XOFFSET = 0;
-        YOFFSET = 30; //30
-        WINWIDTH = (int)screenSize.getWidth(); //338
-        WINHEIGHT = (int)screenSize.getHeight() - 40; //271
-        endgame = false;
-        hosting = false;
-
-        try {
-            background = ImageIO.read(new File("images\\ocean.png"));
-            scrollBackground = ImageIO.read(new File("images\\file.png"));
-            tile = ImageIO.read(new File("images\\tile.png"));
-            tile_small = ImageIO.read(new File("images\\tile_small.png"));
-            flat_tile = ImageIO.read(new File("images\\flatland_tile.png"));
-            flat_tile_small = ImageIO.read(new File("images\\flatland_tile_small.png"));
-            forest_tile = ImageIO.read(new File("images\\forest_tile.png"));
-            forest_tile_small = ImageIO.read(new File("images\\forest_tile_small.png"));
-            mount_tile = ImageIO.read(new File("images\\mountain_tile.png"));
-            mount_tile_small = ImageIO.read(new File("images\\mountain_tile_small.png"));
-            desert_tile = ImageIO.read(new File("images\\desert_tile.png"));
-            desert_tile_small = ImageIO.read(new File("images\\desert_tile_small.png"));
-            player_flat_tile = ImageIO.read(new File("images\\player_flatland_tile.png"));
-            enemy_flat_tile = ImageIO.read(new File("images\\enemy_flatland_tile.png"));
-            player_flat_tile_small = ImageIO.read(new File("images\\player_flatland_tile_small.png"));
-            enemy_flat_tile_small = ImageIO.read(new File("images\\enemy_flatland_tile_small.png"));
-            player_forest_tile = ImageIO.read(new File("images\\player_forest_tile.png"));
-            enemy_forest_tile = ImageIO.read(new File("images\\enemy_forest_tile.png"));
-            player_forest_tile_small = ImageIO.read(new File("images\\player_forest_tile_small.png"));
-            enemy_forest_tile_small = ImageIO.read(new File("images\\enemy_forest_tile_small.png"));
-            player_mount_tile = ImageIO.read(new File("images\\player_mountain_tile.png"));
-            enemy_mount_tile = ImageIO.read(new File("images\\enemy_mountain_tile.png"));
-            player_mount_tile_small = ImageIO.read(new File("images\\player_mountain_tile_small.png"));
-            enemy_mount_tile_small = ImageIO.read(new File("images\\enemy_mountain_tile_small.png"));
-            player_desert_tile = ImageIO.read(new File("images\\player_desert_tile.png"));
-            enemy_desert_tile = ImageIO.read(new File("images\\enemy_desert_tile.png"));
-            player_desert_tile_small = ImageIO.read(new File("images\\player_desert_tile_small.png"));
-            enemy_desert_tile_small = ImageIO.read(new File("images\\enemy_desert_tile_small.png"));
-        } catch (IOException ioe) { }
-    }
-
-    private static class Animate implements Runnable {
-        public void run() {
-            while (endgame == false) {
-                tileDraw();
-                try {
-                    Thread.sleep(32);
-                } catch (InterruptedException e) {
-                    if (!background_drawn) {
-                        backgroundDraw();
-                    }
+        public double getX() {
+            return x;
+        }
+        public double getY() {
+            return y;
+        }
+        public double getWidth() {
+            return xwidth;
+        }
+        public double getHeight() {
+            return yheight;
+        }
+        public double getAngle() {
+            return angle;
+        }
+        public double getInternalangle() {
+            return internalangle;
+        }
+        public void setAngle(double angleinput){
+            angle = angleinput;
+        }
+        public void setInternalangle(double internalangleinput) {
+            internalangle = internalangleinput;
+        }
+        public Vector<Double> getCoords() {
+            return coords;
+        }
+        public void setCoords(Vector<Double> coordsinput) {
+            coords =coordsinput;
+            generateTriangles();
+            //printTriangles();
+        }
+        public void generateTriangles() {
+            triangles = new Vector<Double>();
+            comX = getComX();
+            comY = getComY();
+            for (int i = 0; i < coords.size(); i = i + 2) {
+                triangles.addElement(coords.elementAt(i));
+                triangles.addElement(coords.elementAt(i+1));
+                triangles.addElement(coords.elementAt((i+2) % coords.size()));
+                triangles.addElement(coords.elementAt((i+3) % coords.size()));
+                triangles.addElement(comX);
+                triangles.addElement(comY);
+            }
+        }
+        public void printTrianlges() {
+            for (int i = 0; i < triangles.size(); i = i + 6) {
+                System.out.print("p0x: " + triangles.elementAt(i) + ", p0y: " + triangles.elementAt(i+1));
+                System.out.print(" p1x: " + triangles.elementAt(i+2) + ", p1y: " + triangles.elementAt(i+3));
+                System.out.print(" p2x: " + triangles.elementAt(i+4) + ", p2y: " + triangles.elementAt(i+5));
+            }
+        }
+        public double getComX() {
+            double ret = 0;
+            if (coords.size() > 0) {
+                for (int i = 0;  i < coords.size(); i = i+2) {
+                    ret = ret + coords.elementAt(i);
                 }
+                ret = ret / (coords.size() / 2.0);
+            }
+            return ret;
+        }
+        public double getComY() {
+            double ret = 0;
+            if (coords.size() > 0) {
+                for (int i = 1; i < coords.size(); i = i+2) {
+                    ret = ret + coords.elementAt(i);
+                }
+                ret = ret / (coords.size() / 2.0);
+            }
+            return ret;
+        }
+        public void move(double xinput, double yinput) {
+            x = x + xinput;
+            y = y + yinput;
+        }
+        public void moveto(double xinput, double yinput) {
+            x = xinput;
+            y = yinput;
+        }
+        public void rotate(double angleinput) {
+            angle = angle + angleinput;
+            while (angle > twoPi) {
+                angle = angle - twoPi;
+            }
+            while (angle < 0) {
+                angle = angle + twoPi;
+            }
+        }
+        public String toString() {
+            return "[" + x + "," + y + "]" + "  [" + xwidth + "," + yheight + "]";
+        }
+        public void screenContain() {
+            if (x + xwidth > appFrame.getWidth()) {
+                tileFixX = -((x+xwidth)-appFrame.getWidth());
+            }
+            if (x < 0) {
+                tileFixX = -x;
+            }
+            if (y > appFrame.getHeight() - YOFFSET - 25) {
+                tileFixY = -(y- appFrame.getHeight()+YOFFSET+25);
+            }
+            if (y - yheight < 0) {
+                tileFixY = -(y-yheight);
+            }
+            if (tileFixX != 0 || tileFixY != 0) {
+                move(tileFixX,tileFixY);
             }
         }
     }
 
-    //  Throws an image as the background and creates the resource labels on the MenuBar
-    private static void backgroundDraw() {
-        Graphics g = appFrame.getGraphics();
-        Graphics2D g2D = (Graphics2D) g;
-        g2D.drawImage(background, XOFFSET, YOFFSET + 25, null);
-        background_drawn = true;
-        if (Stark.isActive()) {
-            metalLabel.setText("    Metal: " + Stark.metal);
-            woodLabel.setText("    Wood: " + Stark.wood);
-            foodLabel.setText("    Food: " + Stark.food);
-            laborLabel.setText("    Labor: " + Stark.labor);
-            educationLabel.setText("    Education: " + Stark.education);
-        } else if (Lannister.isActive()) {
-            metalLabel.setText("    Metal: " + Lannister.metal);
-            woodLabel.setText("    Wood: " + Lannister.wood);
-            foodLabel.setText("    Food: " + Lannister.food);
-            laborLabel.setText("    Labor: " + Lannister.labor);
-            educationLabel.setText("    Education: " + Lannister.education);
-        } else if (Targaryen.isActive()) {
-            metalLabel.setText("    Metal: " + Targaryen.metal);
-            woodLabel.setText("    Wood: " + Targaryen.wood);
-            foodLabel.setText("    Food: " + Targaryen.food);
-            laborLabel.setText("    Labor: " + Targaryen.labor);
-            educationLabel.setText("    Education: " + Targaryen.education);
-        }
-        actionLabel.setText("    Actions: " + (maxActions-actionsTaken));
-    }
+    public static class Tile extends ImageObject {
+        private String owner;
+        private Vector<Tile> neighbors;
+        private Vector<Integer> resourceRates;
+        private biome myBiome;
+        private boolean waterSide;
+        private Vector<MilitaryUnit> occupyingUnits;
+        private int mine;
+        private int forge;
+        private int lumberMill;
+        private int deforestation;
+        private int farm;
+        private int plantation;
+        private int school;
+        private int college;
 
-    private static void tileDraw() {
-        Graphics g = appFrame.getGraphics();
-        Graphics2D g2d = (Graphics2D) g;
-        for (int i = 0; i < tiles.size(); i++) {
-            Tile current = tiles.get(i);
-            if (current.owner.equals(currentNation)) {
-                if (current.mouseHover) {
-//                    System.out.println((current.x + current.getWidth() / 2) + " " + (current.y - current.getHeight() / 2) + "\n" + board.mouseX + " " + board.mouseY);
-                    if (current.myBiome == biome.Flatland) {
-                        g2d.drawImage(rotateImageObject(current).filter(player_flat_tile, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
-                    } else if (current.myBiome == biome.Forest) {
-                        g2d.drawImage(rotateImageObject(current).filter(player_forest_tile, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
-                    } else if (current.myBiome == biome.Mountain) {
-                        g2d.drawImage(rotateImageObject(current).filter(player_mount_tile, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
-                    } else if (current.myBiome == biome.Desert) {
-                        g2d.drawImage(rotateImageObject(current).filter(player_desert_tile, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
-                    }
-//                    System.out.println(current.toString());
-                } else {
-                    if (current.myBiome == biome.Flatland) {
-                        g2d.drawImage(rotateImageObject(current).filter(player_flat_tile_small, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
-                    } else if (current.myBiome == biome.Forest) {
-                        g2d.drawImage(rotateImageObject(current).filter(player_forest_tile_small, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
-                    } else if (current.myBiome == biome.Mountain) {
-                        g2d.drawImage(rotateImageObject(current).filter(player_mount_tile_small, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
-                    } else if (current.myBiome == biome.Desert) {
-                        g2d.drawImage(rotateImageObject(current).filter(player_desert_tile_small, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
-                    }
-                }
-            } else if (current.owner.equals("")) {
-                if (current.mouseHover) {
-//                    System.out.println((current.x + current.getWidth() / 2) + " " + (current.y - current.getHeight() / 2) + "\n" + board.mouseX + " " + board.mouseY);
-                    if (!movingUnits.isEmpty()) {
-                        drawPath(g2d,current);
-                    }
-                    try {
-                        Thread.sleep(300);
-                    } catch (InterruptedException ie) {}
-                    if (current.myBiome == biome.Flatland) {
-                        g2d.drawImage(rotateImageObject(current).filter(flat_tile, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
-                    } else if (current.myBiome == biome.Forest) {
-                        g2d.drawImage(rotateImageObject(current).filter(forest_tile, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
-                    } else if (current.myBiome == biome.Mountain) {
-                        g2d.drawImage(rotateImageObject(current).filter(mount_tile, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
-                    } else if (current.myBiome == biome.Desert) {
-                        g2d.drawImage(rotateImageObject(current).filter(desert_tile, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
-                    }
-//                    System.out.println(current.toString());
-                } else {
-                    if (current.myBiome == biome.Flatland) {
-                        g2d.drawImage(rotateImageObject(current).filter(flat_tile_small, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
-                    } else if (current.myBiome == biome.Forest) {
-                        g2d.drawImage(rotateImageObject(current).filter(forest_tile_small, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
-                    } else if (current.myBiome == biome.Mountain) {
-                        g2d.drawImage(rotateImageObject(current).filter(mount_tile_small, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
-                    } else if (current.myBiome == biome.Desert) {
-                        g2d.drawImage(rotateImageObject(current).filter(desert_tile_small, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
-                    }
-                }
+        public Tile(double xinput, double yinput, double width, double height, double angle) {
+            super(xinput,yinput,width,height,angle);
+            neighbors = new Vector<>();
+            resourceRates = new Vector<>();
+            occupyingUnits = new Vector<>();
+            mine = 0;
+            forge = 0;
+            lumberMill = 0;
+            deforestation = 0;
+            farm = 0;
+            plantation = 0;
+            school = 0;
+            college = 0;
+        }
+
+        public Tile(String owner, double xinput, double yinput, double width, double height, double angle, String myBiome, int mine, int forge, int lumberMill, int deforestation, int farm, int plantation, int school, int college, String[] military) {
+            super(xinput,yinput,width,height,angle);
+            neighbors = new Vector<>();
+            resourceRates = new Vector<>();
+            occupyingUnits = new Vector<>();
+            this.owner = owner;
+            this.myBiome = biome.valueOf(myBiome);
+            if (this.myBiome == biome.Flatland) biomeCounts.set(0,biomeCounts.get(0)+1);
+            if (this.myBiome == biome.Flatland) biomeCounts.set(1,biomeCounts.get(1)+1);
+            if (this.myBiome == biome.Flatland) biomeCounts.set(2,biomeCounts.get(2)+1);
+            if (this.myBiome == biome.Flatland) biomeCounts.set(3,biomeCounts.get(3)+1);
+            this.mine = mine;
+            this.forge = forge;
+            this.lumberMill = lumberMill;
+            this.deforestation = deforestation;
+            this.farm = farm;
+            this.plantation = plantation;
+            this.school = school;
+            this.college = college;
+            for (int i = 0; i < military.length-1; i+=2) {
+                this.setMilitary(military[i],1,military[i+1]);
+            }
+        }
+        public String toString() {
+            return owner + "- Labor: " + resourceRates.get(0) + " Wood: " + resourceRates.get(1) + " Metal: " + resourceRates.get(2) + " Food: " + resourceRates.get(3) + " Research: " + resourceRates.get(4);
+        }
+        public boolean equals(Tile a) {
+            return x == a.x && y == a.y;
+        }
+        public void setOwner(int index) {
+            if (index == 0) {
+                owner = "Stark";
+            } else if (index == numTiles - 1) {
+                owner = "Lannister";
             } else {
-                if (current.mouseHover) {
-//                    System.out.println((current.x + current.getWidth() / 2) + " " + (current.y - current.getHeight() / 2) + "\n" + board.mouseX + " " + board.mouseY);
-                    if (current.myBiome == biome.Flatland) {
-                        g2d.drawImage(rotateImageObject(current).filter(enemy_flat_tile, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
-                    } else if (current.myBiome == biome.Forest) {
-                        g2d.drawImage(rotateImageObject(current).filter(enemy_forest_tile, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
-                    } else if (current.myBiome == biome.Mountain) {
-                        g2d.drawImage(rotateImageObject(current).filter(enemy_mount_tile, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
-                    } else if (current.myBiome == biome.Desert) {
-                        g2d.drawImage(rotateImageObject(current).filter(enemy_desert_tile, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                owner = "";
+            }
+        }
+        public biome getBiome() {
+            return myBiome;
+        }
+        public void isWaterSide() { waterSide = (neighbors.size() < 6); }
+        public Point2D.Double getCenter() {
+            return new Point2D.Double(x + (xwidth*0.5),y+(yheight*1.5));
+        }
+        public void setResourceRates() {
+            resourceRates.clear();
+            int labor, wood, metal, food, research;
+            Random rand = new Random(System.currentTimeMillis() + (int)x + (int)y);
+            if (myBiome == biome.Flatland) {
+                labor = rand.nextInt(20) + 20;
+                wood = rand.nextInt(5) + 5;
+                metal = rand.nextInt(5);
+                food = rand.nextInt(10) + 25;
+                research = rand.nextInt(5);
+            } else if (myBiome == biome.Forest) {
+                labor = rand.nextInt(5);
+                wood = rand.nextInt(20) + 30;
+                metal = rand.nextInt(5);
+                food = rand.nextInt(10) + 10;
+                research = rand.nextInt(5) + 10;
+            } else if (myBiome == biome.Mountain) {
+                labor = rand.nextInt(5);
+                wood = rand.nextInt(10);
+                metal = rand.nextInt(20) + 40;
+                food = rand.nextInt(5) + 5;
+                research = rand.nextInt(5) + 5;
+            } else {
+                labor = rand.nextInt(10) + 20;
+                wood = rand.nextInt(5) + 5;
+                metal = rand.nextInt(5);
+                food = rand.nextInt(5);
+                research = rand.nextInt(10) + 25;
+            }
+            if (waterSide) {
+                labor += rand.nextInt(10);
+                food += rand.nextInt(10);
+            }
+            wood += 5 * lumberMill + 10 * deforestation;
+            metal += 5 * mine + 10 * forge;
+            food += 5 * farm + 10 * plantation;
+            research += 5 * school  + 10 * college;
+            resourceRates.add(labor);
+            resourceRates.add(wood);
+            resourceRates.add(metal);
+            resourceRates.add(food);
+            resourceRates.add(research);
+        }
+        public void generateBiome() {
+            Vector<Integer> neighborBiomes = countNeighborBiomes();
+            int flat_count = neighborBiomes.get(0) * 12;
+            if (biomeCounts.get(0) > numTiles / 3) {
+                flat_count = -25;
+            }
+            int forest_count = neighborBiomes.get(1) * 12;
+            if (biomeCounts.get(1) > numTiles / 3) {
+                forest_count = -25;
+            }
+            int mountain_count = neighborBiomes.get(2) * 12;
+            if (biomeCounts.get(2) > numTiles / 3) {
+                mountain_count = -25;
+            }
+            int desert_count = neighborBiomes.get(3) * 12;
+            if (biomeCounts.get(3) > numTiles / 3) {
+                desert_count = -25;
+            }
+            int total = 100 + flat_count + forest_count + mountain_count + desert_count;
+            Random rand = new Random(System.currentTimeMillis());
+            int selector = rand.nextInt(total) + 1;
+            if (selector <= 25 + flat_count) {
+                myBiome = biome.Flatland;
+                biomeCounts.set(0,biomeCounts.get(0)+1);
+            } else if (selector <= 50 + flat_count + forest_count) {
+                myBiome = biome.Forest;
+                biomeCounts.set(1,biomeCounts.get(1)+1);
+            } else if (selector <= 75 + flat_count + forest_count + mountain_count) {
+                myBiome = biome.Mountain;
+                biomeCounts.set(2,biomeCounts.get(2)+1);
+            } else if (selector <= 100 + flat_count + forest_count + mountain_count + desert_count) {
+                myBiome = biome.Desert;
+                biomeCounts.set(3,biomeCounts.get(3)+1);
+            } else {
+                throw new IllegalArgumentException();
+            }
+        }
+        private Vector<Integer> countNeighborBiomes() {
+            Vector<Integer> biomeCount = new Vector<>();
+            biomeCount.add(0);
+            biomeCount.add(0);
+            biomeCount.add(0);
+            biomeCount.add(0);
+            for (int i = 0; i < neighbors.size(); i++) {
+                biome neighborBiome = neighbors.get(i).getBiome();
+                if (neighborBiome == biome.Flatland) {
+                    biomeCount.set(0,biomeCount.get(0)+1);
+                } else if (neighborBiome == biome.Forest) {
+                    biomeCount.set(1,biomeCount.get(1)+1);
+                } else if (neighborBiome == biome.Mountain) {
+                    biomeCount.set(2,biomeCount.get(2)+1);
+                } else if (neighborBiome == biome.Desert) {
+                    biomeCount.set(3,biomeCount.get(3)+1);
+                }
+            }
+            return biomeCount;
+        }
+        public void findNeighbors(Vector<Tile> tiles) {
+            Point2D.Double up = new Point2D.Double(x + (xwidth * 0.5),y - (yheight * 1.5));
+            Point2D.Double upRight = new Point2D.Double(x + (xwidth * 1.25),y - yheight);
+            Point2D.Double downRight = new Point2D.Double(x + (xwidth * 1.25),y);
+            Point2D.Double down = new Point2D.Double(x + (xwidth * 0.5),y + (yheight * 0.5));
+            Point2D.Double downLeft = new Point2D.Double(x- (xwidth * 0.25),y);
+            Point2D.Double upLeft = new Point2D.Double(x - (xwidth * 0.25),y - yheight);
+            for (int i = 0; i < tiles.size(); i++) {
+                Tile current = tiles.get(i);
+                if (!(current.getX() == x && current.getY() == y)) {
+                    if(isInside(up.getX(),up.getY(),current.getX(),current.getY(),current.getX() + current.getWidth(),current.getY() - current.getHeight())) {
+                        neighbors.add(current);
                     }
-//                    System.out.println(current.toString());
-                } else {
-                    if (current.myBiome == biome.Flatland) {
-                        g2d.drawImage(rotateImageObject(current).filter(enemy_flat_tile_small, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
-                    } else if (current.myBiome == biome.Forest) {
-                        g2d.drawImage(rotateImageObject(current).filter(enemy_forest_tile_small, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
-                    } else if (current.myBiome == biome.Mountain) {
-                        g2d.drawImage(rotateImageObject(current).filter(enemy_mount_tile_small, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
-                    } else if (current.myBiome == biome.Desert) {
-                        g2d.drawImage(rotateImageObject(current).filter(enemy_desert_tile_small, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                    if(isInside(upRight.getX(),upRight.getY(),current.getX(),current.getY(),current.getX() + current.getWidth(),current.getY() - current.getHeight())) {
+                        neighbors.add(current);
+                    }
+                    if(isInside(downRight.getX(),downRight.getY(),current.getX(),current.getY(),current.getX() + current.getWidth(),current.getY() - current.getHeight())) {
+                        neighbors.add(current);
+                    }
+                    if(isInside(downLeft.getX(),downLeft.getY(),current.getX(),current.getY(),current.getX() + current.getWidth(),current.getY() - current.getHeight())) {
+                        neighbors.add(current);
+                    }
+                    if(isInside(down.getX(),down.getY(),current.getX(),current.getY(),current.getX() + current.getWidth(),current.getY() - current.getHeight())) {
+                        neighbors.add(current);
+                    }
+                    if(isInside(upLeft.getX(),upLeft.getY(),current.getX(),current.getY(),current.getX() + current.getWidth(),current.getY() - current.getHeight())) {
+                        neighbors.add(current);
                     }
                 }
             }
         }
-    }
 
-    private static void drawPath(Graphics2D g2d, Tile current) {
-        Vector<Tile> path = getPath(pathBeginning,current);
-        for (int i = 0; i < path.size()-1; i++) {
-            g2d.drawLine((int)path.get(i).getCenter().getX(),(int)path.get(i).getCenter().getY(),(int)path.get(i+1).getCenter().getX(),(int)path.get(i+1).getCenter().getY());
+        public void setMilitary(String unit, int change, String nation) {
+            if (nation == "Stark") {
+                if (change < 0) {
+                    int index = -1;
+                    for (int i = 0; i < occupyingUnits.size(); i++) {
+                        if (occupyingUnits.get(i).unitName == unit && occupyingUnits.get(i).owner == "Stark") {
+                            index = i;
+                            System.out.println("\t" + index);
+//                            occupyingUnits.remove(i);
+                        }
+                    }
+                    if (index >= 0) {
+                        occupyingUnits.remove(index);
+                    }
+                } else {
+                    occupyingUnits.add(0, new MilitaryUnit(nation, unit));
+                    Stark.setMilitary(unit, change);
+                }
+            } else if (nation == "Lannister") {
+                if (change < 0) {
+                    for (int i = 0; i < occupyingUnits.size(); i++) {
+                        if (occupyingUnits.get(i).unitName == unit && occupyingUnits.get(i).owner == "Lannister") {
+                            occupyingUnits.remove(i);
+                        }
+                    }
+                } else {
+                    occupyingUnits.add(0, new MilitaryUnit(nation, unit));
+                    Lannister.setMilitary(unit, change);
+                }
+            } else if (nation == "Targaryen") {
+                if (change < 0) {
+                    for (int i = 0; i < occupyingUnits.size(); i++) {
+                        if (occupyingUnits.get(i).unitName == unit && occupyingUnits.get(i).owner == "Targaryen") {
+                            occupyingUnits.remove(i);
+                        }
+                    }
+                } else {
+                    occupyingUnits.add(0, new MilitaryUnit(nation, unit));
+                    Targaryen.setMilitary(unit, change);
+                }
+            }
+            backgroundDraw();
+        }
+
+        public void setBuilding(String unit, int change) {
+            if (owner == "Stark") {
+                if (unit == "mine") {
+                    mine += change;
+                } else if (unit == "forge") {
+                    forge += change;
+                } else if (unit == "lumberMill") {
+                    lumberMill += change;
+                } else if (unit == "deforestation") {
+                    deforestation += change;
+                } else if (unit == "farm") {
+                    farm += change;
+                } else if (unit == "plantation") {
+                    plantation += change;
+                } else if (unit == "school") {
+                    school += change;
+                } else if (unit == "college") {
+                    college += change;
+                }
+                Stark.setBuilding(unit, change);
+            } else if (owner == "Lannister") {
+                if (unit == "mine") {
+                    mine += change;
+                } else if (unit == "forge") {
+                    forge += change;
+                } else if (unit == "lumberMill") {
+                    lumberMill += change;
+                } else if (unit == "deforestation") {
+                    deforestation += change;
+                } else if (unit == "farm") {
+                    farm += change;
+                } else if (unit == "plantation") {
+                    plantation += change;
+                } else if (unit == "school") {
+                    school += change;
+                } else if (unit == "college") {
+                    college += change;
+                }
+                Lannister.setBuilding(unit, change);
+            } else if (owner == "Targaryen") {
+                if (unit == "mine") {
+                    mine += change;
+                } else if (unit == "forge") {
+                    forge += change;
+                } else if (unit == "lumberMill") {
+                    lumberMill += change;
+                } else if (unit == "deforestation") {
+                    deforestation += change;
+                } else if (unit == "farm") {
+                    farm += change;
+                } else if (unit == "plantation") {
+                    plantation += change;
+                } else if (unit == "school") {
+                    school += change;
+                } else if (unit == "college") {
+                    college += change;
+                }
+                Targaryen.setBuilding(unit, change);
+            }
+            backgroundDraw();
+        }
+        public void addResources() {
+            if (owner.equals("Stark")) {
+                Stark.setResource("labor",resourceRates.get(0));
+                Stark.setResource("wood",resourceRates.get(1));
+                Stark.setResource("metal",resourceRates.get(2));
+                Stark.setResource("food",resourceRates.get(3));
+                Stark.setResource("education",resourceRates.get(4));
+            } else if (owner.equals("Lannister")) {
+                Lannister.setResource("labor",resourceRates.get(0));
+                Lannister.setResource("wood",resourceRates.get(1));
+                Lannister.setResource("metal",resourceRates.get(2));
+                Lannister.setResource("food",resourceRates.get(3));
+                Lannister.setResource("education",resourceRates.get(4));
+            } else if (owner.equals("Targaryen")) {
+                Targaryen.setResource("labor",resourceRates.get(0));
+                Targaryen.setResource("wood",resourceRates.get(1));
+                Targaryen.setResource("metal",resourceRates.get(2));
+                Targaryen.setResource("food",resourceRates.get(3));
+                Targaryen.setResource("education",resourceRates.get(4));
+            }
         }
     }
 
+    private static class MilitaryUnit {
+        private String owner;
+        String unitName;
+        private enum unitType{melee, range, siege};
+        unitType type;
+        private int health;
+        private int melee;
+        private int range;
+        private int siege;
+
+        public MilitaryUnit(String unitOwner, String unit) {
+            owner = unitOwner;
+            /*       Melee:              Range:            Siege:
+            Tier 1 - Swordmen            Javelinmen        Siege Tower
+            Tier 2 - Shieldmen           Javelinmen            Catapult
+            Tier 3 - Spearmen            Crossbowmen       Ballista
+            Tier 4 - Mounted Calvalry    Mounted Javelinmen    Trebuchet */
+            if (unit == "Swordmen") {
+                unitName = "Swordmen";
+                type = unitType.melee;
+                health = 5;
+                melee = 5;
+                range = 5;
+                siege = 0;
+            } else if (unit == "Shieldmen") {
+                unitName = "Shieldmen";
+                type = unitType.melee;
+                health = 10;
+                melee = 5;
+                range = 15;
+                siege = 0;
+            } else if (unit == "Spearmen") {
+                unitName = "Spearmen";
+                type = unitType.melee;
+                health = 15;
+                melee = 10;
+                range = 20;
+                siege = 0;
+            } else if (unit == "Mounted Calvalry") {
+                unitName = "Mounted Calvalry";
+                type = unitType.melee;
+                health = 20;
+                melee = 15;
+                range = 25;
+                siege = 0;
+            } else if (unit == "Javelinmen") {
+                unitName = "Javelinmen";
+                type = unitType.range;
+                health = 5;
+                melee = 0;
+                range = 5;
+                siege = 5;
+            } else if (unit == "Archer") {
+                unitName = "Archer";
+                type = unitType.range;
+                health = 10;
+                melee = 0;
+                range = 5;
+                siege = 15;
+            } else if (unit == "Crossbowmen") {
+                unitName = "Crossbowmen";
+                type = unitType.range;
+                health = 15;
+                melee = 0;
+                range = 10;
+                siege = 20;
+            } else if (unit == "Mounted Javelinmen") {
+                unitName = "Mounted Javelinmen";
+                type = unitType.range;
+                health = 20;
+                melee = 0;
+                range = 15;
+                siege = 25;
+            } else if (unit == "Siege Tower") {
+                unitName = "Siege Tower";
+                type = unitType.siege;
+                health = 5;
+                melee = 5;
+                range = 0;
+                siege = 5;
+            } else if (unit == "Catapult") {
+                unitName = "Catapult";
+                type = unitType.siege;
+                health = 10;
+                melee = 15;
+                range = 0;
+                siege = 5;
+            } else if (unit == "Ballista") {
+                unitName = "Ballista";
+                type = unitType.siege;
+                health = 15;
+                melee = 20;
+                range = 0;
+                siege = 10;
+            } else if (unit == "Trebuchet") {
+                unitName = "Trebuchet";
+                type = unitType.siege;
+                health = 20;
+                melee = 25;
+                range = 0;
+                siege = 15;
+            }
+        }
+    }
+
+    private static class Nation {
+        private String nationName;
+        private boolean currentStatus;
+        private JTabbedPane inboxTabs = new JTabbedPane();
+        private JTabbedPane sentTabs = new JTabbedPane();
+        private JTabbedPane archivedTabs = new JTabbedPane();
+        private int metal;
+        private int wood;
+        private int food;
+        private int labor;
+        private int education;
+        private int swordmen;
+        private int shieldmen;
+        private int spearmen;
+        private int mountedCalvalry;
+        private int javelinmen;
+        private int archer;
+        private int crossbowmen;
+        private int mountedArcher;
+        private int siegeTower;
+        private int catapult;
+        private int ballista;
+        private int trebuchet;
+        private int mine;
+        private int forge;
+        private int lumberMill;
+        private int deforestation;
+        private int farm;
+        private int plantation;
+        private int school;
+        private int college;
+        private boolean mineResearched;
+        private boolean forgeResearched;
+        private boolean lumberMillResearched;
+        private boolean deforestationResearched;
+        private boolean farmResearched;
+        private boolean plantationResearched;
+        private boolean schoolResearched;
+        private boolean collegeResearched;
+
+        private boolean swordmenResearched;
+
+        private boolean shieldmenResearched;
+        private boolean spearmenResearched;
+        private boolean mountedCalvalryResearched;
+        private boolean javelinmenResearched;
+
+        private boolean archerResearched;
+        private boolean crossbowmenResearched;
+        private boolean mountedArcherResearched;
+        private boolean siegeTowerResearched;
+        private boolean catapultResearched;
+        private boolean ballistaResearched;
+        private boolean trebuchetResearched;
+
+        public Nation() {
+            inboxTabs.setTabPlacement(JTabbedPane.LEFT);
+            inboxTabs.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
+            sentTabs.setTabPlacement(JTabbedPane.LEFT);
+            sentTabs.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
+            archivedTabs.setTabPlacement(JTabbedPane.LEFT);
+            archivedTabs.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
+            metal = 0;
+            wood = 0;
+            food = 0;
+            labor = 0;
+            education = 0;
+            swordmen = 0;
+            shieldmen = 0;
+            spearmen = 0;
+            mountedCalvalry = 0;
+            javelinmen = 0;
+            archer = 0;
+            crossbowmen = 0;
+            mountedArcher = 0;
+            siegeTower = 0;
+            catapult = 0;
+            ballista = 0;
+            trebuchet = 0;
+            mine = 0;
+            forge = 0;
+            lumberMill = 0;
+            deforestation = 0;
+            farm = 0;
+            plantation = 0;
+            school = 0;
+            college = 0;
+            mineResearched = false;
+            forgeResearched = false;
+            lumberMillResearched = false;
+            deforestationResearched = false;
+            farmResearched = false;
+            plantationResearched = false;
+            schoolResearched = false;
+            collegeResearched = false;
+            swordmenResearched = true;
+            shieldmenResearched = false;
+            spearmenResearched = false;
+            mountedCalvalryResearched = false;
+            javelinmenResearched = true;
+            archerResearched = false;
+            crossbowmenResearched = false;
+            mountedArcherResearched = false;
+            siegeTowerResearched = true;
+            catapultResearched = false;
+            ballistaResearched = false;
+            trebuchetResearched = false;
+        }
+
+        public void setActive(boolean status) {
+            currentStatus = status;
+        }
+
+        public boolean isActive() {
+            return currentStatus;
+        }
+
+        public void setResource(String unit, int change) {
+            if (unit == "metal") {
+                metal += change;
+            } else if (unit == "wood") {
+                wood += change;
+            } else if (unit == "food") {
+                food += change;
+            } else if (unit == "labor") {
+                labor += change;
+            } else if (unit == "education") {
+                education += change;
+            }
+            backgroundDraw();
+        }
+
+        public void setMilitary(String unit, int change) {
+            if (change > 0) {
+                if (unit == "Swordmen") {
+                    swordmen += change;
+                    metal -= 10 * change;
+                    food -= 10 * change;
+                    labor -= 10 * change;
+                } else if (unit == "Shieldmen") {
+                    shieldmen += change;
+                    metal -= 10 * change;
+                    food -= 10 * change;
+                    labor -= 20 * change;
+                } else if (unit == "Spearmen") {
+                    spearmen += change;
+                    metal -= 20 * change;
+                    food -= 10 * change;
+                    labor -= 10 * change;
+                } else if (unit == "Mounted Cavalry") {
+                    mountedCalvalry += change;
+                    metal -= 20 * change;
+                    food -= 10 * change;
+                    labor -= 20 * change;
+                } else if (unit == "Javelinmen") {
+                    javelinmen += change;
+                    metal -= 10 * change;
+                    food -= 10 * change;
+                    labor -= 10 * change;
+                } else if (unit == "Archer") {
+                    archer += change;
+                    food -= 10 * change;
+                    labor -= 10 * change;
+                } else if (unit == "Crossbowmen") {
+                    crossbowmen += change;
+                    metal -= 10 * change;
+                    wood -= 20 * change;
+                    food -= 10 * change;
+                    labor -= 10 * change;
+                } else if (unit == "Mounted Archer") {
+                    mountedArcher += change;
+                    metal -= 20 * change;
+                    wood -= 30 * change;
+                    food -= 10 * change;
+                    labor -= 10 * change;
+                } else if (unit == "Siege Tower") {
+                    siegeTower += change;
+                    food -= 50 * change;
+                    labor -= 25 * change;
+                } else if (unit == "Catapult") {
+                    catapult += change;
+                    metal -= 10 * change;
+                    wood -= 100 * change;
+                    food -= 10 * change;
+                    labor -= 50 * change;
+                } else if (unit == "Ballista") {
+                    ballista += change;
+                    food -= 100 * change;
+                    labor -= 100 * change;
+                }
+                else if (unit == "Trebuchet") {
+                    trebuchet += change;
+                    food -= 100 * change;
+                    labor -= 100 * change;
+                }
+            } else if (change < 0) {
+                if (unit == "Swordmen") {
+                    swordmen += change;
+                } else if (unit == "Shieldmen") {
+                    shieldmen += change;
+                } else if (unit == "Spearmen") {
+                    spearmen += change;
+                } else if (unit == "Mounted Cavalry") {
+                    mountedCalvalry += change;
+                } else if (unit == "Javelinmen") {
+                    javelinmen += change;
+                } else if (unit == "Archer") {
+                    archer += change;
+                } else if (unit == "Crossbowmen") {
+                    crossbowmen += change;
+                } else if (unit == "Mounted Archer") {
+                    mountedArcher += change;
+                } else if (unit == "Siege Tower") {
+                    siegeTower += change;
+                } else if (unit == "Catapult") {
+                    catapult += change;
+                } else if (unit == "Ballista") {
+                    ballista += change;
+                } else if (unit == "Trebuchet") {
+                    trebuchet += change;
+                }
+            }
+            backgroundDraw();
+        }
+
+        public void setBuilding(String unit, int change) {
+            if (unit == "mine") {
+                mine += change;
+                metal -= 10 * change;
+                wood -= 50 * change;
+                food -= 20 * change;
+                labor -= 20 * change;
+            } else if (unit == "forge") {
+                forge += change;
+                metal -= 50 * change;
+                wood -= 40 * change;
+                food -= 20 * change;
+                labor -= 40 * change;
+            } else if (unit == "lumberMill") {
+                lumberMill += change;
+                metal -= 50 * change;
+                wood -= 10 * change;
+                food -= 20 * change;
+                labor -= 20 * change;
+            } else if (unit == "deforestation") {
+                deforestation += change;
+                metal -= 20 * change;
+                wood -= 40 * change;
+                food -= 50 * change;
+                labor -= 40 * change;
+            } else if (unit == "farm") {
+                farm += change;
+                metal -= 20 * change;
+                wood -= 40 * change;
+                food -= 20 * change;
+                labor -= 20 * change;
+            } else if (unit == "plantation") {
+                plantation += change;
+                metal -= 40 * change;
+                wood -= 50 * change;
+                food -= 20 * change;
+                labor -= 40 * change;
+            } else if (unit == "school") {
+                school += change;
+                metal -= 40 * change;
+                wood -= 20 * change;
+                food -= 20 * change;
+                labor -= 20 * change;
+            } else if (unit == "college") {
+                college += change;
+                metal -= 40 * change;
+                wood -= 40 * change;
+                food -= 30 * change;
+                labor -= 40 * change;
+            }
+            backgroundDraw();
+        }
+
+        public void setResearch(String unit, boolean change) {
+            if (unit == "mine") {
+                mineResearched = change;
+                education -= 50;
+                labor -= 10;
+            } else if (unit == "forge") {
+                forgeResearched = change;
+                education -= 75;
+                labor -= 25;
+            } else if (unit == "lumberMill") {
+                lumberMillResearched = change;
+                education -= 50;
+                labor -= 10;
+            } else if (unit == "deforestation") {
+                deforestationResearched = change;
+                education -= 75;
+                labor -= 25;
+            } else if (unit == "farm") {
+                farmResearched = change;
+                education -= 50;
+                labor -= 10;
+            } else if (unit == "plantation") {
+                plantationResearched = change;
+                education -= 75;
+                labor -= 25;
+            } else if (unit == "school") {
+                schoolResearched = change;
+                education -= 50;
+                labor -= 10;
+            } else if (unit == "college") {
+                collegeResearched = change;
+                education -= 75;
+                labor -= 25;
+            } else if (unit == "swordmen") {
+                spearmenResearched = change;
+                education -= 50;
+                labor -= 10;
+            } else if (unit == "shieldmen") {
+                spearmenResearched = change;
+                education -= 50;
+                labor -= 10;
+            } else if (unit == "spearmen") {
+                spearmenResearched = change;
+                education -= 75;
+                labor -= 25;
+            } else if (unit == "mountedCalvalry") {
+                mountedCalvalryResearched = change;
+                education -= 100;
+                labor -= 50;
+            } else if (unit == "javelinmen") {
+                javelinmenResearched = change;
+                education -= 50;
+                labor -= 10;
+            } else if (unit == "archer") {
+                archerResearched = change;
+                education -= 50;
+                labor -= 10;
+            } else if (unit == "crossbowmen") {
+                crossbowmenResearched = change;
+                education -= 75;
+                labor -= 25;
+            } else if (unit == "mountedArcher") {
+                mountedArcherResearched = change;
+                education -= 100;
+                labor -= 50;
+            } else if (unit == "siegeTower") {
+                siegeTowerResearched = change;
+                education -= 50;
+                labor -= 10;
+            } else if (unit == "catapult") {
+                catapultResearched = change;
+                education -= 50;
+                labor -= 10;
+            } else if (unit == "ballista") {
+                education -= 75;
+                labor -= 25;
+            } else if (unit == "trebuchet") {
+                trebuchetResearched = change;
+                education -= 100;
+                labor -= 50;
+            }
+            backgroundDraw();
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //TODO: Open Menus
     private static void openStartScreen() {
         JFrame frame = new JFrame("Start Screen");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -655,284 +1346,6 @@ public class Main {
         frame.setVisible(true);
     }
 
-    //All Network Stuff
-    private static class ServerRunner implements Runnable {
-        private static Map<String, PlayerHandler> players = new ConcurrentHashMap<>();
-        public void run() {
-            try (ServerSocket serverSocket = new ServerSocket(12345)) {
-                System.out.println("DND Server is running on port 12345");
-
-                while (true) {
-                    Socket clientSocket = serverSocket.accept();
-                    PlayerHandler playerHandler = new PlayerHandler(clientSocket);
-                    new Thread(playerHandler).start();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        public static synchronized void broadcast(String message, PlayerHandler sender) {
-            for (PlayerHandler player : players.values()) {
-                if (player != sender) {
-                    player.sendMessage(message);
-                }
-            }
-        }
-
-        public static synchronized void updatePlayerMove(String playerName, String move) {
-            String message = "UPDATE: " + move;
-            broadcast(message, players.get(playerName));
-        }
-
-        public static synchronized void sendBoard(String playerName, String move) {
-            String message = "BOARD" + move;
-            broadcast(message, players.get(playerName));
-        }
-
-        public static synchronized void addPlayer(String playerName, PlayerHandler playerHandler) {
-            players.put(playerName, playerHandler);
-        }
-
-        public static synchronized void removePlayer(String playerName) {
-            players.remove(playerName);
-        }
-    }
-
-    private static class PlayerHandler implements Runnable {
-        private Socket socket;
-        private PrintWriter out;
-        private BufferedReader in;
-        private String playerName;
-
-        public PlayerHandler(Socket socket) {
-            this.socket = socket;
-        }
-
-        @Override
-        public void run() {
-            try {
-                in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                out = new PrintWriter(socket.getOutputStream(),true);
-
-                playerName = currentNation;
-
-                //Deal with moves here
-                String message;
-                while ((message = in.readLine()) != null) {
-                    if (message.startsWith("MOVE:")) {
-                        String move = message.substring(6);
-                        String[] parts = move.split("\\|");
-                        playerName = parts[0];
-                        System.out.println("Server: received move from " + playerName);
-                        ServerRunner.sendBoard(playerName,parts[1].substring(5));
-                    } else if (message.startsWith("JOIN:")) {
-                        playerName = message.substring(6);
-                        ServerRunner.addPlayer(playerName, this);
-                        System.out.println(playerName + " has joined the game.");
-                        if (!playerName.equals(currentNation)) {
-                            System.out.println("Server: Requesting board");
-                            ServerRunner.sendBoard(playerName,": Request");
-                            //ServerRunner.broadcast("BOARD: Request",ServerRunner.players.get(playerName));
-                        }
-                    } else if (message.startsWith("BOARD[")) {
-                        System.out.println("Server: Recieved board");
-                        ServerRunner.sendBoard(playerName,message.substring(5));
-                        //ServerRunner.broadcast(message,ServerRunner.players.get(playerName));
-                    }
-                }
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                try {
-                    ServerRunner.removePlayer(playerName);
-                    socket.close();
-                    System.out.println(playerName + " has left the game.");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        public void sendMessage(String message) {
-            out.println(message);
-        }
-    }
-
-    private static class ClientRunner implements Runnable {
-        public void run() {
-            try {
-                Socket socket;
-                if (ip == null) {
-                    socket = new Socket("localhost",12345);
-                } else {
-                    socket = new Socket(ip,12345);
-                }
-                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                PrintWriter out = new PrintWriter(socket.getOutputStream(),true);
-
-                new Thread(() -> {
-                    String serverMessage;
-                    try {
-                        while ((serverMessage = in.readLine()) != null) {
-                            if (serverMessage.startsWith("UPDATE:")) {
-                                String[] parts = serverMessage.split(",");
-                                System.out.println("Client: " + serverMessage);
-                            } else if (serverMessage.equals("BOARD: Request")) {
-                                System.out.println("Client: Sending board");
-                                out.println(getGameState());
-                            } else if (serverMessage.startsWith("BOARD[")) {
-                                System.out.println("Client: Received board");
-                                tiles = CreateBoard(serverMessage);
-                                actionsTaken = 0;
-                            }
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        appFrame.setVisible(false);
-                        openStartScreen();
-                    }
-                }).start();
-
-                String move = "";
-                String lastMove = "";
-                if (!joined) {
-                    move = "JOIN: " + currentNation;
-                    out.println(move);
-                    joined = true;
-                }
-                while (true) {
-                    try {
-                        Thread.sleep(300);
-                    } catch (InterruptedException ie) {}
-                    if (actionsTaken == maxActions && joined) {
-                        System.out.println("Client: Sending moves");
-                        actionsTaken = maxActions + 1;
-                        out.println("MOVE: " + currentNation + "|" + getGameState());
-                    } else if (attacking) {
-                        out.println("ATTACK");
-                    }
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-                appFrame.setVisible(false);
-                openStartScreen();
-            }
-        }
-    }
-
-    private static String getGameState() {
-        String gameState = "BOARD[";
-        for (Tile tile: tiles) {
-            biome biomeEnum = tile.getBiome();
-            gameState = gameState + "(" + tile.owner + "," + tile.getX() + "," + tile.getY() + "," + biomeEnum.name() + "," + tile.mine + "," + tile.forge + "," + tile.lumberMill + "," + tile.deforestation + "," + tile.farm + "," + tile.plantation + "," + tile.school + "," + tile.college;
-            for (int i = 0; i < tile.occupyingUnits.size(); i++) {
-                gameState += "," + tile.occupyingUnits.get(i).unitName + "," + tile.occupyingUnits.get(i).owner;
-            }
-            gameState += ")";
-        }
-        gameState = gameState + "]";
-        return gameState;
-    }
-
-    private static Vector<Tile> CreateBoard(String board) {
-        Vector<Tile> tiles = new Vector<>();
-        board = board.substring(6);
-//        System.out.println(board);
-        String[] tileArr = board.split("\\(");
-        for (String tile: tileArr) {
-            if (tile.equals(tileArr[0])) continue;
-            String[] items = tile.split(",");
-            items[items.length-1] = items[items.length-1].substring(0,1);
-//            System.out.println(tileArr[1]);
-            Tile current = new Tile(items[0],Double.parseDouble(items[1]),Double.parseDouble(items[2]),tile_small.getWidth(),tile_small.getHeight(),0,items[3],Integer.parseInt(items[4]),Integer.parseInt(items[5]),Integer.parseInt(items[6]),Integer.parseInt(items[7]),Integer.parseInt(items[8]),Integer.parseInt(items[9]),Integer.parseInt(items[10]),Integer.parseInt(items[11]),Arrays.copyOfRange(items,12,items.length));
-            tiles.add(current);
-        }
-        for (Tile tile: tiles) {
-            tile.findNeighbors(tiles);
-            tile.isWaterSide();
-            tile.setResourceRates();
-            tile.addResources();
-        }
-        return tiles;
-    }
-
-    private static Vector<Tile> CreateBoard(int numTiles) {
-        Vector<Tile> tiles = new Vector<>();
-        Random rand = new Random(System.currentTimeMillis());
-        int loc;
-        int fails = 0;
-        tiles.addElement(new Tile(WINWIDTH/2,WINHEIGHT/2,tile_small.getWidth(),tile_small.getHeight(),0));
-        for (int i = 0; i < numTiles-1; i++) {
-            ImageObject current = tiles.get(i);
-            Point2D.Double checkPoint;
-            boolean createTile = true;
-            loc = rand.nextInt(6);
-            if (fails > 6) {
-                current = tiles.get(rand.nextInt(tiles.size()-1));
-            }
-            if (loc == 0) {
-                checkPoint = new Point2D.Double(current.getX(),(current.getY() - current.getHeight() - 2));
-            } else if (loc == 1) {
-                checkPoint = new Point2D.Double((current.getX() + (current.getWidth()*0.75) + Math.sqrt(2)),(current.getY() - (current.getHeight() * 0.5) - Math.sqrt(2)));
-            } else if (loc == 2) {
-                checkPoint = new Point2D.Double((current.getX() + (current.getWidth() * 0.75) + Math.sqrt(2)),(current.getY() + (current.getHeight() * 0.5) + Math.sqrt(2)));
-            } else if (loc == 3) {
-                checkPoint = new Point2D.Double(current.getX(),(current.getY() + current.getHeight() + 2));
-            } else if (loc == 4) {
-                checkPoint = new Point2D.Double((current.getX() - (current.getWidth() * 0.75) - Math.sqrt(2)),(current.getY() + (current.getHeight() * 0.5) + Math.sqrt(2)));
-            } else if (loc == 5) {
-                checkPoint = new Point2D.Double((current.getX() - (current.getWidth() * 0.75) - Math.sqrt(2)),(current.getY() - (current.getHeight() * 0.5) - Math.sqrt(2)));
-            } else {
-                checkPoint = new Point2D.Double();
-            }
-            for (int j = 0; j < tiles.size(); j++) {
-                if (checkPoint.getX() < 0 || checkPoint.getX() + tile_small.getWidth() > WINWIDTH || checkPoint.getY() > appFrame.getHeight() - YOFFSET - 25 || checkPoint.getY() - tile_small.getHeight() < 40 || isInside(checkPoint.getX() + (tile_small.getWidth() * 0.5),checkPoint.getY() - (tile_small.getHeight() * 0.5),tiles.get(j).getX(),tiles.get(j).getY(),tiles.get(j).getX()+tile_small.getWidth(),tiles.get(j).getY()-tile_small.getHeight())) {
-                    createTile = false;
-                    i--;
-                    fails++;
-                    break;
-                }
-            }
-            if (createTile) {
-                tiles.addElement(new Tile(checkPoint.getX(),checkPoint.getY(),tile_small.getWidth(),tile_small.getHeight(),0));
-                fails = 0;
-            }
-        }
-        for (int i = 0; i < tiles.size(); i++) {
-            tiles.get(i).findNeighbors(tiles);
-            tiles.get(i).generateBiome();
-            tiles.get(i).isWaterSide();
-            tiles.get(i).setResourceRates();
-            tiles.get(i).setOwner(i);
-            tiles.get(i).addResources();
-        }
-        return tiles;
-    }
-
-    private static class TileMover implements Runnable {
-        public void run() {
-            int off_tile = -1;
-            while (!endgame) {
-                for (int i = 0; i < tiles.size(); i++) {
-                    tiles.get(i).screenContain();
-                    if (off_tile == -1 && (tileFixX != 0 || tileFixY != 0)) {
-                        off_tile = i;
-                    }
-                }
-                if (off_tile != -1) {
-                    for (int i = 0; i < off_tile; i++) {
-                        tiles.get(i).screenContain();
-                    }
-                    off_tile = -1;
-                    tileFixY = 0;
-                    tileFixX = 0;
-                }
-            }
-        }
-    }
-
     public static void OpenLoadMenu() {
         JFrame frame = new JFrame("Load Menu");
         frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
@@ -1003,132 +1416,6 @@ public class Main {
             frame.setSize(30, 100);
             frame.setVisible(true);
         }
-    }
-
-    private static void OpenTileMenu(Tile tile) {
-        JFrame frame = new JFrame("Tile Menu");
-        frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-        frame.setLocation((int)(tile.getX() + tile.getWidth()),(int)tile.getY());
-
-        if (movingUnits.size() > 0) {
-            for (int i = 0; i < movingUnits.size(); i++) {
-                tile.setMilitary(movingUnits.get(i).unitName, 0, currentNation);
-            }
-            movingUnits = new Vector<>();
-        }
-
-        JPanel jPanel = new JPanel();
-        jPanel.setLayout(new BoxLayout(jPanel, BoxLayout.Y_AXIS));
-
-        JLabel tileOwner = new JLabel(tile.owner);
-        DefaultTableModel dm = new DefaultTableModel();
-        dm.setDataVector(new Object[][]{{"Metal: " + tile.resourceRates.get(2), "Mines: " + tile.mine},
-                        {"Wood: " + tile.resourceRates.get(1), "Forges: " + tile.forge},
-                        {"Food: " + tile.resourceRates.get(3), "Lumber Mills: " + tile.lumberMill},
-                        {"Labor: " + tile.resourceRates.get(0), "Deforestation: " + tile.deforestation},
-                        {"Education: " + tile.resourceRates.get(4), "Farms: " + tile.farm},
-                        {"", "Plantations: " + tile.plantation},
-                        {"", "Schools: " + tile.school},
-                        {"", "Colleges: " + tile.college}},
-                new Object[]{"Resource", "Building"});
-        JTable table = new JTable(dm);
-
-        JButton claimTile = new JButton("Claim Tile");
-        claimTile.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                frame.setVisible(false);
-                actionsTaken+=5;
-                if (actionsTaken > maxActions) {
-                    JOptionPane.showMessageDialog(claimTile,"You need 5 action points to claim a tile");
-                    actionsTaken-=5;
-                } else if (actionsTaken == maxActions + 1) {
-                    JOptionPane.showMessageDialog(claimTile,"It is not your turn");
-                    actionsTaken-=5;
-                } else {
-                    tile.owner = currentNation;
-                    tileOwner.setText(currentNation);
-                    if (currentNation.equals("Stark")) {
-                        Stark.labor += tile.resourceRates.get(0);
-                        Stark.wood += tile.resourceRates.get(1);
-                        Stark.metal += tile.resourceRates.get(2);
-                        Stark.food += tile.resourceRates.get(3);
-                        Stark.education += tile.resourceRates.get(4);
-                    } else if (currentNation.equals("Lannister")) {
-                        Lannister.labor += tile.resourceRates.get(0);
-                        Lannister.wood += tile.resourceRates.get(1);
-                        Lannister.metal += tile.resourceRates.get(2);
-                        Lannister.food += tile.resourceRates.get(3);
-                        Lannister.education += tile.resourceRates.get(4);
-                    } else {
-                        Targaryen.labor += tile.resourceRates.get(0);
-                        Targaryen.wood += tile.resourceRates.get(1);
-                        Targaryen.metal += tile.resourceRates.get(2);
-                        Targaryen.food += tile.resourceRates.get(3);
-                        Targaryen.education += tile.resourceRates.get(4);
-                    }
-                    jPanel.remove(claimTile);
-                    jPanel.repaint();
-                    backgroundDraw();
-                }
-            }
-        });
-
-        JButton buildButton = new JButton("Build");
-        buildButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                frame.dispose();
-                OpenConstructionMenu(tile);
-            }
-        });
-        JButton trainButton = new JButton("Train");
-        trainButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                frame.dispose();
-                OpenMilitaryMenu(tile);
-            }
-        });
-
-        JButton commandButton = new JButton("Command");
-        commandButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                frame.dispose();
-                OpenCommandMenu(tile);
-            }
-        });
-
-        Boolean hasAllies = false;
-        for (int i = 0; i < tile.occupyingUnits.size(); i++) {
-            if (tile.occupyingUnits.get(i).owner == currentNation) {
-                hasAllies = true;
-            }
-        }
-
-        jPanel.setBackground(colorBackground);
-        table.getTableHeader().setBackground(colorButton);
-        table.setBackground(colorBackground);
-        claimTile.setBackground(colorButton);
-        buildButton.setBackground(colorButton);
-        trainButton.setBackground(colorButton);
-        commandButton.setBackground(colorButton);
-        frame.setBackground(colorBackground);
-        jPanel.add(tileOwner);
-        jPanel.add(table);
-        if (tile.owner.equals("") && hasAllies) {
-            jPanel.add(claimTile);
-        } else if (tile.owner.equals(currentNation)) {
-            jPanel.add(buildButton);
-            jPanel.add(trainButton);
-        }
-        if (hasAllies) {
-            jPanel.add(commandButton);
-        }
-        frame.add(jPanel);
-        frame.pack();
-        frame.setVisible(true);
     }
 
     private static class OpenNationMenu implements ActionListener {
@@ -1214,381 +1501,6 @@ public class Main {
             frame.setSize(1000, 300);
             frame.setVisible(true);
         }
-    }
-
-    private static void OpenCommandMenu(Tile tile) {
-        JFrame frame = new JFrame("Command Menu");
-        frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-        frame.setLocation(300, 200);
-
-        DefaultTableModel dm1 = new DefaultTableModel();
-        dm1.setDataVector(null,
-                new Object[]{"Unit", "Owner", "Move"});
-        for (int i = 0; i < tile.occupyingUnits.size(); i++) {
-            if (tile.occupyingUnits.get(i).owner == currentNation) {
-                dm1.addRow(new Object[]{tile.occupyingUnits.get(i).unitName, tile.occupyingUnits.get(i).owner, false});
-            }
-        }
-        JTable allyTable = new JTable(dm1) {
-            @Override
-            public Class getColumnClass(int column) {
-                switch (column) {
-                    case 0:
-                        return String.class;
-                    case 1:
-                        return String.class;
-                    default:
-                        return Boolean.class;
-                }
-            }
-        };
-        JLabel selectedUnits = new JLabel();
-        allyTable.getModel().addTableModelListener(new TableModelListener() {
-            @Override
-            public void tableChanged(TableModelEvent e) {
-                if (actionsTaken < 10) {
-                    String temp = "<html>";
-                    movingUnits = new Vector<>();
-                    for(int i = 0; i < allyTable.getModel().getRowCount(); i++) {
-                        if ((Boolean) allyTable.getModel().getValueAt(i,2)) {
-                            temp += allyTable.getValueAt(i, 0) + "<br/>";
-                            tile.setMilitary((String) allyTable.getValueAt(i, 0), -1, currentNation);
-                            movingUnits.add(0, new MilitaryUnit(currentNation, (String) allyTable.getValueAt(i, 0)));
-                        }
-                    }
-                    temp += "</html>";
-                    selectedUnits.setText(temp);
-                }
-            }
-        });
-
-        Boolean hasEnemies = false;
-        DefaultTableModel dm2 = new DefaultTableModel();
-        dm2.setDataVector(null,
-                new Object[]{"Unit", "Owner", "Move"});
-        for (int i = 0; i < tile.occupyingUnits.size(); i++) {
-            if (tile.occupyingUnits.get(i).owner != currentNation) {
-                dm2.addRow(new Object[]{tile.occupyingUnits.get(i).unitName, tile.occupyingUnits.get(i).owner, ""});
-                hasEnemies = true;
-            }
-        }
-        JTable enemyTable = new JTable(dm2);
-
-        JButton moveButton = new JButton("Move Units");
-        moveButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                pathBeginning = tile;
-                frame.dispose();
-            }
-        });
-
-        JButton attackButton = new JButton("Attack");
-        attackButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                OpenAttackMenu(tile);
-                attacking = true;
-                frame.dispose();
-            }
-        });
-
-        JPanel jPanel = new JPanel();
-        jPanel.setLayout(new BoxLayout(jPanel, BoxLayout.Y_AXIS));
-        jPanel.setBackground(colorBackground);
-        allyTable.setBackground(colorBackground);
-        enemyTable.setBackground(colorBackground);
-        moveButton.setBackground(colorButton);
-        attackButton.setBackground(colorButton);
-        frame.setBackground(colorBackground);
-        jPanel.add(allyTable);
-        jPanel.add(enemyTable);
-        jPanel.add(selectedUnits);
-        if (hasEnemies) {
-            jPanel.add(attackButton);
-        }
-        if (actionsTaken < 10) {
-            jPanel.add(moveButton);
-        }
-
-        frame.add(jPanel);
-        frame.setSize(300, 300);
-        frame.setVisible(true);
-    }
-
-    private static void OpenAttackMenu(Tile tile) {
-        JFrame frame = new JFrame("Attack Menu");
-        frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-        frame.setLocation(300, 200);
-
-        Vector<MilitaryUnit> starkUnits = new Vector<>();
-        Vector<MilitaryUnit> lannisterUnits = new Vector<>();
-        Vector<MilitaryUnit> targaryenUnits = new Vector<>();
-        for (int i = 0; i < tile.occupyingUnits.size(); i++) {
-            if (tile.occupyingUnits.get(i).owner == "Stark") {
-                starkUnits.add(0, new MilitaryUnit(tile.occupyingUnits.get(i).owner, tile.occupyingUnits.get(i).unitName));
-            } else if (tile.occupyingUnits.get(i).owner == "Lannister") {
-                lannisterUnits.add(0, new MilitaryUnit(tile.occupyingUnits.get(i).owner, tile.occupyingUnits.get(i).unitName));
-            } else if (tile.occupyingUnits.get(i).owner == "Targaryen") {
-                targaryenUnits.add(0, new MilitaryUnit(tile.occupyingUnits.get(i).owner, tile.occupyingUnits.get(i).unitName));
-            }
-        }
-
-        double starkMeleePower = 0;
-        double starkRangePower = 0;
-        double starkSiegePower = 0;
-        double starkMeleeHealth = 0;
-        double starkRangeHealth = 0;
-        double starkSiegeHealth = 0;
-
-        double lannisterMeleePower = 0;
-        double lannisterRangePower = 0;
-        double lannisterSiegePower = 0;
-        double lannisterMeleeHealth = 0;
-        double lannisterRangeHealth = 0;
-        double lannisterSiegeHealth = 0;
-
-//        int targaryenMeleePower = 0;
-//        int targaryenRangePower = 0;
-//        int targaryenAirPower = 0;
-//        int targaryenMeleeHealth = 0;
-//        int targaryenRangeHealth = 0;
-//        int targaryenAirHealth = 0;
-        for (int i = 0; i < starkUnits.size(); i++) {
-            starkMeleePower += starkUnits.get(i).melee;
-            starkRangePower += starkUnits.get(i).range;
-            starkSiegePower += starkUnits.get(i).siege;
-            if (starkUnits.get(i).type == MilitaryUnit.unitType.melee) {
-                starkMeleeHealth += starkUnits.get(i).health;
-            } else if (starkUnits.get(i).type == MilitaryUnit.unitType.range) {
-                starkRangeHealth += starkUnits.get(i).health;
-            } else if (starkUnits.get(i).type == MilitaryUnit.unitType.siege) {
-                starkSiegeHealth += starkUnits.get(i).health;
-            }
-        }
-        for (int i = 0; i < lannisterUnits.size(); i++) {
-            lannisterMeleePower += starkUnits.get(i).melee;
-            lannisterRangePower += starkUnits.get(i).range;
-            lannisterSiegePower += lannisterUnits.get(i).siege;
-            if (lannisterUnits.get(i).type == MilitaryUnit.unitType.melee) {
-                lannisterMeleeHealth += lannisterUnits.get(i).health;
-            } else if (lannisterUnits.get(i).type == MilitaryUnit.unitType.range) {
-                lannisterRangeHealth += lannisterUnits.get(i).health;
-            } else if (lannisterUnits.get(i).type == MilitaryUnit.unitType.siege) {
-                lannisterSiegeHealth += lannisterUnits.get(i).health;
-            }
-        }
-//        for (int i = 0; i < targaryenUnits.size(); i++) {
-//            targaryenMeleePower += starkUnits.get(i).melee;
-//            targaryenRangePower += starkUnits.get(i).range;
-//            targaryenAirPower += targaryenUnits.get(i).air;
-//            if (targaryenUnits.get(i).type == MilitaryUnit.unitType.melee) {
-//                targaryenMeleeHealth += targaryenUnits.get(i).health;
-//            } else if (targaryenUnits.get(i).type == MilitaryUnit.unitType.range) {
-//                targaryenRangeHealth += targaryenUnits.get(i).health;
-//            } else if (targaryenUnits.get(i).type == MilitaryUnit.unitType.air) {
-//                targaryenAirHealth += targaryenUnits.get(i).health;
-//            }
-//        }
-
-        starkMeleeHealth -= (lannisterMeleePower * 0.5) + (lannisterRangePower * 0.25) + (lannisterSiegePower * 1.0);
-        starkRangeHealth -= (lannisterMeleePower * 1.0) + (lannisterRangePower * 0.5) + (lannisterSiegePower * 0.25);
-        starkSiegeHealth -= (lannisterMeleePower * 0.25) + (lannisterRangePower * 1.0) + (lannisterSiegePower * 0.5);
-        double starkHealth = starkMeleeHealth + starkRangeHealth + starkSiegeHealth;
-        lannisterMeleeHealth -= (starkMeleePower * 0.5) + (starkRangePower * 0.25) + (starkSiegePower * 1.0);
-        lannisterRangeHealth -= (starkMeleePower * 1.0) + (starkRangePower * 0.5) + (starkSiegePower * 0.25);
-        lannisterSiegeHealth -= (starkMeleePower * 0.25) + (starkRangePower * 1.0) + (starkSiegePower * 0.5);
-        double lannisterHealth = lannisterMeleeHealth + lannisterRangeHealth + lannisterSiegeHealth;
-
-        String winner = "";
-        if (starkHealth > lannisterHealth) {
-            winner = "Stark Wins";
-            for (int i = 0; i < lannisterUnits.size(); i++) {
-                tile.setMilitary(lannisterUnits.get(i).unitName, -1, "Lannister");
-                Lannister.setMilitary(lannisterUnits.get(i).unitName, -1);
-            }
-        } else if (lannisterHealth > starkHealth) {
-            winner = "Lannister Wins";
-            for (int i = 0; i < starkUnits.size(); i++) {
-                tile.setMilitary(starkUnits.get(i).unitName, -1, "Stark");
-                Stark.setMilitary(starkUnits.get(i).unitName, -1);
-            }
-        }
-        JLabel starkL = new JLabel("[STARK] Melee: " + starkMeleePower + " Range: " + starkRangePower + " Siege: " + starkSiegePower + " Health: " + starkHealth);
-        JLabel lannisterL = new JLabel("[LANNISTER] Melee: " + lannisterMeleePower + " Range: " + lannisterRangePower + " Siege: " + lannisterSiegePower + " Health: " + lannisterHealth);
-        JLabel winnerL = new JLabel(winner);
-
-        JPanel jPanel = new JPanel();
-        jPanel.setLayout(new BoxLayout(jPanel, BoxLayout.Y_AXIS));
-        jPanel.setBackground(colorBackground);
-        frame.setBackground(colorBackground);
-        jPanel.add(starkL);
-        jPanel.add(lannisterL);
-        jPanel.add(winnerL);
-
-        frame.add(jPanel);
-        frame.setSize(1000, 300);
-        frame.setVisible(true);
-    }
-
-    private static class PathItem {
-        Tile node;
-        Vector<Tile> path;
-        int cost;
-        public PathItem(Tile node, Vector<Tile> path, int cost) {
-            this.node = node;
-            this.path = path;
-            this.cost = cost;
-        }
-    }
-
-    private static Vector<Tile> getPath(Tile a, Tile b) {
-        Line2D.Double straight = new Line2D.Double(a.getCenter(),b.getCenter());
-        Vector<Tile> explored = new Vector<>();
-        Comparator<PathItem> comp = new Comparator<PathItem>() {
-            @Override
-            public int compare(PathItem o1, PathItem o2) {
-                if (o1.node.getCenter().distance(b.getCenter()) + o1.cost > o2.node.getCenter().distance(b.getCenter()) + o2.cost) {
-                    return 1;
-                } else if (o1.node.getCenter().distance(b.getCenter()) + o1.cost < o2.node.getCenter().distance(b.getCenter()) + o2.cost) {
-                    return -1;
-                } else {
-                    return 0;
-                }
-            }
-        };
-        PriorityQueue<PathItem> fringe = new PriorityQueue<>(comp);
-        fringe.add(new PathItem(a,new Vector<Tile>(),0));
-        while(true) {
-            if (fringe.isEmpty()) return null;
-            PathItem current = fringe.remove();
-            Tile node = current.node;
-            Vector<Tile> path = current.path;
-//            System.out.println(fringe.size());
-            int totalCost = current.cost;
-            if (node.equals(b)) {
-                path.add(node);
-                return path;
-            }
-            if (!explored.contains(node)) {
-                explored.add(node);
-                for (int i = 0; i < node.neighbors.size(); i++) {
-                    Vector<Tile> newPath = new Vector<>(path);
-                    newPath.add(node);
-                    totalCost+=10;
-                    PathItem next = new PathItem(node.neighbors.get(i),newPath,totalCost);
-                    fringe.add(next);
-                }
-            }
-        }
-
-
-
-
-
-//        Tile current = a;
-//        while (!path.get(path.size()-1).equals(b.getCenter())) {
-//            Tile bestNext = current.neighbors.get(0);
-//            double bestDist = straight.ptLineDist(bestNext.getCenter());
-//            for (int i = 0; i < current.neighbors.size(); i++) {
-//                double dist = straight.ptLineDist(current.neighbors.get(i).getCenter());
-//                if (dist < bestDist) {
-//                    if (path.contains(current.neighbors.get(i).getCenter())) continue;
-//                    bestNext = current.neighbors.get(i);
-//                    bestDist = dist;
-//
-//                }
-//            }
-//            path.add(bestNext.getCenter());
-//        }
-//        return path;
-    }
-
-//    private static Line2D.Double getPath(Tile a, Tile b) {
-//        Line2D.Double straight = new Line2D.Double(a.getCenter(),b.getCenter());
-//        return straight;
-//    }
-
-    private static void OpenMilitaryMenu(Tile tile) {
-        JFrame frame = new JFrame("Military Menu");
-        frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-        frame.setLocation(300, 200);
-
-        DefaultTableModel dm = new DefaultTableModel();
-        dm.setDataVector(new Object[][]{{"Swordmen", "Tier 1 melee unit", "M:10  W:10  F:0  L:10", "Buy Swordmen"},
-                        {"Shieldmen", "Tier 2 melee unit", "M:25  W:10  F:10  L:10", "Buy Shieldmen"},
-                        {"Spearmen", "Tier 3 melee unit", "M:30  W:15  F:15  L:15", "Buy Spearmen"},
-                        {"Mounted Cavalry", "Tier 4 melee unit", "M:35  W:20  F:15  L:20", "Buy Mounted Calvalry"},
-                        {"Javelinmen", "Tier 1 range unit", "M:10  W:0  F:10  L:10", "Buy Javelinmen"},
-                        {"Archer", "Tier 2 range unit", "M:10  W:10  F:25  L:10", "Buy Archer"},
-                        {"Crossbowmen", "Tier 3 range unit", "M:15  W:15  F:30  L:15", "Buy Crossbowmen"},
-                        {"Mounted Archer", "Tier 4 range unit", "M:20  W:15  F:35  L:20", "Buy Mounted Archer"},
-                        {"Siege Tower", "Tier 1 siege unit", "M:0  W:10  F:10  L:10", "Buy Siege Tower"},
-                        {"Catapult", "Tier 2 siege unit", "M:10  W:25  F:10  L:10", "Buy Catapult"},
-                        {"Ballista", "Tier 3 siege unit", "M:15  W:30  F:15  L:15", "Buy Ballista"},
-                        {"Trebuchet", "Tier 4 siege unit", "M:15  W:35  F:20  L:20", "Buy Trebuchet"}},
-                new Object[]{"Name", "Description", "Price", ""});
-
-        JTable table = new JTable(dm);
-        table.getColumn("").setCellRenderer(new ButtonRenderer());
-        table.getColumn("").setCellEditor(new ButtonEditor(new JCheckBox(), tile));
-        table.getTableHeader().setBackground(colorButton);
-        table.setBackground(colorBackground);
-        frame.setBackground(colorBackground);
-
-        JScrollPane scroll = new JScrollPane(table);
-        JPanel temp = new JPanel();
-        temp.setBackground(colorBackground);
-        scroll.setCorner(JScrollPane.UPPER_RIGHT_CORNER, temp);
-        scroll.getVerticalScrollBar().setBackground(colorBackground);
-        table.setPreferredScrollableViewportSize(table.getPreferredSize());
-        table.getColumnModel().getColumn(0).setPreferredWidth(200);
-        table.getColumnModel().getColumn(1).setPreferredWidth(400);
-        table.getColumnModel().getColumn(2).setPreferredWidth(200);
-        table.getColumnModel().getColumn(3).setPreferredWidth(200);
-        table.setRowHeight(25);
-        frame.setSize(1000, 300);
-        frame.add(scroll);
-        frame.setVisible(true);
-    }
-
-    public static void OpenConstructionMenu(Tile tile) {
-        JFrame frame = new JFrame("Construction Menu");
-        frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-        frame.setLocation(300, 200);
-
-        DefaultTableModel dm = new DefaultTableModel();
-        dm.setDataVector(new Object[][]{{"Mine", "Mine to boost metal production.", "M:10  W:50  F:20  L:20", "Buy Mine"},
-                        {"Forge", "Forge to greatly boost metal production.", "M:50  W:40  F:20  L:40", "Buy Forge"},
-                        {"Lumber Mill", "Mill to boost wood production.", "M:50  W:10  F:20  L:20", "Buy Lumber Mill"},
-                        {"Deforestation", "Deforestation to greatly boost wood production.", "M:20  W:40  F:50  L:40", "Buy Deforestation"},
-                        {"Farm", "Farm to boost food production.", "M:20  W:40  F:20  L:20", "Buy Farm"},
-                        {"Plantation", "Plantation to greatly boost food production.", "M:40  W:50  F:20  L:40", "Buy Plantation"},
-                        {"School", "School to boost education production.", "M:40  W:20  F:20  L:20", "Buy School"},
-                        {"College", "College to greatly boost education production.", "M:40  W:40  F:30  L:40", "Buy College"}},
-                new Object[]{"Name", "Description", "Price", ""});
-
-        JTable table = new JTable(dm);
-        table.getColumn("").setCellRenderer(new ButtonRenderer());
-        table.getColumn("").setCellEditor(new ButtonEditor(new JCheckBox(), tile));
-        table.getTableHeader().setBackground(colorButton);
-        table.setBackground(colorBackground);
-        frame.setBackground(colorBackground);
-
-        JScrollPane scroll = new JScrollPane(table);
-        JPanel temp = new JPanel();
-        temp.setBackground(colorBackground);
-        scroll.setCorner(JScrollPane.UPPER_RIGHT_CORNER, temp);
-        scroll.getVerticalScrollBar().setBackground(colorBackground);
-        table.setPreferredScrollableViewportSize(table.getPreferredSize());
-        table.getColumnModel().getColumn(0).setPreferredWidth(200);
-        table.getColumnModel().getColumn(1).setPreferredWidth(400);
-        table.getColumnModel().getColumn(2).setPreferredWidth(200);
-        table.getColumnModel().getColumn(3).setPreferredWidth(200);
-        table.setRowHeight(25);
-        frame.setSize(1000, 300);
-        frame.add(scroll);
-        frame.setVisible(true);
     }
 
     private static class OpenResearchMenu implements ActionListener {
@@ -2066,7 +1978,436 @@ public class Main {
         }
     }
 
-    //  Makes a button in a cell for a Table
+    private static void OpenTileMenu(Tile tile) {
+        JFrame frame = new JFrame("Tile Menu");
+        frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+        frame.setLocation((int)(tile.getX() + tile.getWidth()),(int)tile.getY());
+
+        if (movingUnits.size() > 0) {
+            for (int i = 0; i < movingUnits.size(); i++) {
+                tile.setMilitary(movingUnits.get(i).unitName, 0, currentNation);
+            }
+            movingUnits.clear();
+        }
+
+        JPanel jPanel = new JPanel();
+        jPanel.setLayout(new BoxLayout(jPanel, BoxLayout.Y_AXIS));
+
+        JLabel tileOwner = new JLabel(tile.owner);
+        DefaultTableModel dm = new DefaultTableModel();
+        dm.setDataVector(new Object[][]{{"Metal: " + tile.resourceRates.get(2), "Mines: " + tile.mine},
+                        {"Wood: " + tile.resourceRates.get(1), "Forges: " + tile.forge},
+                        {"Food: " + tile.resourceRates.get(3), "Lumber Mills: " + tile.lumberMill},
+                        {"Labor: " + tile.resourceRates.get(0), "Deforestation: " + tile.deforestation},
+                        {"Education: " + tile.resourceRates.get(4), "Farms: " + tile.farm},
+                        {"", "Plantations: " + tile.plantation},
+                        {"", "Schools: " + tile.school},
+                        {"", "Colleges: " + tile.college}},
+                new Object[]{"Resource", "Building"});
+        JTable table = new JTable(dm);
+
+        JButton claimTile = new JButton("Claim Tile");
+        claimTile.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                frame.setVisible(false);
+                actionsTaken+=5;
+                if (actionsTaken > maxActions) {
+                    JOptionPane.showMessageDialog(claimTile,"You need 5 action points to claim a tile");
+                    actionsTaken-=5;
+                } else if (actionsTaken == maxActions + 1) {
+                    JOptionPane.showMessageDialog(claimTile,"It is not your turn");
+                    actionsTaken-=5;
+                } else {
+                    tile.owner = currentNation;
+                    tileOwner.setText(currentNation);
+                    if (currentNation.equals("Stark")) {
+                        Stark.labor += tile.resourceRates.get(0);
+                        Stark.wood += tile.resourceRates.get(1);
+                        Stark.metal += tile.resourceRates.get(2);
+                        Stark.food += tile.resourceRates.get(3);
+                        Stark.education += tile.resourceRates.get(4);
+                    } else if (currentNation.equals("Lannister")) {
+                        Lannister.labor += tile.resourceRates.get(0);
+                        Lannister.wood += tile.resourceRates.get(1);
+                        Lannister.metal += tile.resourceRates.get(2);
+                        Lannister.food += tile.resourceRates.get(3);
+                        Lannister.education += tile.resourceRates.get(4);
+                    } else {
+                        Targaryen.labor += tile.resourceRates.get(0);
+                        Targaryen.wood += tile.resourceRates.get(1);
+                        Targaryen.metal += tile.resourceRates.get(2);
+                        Targaryen.food += tile.resourceRates.get(3);
+                        Targaryen.education += tile.resourceRates.get(4);
+                    }
+                    jPanel.remove(claimTile);
+                    jPanel.repaint();
+                    backgroundDraw();
+                }
+            }
+        });
+
+        JButton buildButton = new JButton("Build");
+        buildButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                frame.dispose();
+                OpenConstructionMenu(tile);
+            }
+        });
+        JButton trainButton = new JButton("Train");
+        trainButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                frame.dispose();
+                OpenMilitaryMenu(tile);
+            }
+        });
+
+        JButton commandButton = new JButton("Command");
+        commandButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                frame.dispose();
+                OpenCommandMenu(tile);
+            }
+        });
+
+        Boolean hasAllies = false;
+        for (int i = 0; i < tile.occupyingUnits.size(); i++) {
+            if (tile.occupyingUnits.get(i).owner == currentNation) {
+                hasAllies = true;
+            }
+        }
+
+        jPanel.setBackground(colorBackground);
+        table.getTableHeader().setBackground(colorButton);
+        table.setBackground(colorBackground);
+        claimTile.setBackground(colorButton);
+        buildButton.setBackground(colorButton);
+        trainButton.setBackground(colorButton);
+        commandButton.setBackground(colorButton);
+        frame.setBackground(colorBackground);
+        jPanel.add(tileOwner);
+        jPanel.add(table);
+        if (tile.owner.equals("") && hasAllies) {
+            jPanel.add(claimTile);
+        } else if (tile.owner.equals(currentNation)) {
+            jPanel.add(buildButton);
+            jPanel.add(trainButton);
+        }
+        if (hasAllies) {
+            jPanel.add(commandButton);
+        }
+        frame.add(jPanel);
+        frame.pack();
+        frame.setVisible(true);
+    }
+
+    public static void OpenConstructionMenu(Tile tile) {
+        JFrame frame = new JFrame("Construction Menu");
+        frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+        frame.setLocation(300, 200);
+
+        DefaultTableModel dm = new DefaultTableModel();
+        dm.setDataVector(new Object[][]{{"Mine", "Mine to boost metal production.", "M:10  W:50  F:20  L:20", "Buy Mine"},
+                        {"Forge", "Forge to greatly boost metal production.", "M:50  W:40  F:20  L:40", "Buy Forge"},
+                        {"Lumber Mill", "Mill to boost wood production.", "M:50  W:10  F:20  L:20", "Buy Lumber Mill"},
+                        {"Deforestation", "Deforestation to greatly boost wood production.", "M:20  W:40  F:50  L:40", "Buy Deforestation"},
+                        {"Farm", "Farm to boost food production.", "M:20  W:40  F:20  L:20", "Buy Farm"},
+                        {"Plantation", "Plantation to greatly boost food production.", "M:40  W:50  F:20  L:40", "Buy Plantation"},
+                        {"School", "School to boost education production.", "M:40  W:20  F:20  L:20", "Buy School"},
+                        {"College", "College to greatly boost education production.", "M:40  W:40  F:30  L:40", "Buy College"}},
+                new Object[]{"Name", "Description", "Price", ""});
+
+        JTable table = new JTable(dm);
+        table.getColumn("").setCellRenderer(new ButtonRenderer());
+        table.getColumn("").setCellEditor(new ButtonEditor(new JCheckBox(), tile));
+        table.getTableHeader().setBackground(colorButton);
+        table.setBackground(colorBackground);
+        frame.setBackground(colorBackground);
+
+        JScrollPane scroll = new JScrollPane(table);
+        JPanel temp = new JPanel();
+        temp.setBackground(colorBackground);
+        scroll.setCorner(JScrollPane.UPPER_RIGHT_CORNER, temp);
+        scroll.getVerticalScrollBar().setBackground(colorBackground);
+        table.setPreferredScrollableViewportSize(table.getPreferredSize());
+        table.getColumnModel().getColumn(0).setPreferredWidth(200);
+        table.getColumnModel().getColumn(1).setPreferredWidth(400);
+        table.getColumnModel().getColumn(2).setPreferredWidth(200);
+        table.getColumnModel().getColumn(3).setPreferredWidth(200);
+        table.setRowHeight(25);
+        frame.setSize(1000, 300);
+        frame.add(scroll);
+        frame.setVisible(true);
+    }
+
+    private static void OpenMilitaryMenu(Tile tile) {
+        JFrame frame = new JFrame("Military Menu");
+        frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+        frame.setLocation(300, 200);
+
+        DefaultTableModel dm = new DefaultTableModel();
+        dm.setDataVector(new Object[][]{{"Swordmen", "Tier 1 melee unit", "M:10  W:10  F:0  L:10", "Buy Swordmen"},
+                        {"Shieldmen", "Tier 2 melee unit", "M:25  W:10  F:10  L:10", "Buy Shieldmen"},
+                        {"Spearmen", "Tier 3 melee unit", "M:30  W:15  F:15  L:15", "Buy Spearmen"},
+                        {"Mounted Cavalry", "Tier 4 melee unit", "M:35  W:20  F:15  L:20", "Buy Mounted Calvalry"},
+                        {"Javelinmen", "Tier 1 range unit", "M:10  W:0  F:10  L:10", "Buy Javelinmen"},
+                        {"Archer", "Tier 2 range unit", "M:10  W:10  F:25  L:10", "Buy Archer"},
+                        {"Crossbowmen", "Tier 3 range unit", "M:15  W:15  F:30  L:15", "Buy Crossbowmen"},
+                        {"Mounted Archer", "Tier 4 range unit", "M:20  W:15  F:35  L:20", "Buy Mounted Archer"},
+                        {"Siege Tower", "Tier 1 siege unit", "M:0  W:10  F:10  L:10", "Buy Siege Tower"},
+                        {"Catapult", "Tier 2 siege unit", "M:10  W:25  F:10  L:10", "Buy Catapult"},
+                        {"Ballista", "Tier 3 siege unit", "M:15  W:30  F:15  L:15", "Buy Ballista"},
+                        {"Trebuchet", "Tier 4 siege unit", "M:15  W:35  F:20  L:20", "Buy Trebuchet"}},
+                new Object[]{"Name", "Description", "Price", ""});
+
+        JTable table = new JTable(dm);
+        table.getColumn("").setCellRenderer(new ButtonRenderer());
+        table.getColumn("").setCellEditor(new ButtonEditor(new JCheckBox(), tile));
+        table.getTableHeader().setBackground(colorButton);
+        table.setBackground(colorBackground);
+        frame.setBackground(colorBackground);
+
+        JScrollPane scroll = new JScrollPane(table);
+        JPanel temp = new JPanel();
+        temp.setBackground(colorBackground);
+        scroll.setCorner(JScrollPane.UPPER_RIGHT_CORNER, temp);
+        scroll.getVerticalScrollBar().setBackground(colorBackground);
+        table.setPreferredScrollableViewportSize(table.getPreferredSize());
+        table.getColumnModel().getColumn(0).setPreferredWidth(200);
+        table.getColumnModel().getColumn(1).setPreferredWidth(400);
+        table.getColumnModel().getColumn(2).setPreferredWidth(200);
+        table.getColumnModel().getColumn(3).setPreferredWidth(200);
+        table.setRowHeight(25);
+        frame.setSize(1000, 300);
+        frame.add(scroll);
+        frame.setVisible(true);
+    }
+
+    private static void OpenCommandMenu(Tile tile) {
+        JFrame frame = new JFrame("Command Menu");
+        frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+        frame.setLocation(300, 200);
+
+        DefaultTableModel dm1 = new DefaultTableModel();
+        dm1.setDataVector(null,
+                new Object[]{"Unit", "Owner", "Move"});
+        for (int i = 0; i < tile.occupyingUnits.size(); i++) {
+            if (tile.occupyingUnits.get(i).owner == currentNation) {
+                dm1.addRow(new Object[]{tile.occupyingUnits.get(i).unitName, tile.occupyingUnits.get(i).owner, false});
+            }
+        }
+        JTable allyTable = new JTable(dm1) {
+            @Override
+            public Class getColumnClass(int column) {
+                switch (column) {
+                    case 0:
+                        return String.class;
+                    case 1:
+                        return String.class;
+                    default:
+                        return Boolean.class;
+                }
+            }
+        };
+        JLabel selectedUnits = new JLabel();
+        Vector<MilitaryUnit> movingUnitsTemp = new Vector<>();
+        allyTable.getModel().addTableModelListener(new TableModelListener() {
+            @Override
+            public void tableChanged(TableModelEvent e) {
+                if (actionsTaken < 10) {
+                    String temp = "<html>";
+                    movingUnitsTemp.clear();
+                    for(int i = 0; i < allyTable.getModel().getRowCount(); i++) {
+                        if ((Boolean) allyTable.getModel().getValueAt(i,2)) {
+                            temp += allyTable.getValueAt(i, 0) + "<br/>";
+                            movingUnitsTemp.add(0, new MilitaryUnit(currentNation, (String) allyTable.getValueAt(i, 0)));
+                        }
+                    }
+                    temp += "</html>";
+                    selectedUnits.setText(temp);
+                }
+            }
+        });
+
+        Boolean hasEnemies = false;
+        DefaultTableModel dm2 = new DefaultTableModel();
+        dm2.setDataVector(null,
+                new Object[]{"Unit", "Owner", "Move"});
+        for (int i = 0; i < tile.occupyingUnits.size(); i++) {
+            if (tile.occupyingUnits.get(i).owner != currentNation) {
+                dm2.addRow(new Object[]{tile.occupyingUnits.get(i).unitName, tile.occupyingUnits.get(i).owner, ""});
+                hasEnemies = true;
+            }
+        }
+        JTable enemyTable = new JTable(dm2);
+
+        JButton moveButton = new JButton("Move Units");
+        moveButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                pathBeginning = tile;
+                movingUnits.clear();
+                for (int i = 0; i < movingUnitsTemp.size(); i++) {
+                    tile.setMilitary(movingUnitsTemp.get(i).unitName, -1, movingUnitsTemp.get(i).owner);
+                    movingUnits.add(0, new MilitaryUnit(movingUnitsTemp.get(i).owner, movingUnitsTemp.get(i).unitName));
+                }
+                frame.dispose();
+            }
+        });
+
+        JButton attackButton = new JButton("Attack");
+        attackButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                OpenAttackMenu(tile);
+                attacking = true;
+                frame.dispose();
+            }
+        });
+
+        JPanel jPanel = new JPanel();
+        jPanel.setLayout(new BoxLayout(jPanel, BoxLayout.Y_AXIS));
+        jPanel.setBackground(colorBackground);
+        allyTable.setBackground(colorBackground);
+        enemyTable.setBackground(colorBackground);
+        moveButton.setBackground(colorButton);
+        attackButton.setBackground(colorButton);
+        frame.setBackground(colorBackground);
+        jPanel.add(allyTable);
+        jPanel.add(enemyTable);
+        jPanel.add(selectedUnits);
+        if (hasEnemies) {
+            jPanel.add(attackButton);
+        }
+        if (actionsTaken < 10) {
+            jPanel.add(moveButton);
+        }
+
+        frame.add(jPanel);
+        frame.setSize(300, 300);
+        frame.setVisible(true);
+    }
+
+    private static void OpenAttackMenu(Tile tile) {
+        JFrame frame = new JFrame("Attack Menu");
+        frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+        frame.setLocation(300, 200);
+
+        Vector<MilitaryUnit> starkUnits = new Vector<>();
+        Vector<MilitaryUnit> lannisterUnits = new Vector<>();
+        Vector<MilitaryUnit> targaryenUnits = new Vector<>();
+        for (int i = 0; i < tile.occupyingUnits.size(); i++) {
+            if (tile.occupyingUnits.get(i).owner == "Stark") {
+                starkUnits.add(0, new MilitaryUnit(tile.occupyingUnits.get(i).owner, tile.occupyingUnits.get(i).unitName));
+            } else if (tile.occupyingUnits.get(i).owner == "Lannister") {
+                lannisterUnits.add(0, new MilitaryUnit(tile.occupyingUnits.get(i).owner, tile.occupyingUnits.get(i).unitName));
+            } else if (tile.occupyingUnits.get(i).owner == "Targaryen") {
+                targaryenUnits.add(0, new MilitaryUnit(tile.occupyingUnits.get(i).owner, tile.occupyingUnits.get(i).unitName));
+            }
+        }
+
+        double starkMeleePower = 0;
+        double starkRangePower = 0;
+        double starkSiegePower = 0;
+        double starkMeleeHealth = 0;
+        double starkRangeHealth = 0;
+        double starkSiegeHealth = 0;
+
+        double lannisterMeleePower = 0;
+        double lannisterRangePower = 0;
+        double lannisterSiegePower = 0;
+        double lannisterMeleeHealth = 0;
+        double lannisterRangeHealth = 0;
+        double lannisterSiegeHealth = 0;
+
+//        int targaryenMeleePower = 0;
+//        int targaryenRangePower = 0;
+//        int targaryenAirPower = 0;
+//        int targaryenMeleeHealth = 0;
+//        int targaryenRangeHealth = 0;
+//        int targaryenAirHealth = 0;
+        for (int i = 0; i < starkUnits.size(); i++) {
+            starkMeleePower += starkUnits.get(i).melee;
+            starkRangePower += starkUnits.get(i).range;
+            starkSiegePower += starkUnits.get(i).siege;
+            if (starkUnits.get(i).type == MilitaryUnit.unitType.melee) {
+                starkMeleeHealth += starkUnits.get(i).health;
+            } else if (starkUnits.get(i).type == MilitaryUnit.unitType.range) {
+                starkRangeHealth += starkUnits.get(i).health;
+            } else if (starkUnits.get(i).type == MilitaryUnit.unitType.siege) {
+                starkSiegeHealth += starkUnits.get(i).health;
+            }
+        }
+        for (int i = 0; i < lannisterUnits.size(); i++) {
+            lannisterMeleePower += starkUnits.get(i).melee;
+            lannisterRangePower += starkUnits.get(i).range;
+            lannisterSiegePower += lannisterUnits.get(i).siege;
+            if (lannisterUnits.get(i).type == MilitaryUnit.unitType.melee) {
+                lannisterMeleeHealth += lannisterUnits.get(i).health;
+            } else if (lannisterUnits.get(i).type == MilitaryUnit.unitType.range) {
+                lannisterRangeHealth += lannisterUnits.get(i).health;
+            } else if (lannisterUnits.get(i).type == MilitaryUnit.unitType.siege) {
+                lannisterSiegeHealth += lannisterUnits.get(i).health;
+            }
+        }
+//        for (int i = 0; i < targaryenUnits.size(); i++) {
+//            targaryenMeleePower += starkUnits.get(i).melee;
+//            targaryenRangePower += starkUnits.get(i).range;
+//            targaryenAirPower += targaryenUnits.get(i).air;
+//            if (targaryenUnits.get(i).type == MilitaryUnit.unitType.melee) {
+//                targaryenMeleeHealth += targaryenUnits.get(i).health;
+//            } else if (targaryenUnits.get(i).type == MilitaryUnit.unitType.range) {
+//                targaryenRangeHealth += targaryenUnits.get(i).health;
+//            } else if (targaryenUnits.get(i).type == MilitaryUnit.unitType.air) {
+//                targaryenAirHealth += targaryenUnits.get(i).health;
+//            }
+//        }
+
+        starkMeleeHealth -= (lannisterMeleePower * 0.5) + (lannisterRangePower * 0.25) + (lannisterSiegePower * 1.0);
+        starkRangeHealth -= (lannisterMeleePower * 1.0) + (lannisterRangePower * 0.5) + (lannisterSiegePower * 0.25);
+        starkSiegeHealth -= (lannisterMeleePower * 0.25) + (lannisterRangePower * 1.0) + (lannisterSiegePower * 0.5);
+        double starkHealth = starkMeleeHealth + starkRangeHealth + starkSiegeHealth;
+        lannisterMeleeHealth -= (starkMeleePower * 0.5) + (starkRangePower * 0.25) + (starkSiegePower * 1.0);
+        lannisterRangeHealth -= (starkMeleePower * 1.0) + (starkRangePower * 0.5) + (starkSiegePower * 0.25);
+        lannisterSiegeHealth -= (starkMeleePower * 0.25) + (starkRangePower * 1.0) + (starkSiegePower * 0.5);
+        double lannisterHealth = lannisterMeleeHealth + lannisterRangeHealth + lannisterSiegeHealth;
+
+        String winner = "";
+        if (starkHealth > lannisterHealth) {
+            winner = "Stark Wins";
+            for (int i = 0; i < lannisterUnits.size(); i++) {
+                tile.setMilitary(lannisterUnits.get(i).unitName, -1, "Lannister");
+                Lannister.setMilitary(lannisterUnits.get(i).unitName, -1);
+            }
+        } else if (lannisterHealth > starkHealth) {
+            winner = "Lannister Wins";
+            for (int i = 0; i < starkUnits.size(); i++) {
+                tile.setMilitary(starkUnits.get(i).unitName, -1, "Stark");
+                Stark.setMilitary(starkUnits.get(i).unitName, -1);
+            }
+        }
+        JLabel starkL = new JLabel("[STARK] Melee: " + starkMeleePower + " Range: " + starkRangePower + " Siege: " + starkSiegePower + " Health: " + starkHealth);
+        JLabel lannisterL = new JLabel("[LANNISTER] Melee: " + lannisterMeleePower + " Range: " + lannisterRangePower + " Siege: " + lannisterSiegePower + " Health: " + lannisterHealth);
+        JLabel winnerL = new JLabel(winner);
+
+        JPanel jPanel = new JPanel();
+        jPanel.setLayout(new BoxLayout(jPanel, BoxLayout.Y_AXIS));
+        jPanel.setBackground(colorBackground);
+        frame.setBackground(colorBackground);
+        jPanel.add(starkL);
+        jPanel.add(lannisterL);
+        jPanel.add(winnerL);
+
+        frame.add(jPanel);
+        frame.setSize(1000, 300);
+        frame.setVisible(true);
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //TODO: Button Code
     public static class ButtonRenderer extends JButton implements TableCellRenderer {
         public ButtonRenderer() {
             setOpaque(true);
@@ -2086,7 +2427,6 @@ public class Main {
         }
     }
 
-    // Makes the Table button clickable
     public static class ButtonEditor extends DefaultCellEditor {
         protected JButton button;
         private String label;
@@ -2533,473 +2873,596 @@ public class Main {
         }
     }
 
-    private static class Nation {
-        private String nationName;
-        private boolean currentStatus;
-        private JTabbedPane inboxTabs = new JTabbedPane();
-        private JTabbedPane sentTabs = new JTabbedPane();
-        private JTabbedPane archivedTabs = new JTabbedPane();
-        private int metal;
-        private int wood;
-        private int food;
-        private int labor;
-        private int education;
-        private int swordmen;
-        private int shieldmen;
-        private int spearmen;
-        private int mountedCalvalry;
-        private int javelinmen;
-        private int archer;
-        private int crossbowmen;
-        private int mountedArcher;
-        private int siegeTower;
-        private int catapult;
-        private int ballista;
-        private int trebuchet;
-        private int mine;
-        private int forge;
-        private int lumberMill;
-        private int deforestation;
-        private int farm;
-        private int plantation;
-        private int school;
-        private int college;
-        private boolean mineResearched;
-        private boolean forgeResearched;
-        private boolean lumberMillResearched;
-        private boolean deforestationResearched;
-        private boolean farmResearched;
-        private boolean plantationResearched;
-        private boolean schoolResearched;
-        private boolean collegeResearched;
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //TODO: Server Code
+    private static class ServerRunner implements Runnable {
+        private static Map<String, PlayerHandler> players = new ConcurrentHashMap<>();
+        public void run() {
+            try (ServerSocket serverSocket = new ServerSocket(12345)) {
+                System.out.println("DND Server is running on port 12345");
 
-        private boolean swordmenResearched;
-
-        private boolean shieldmenResearched;
-        private boolean spearmenResearched;
-        private boolean mountedCalvalryResearched;
-        private boolean javelinmenResearched;
-
-        private boolean archerResearched;
-        private boolean crossbowmenResearched;
-        private boolean mountedArcherResearched;
-        private boolean siegeTowerResearched;
-        private boolean catapultResearched;
-        private boolean ballistaResearched;
-        private boolean trebuchetResearched;
-
-        public Nation() {
-            inboxTabs.setTabPlacement(JTabbedPane.LEFT);
-            inboxTabs.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
-            sentTabs.setTabPlacement(JTabbedPane.LEFT);
-            sentTabs.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
-            archivedTabs.setTabPlacement(JTabbedPane.LEFT);
-            archivedTabs.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
-            metal = 0;
-            wood = 0;
-            food = 0;
-            labor = 0;
-            education = 0;
-            swordmen = 0;
-            shieldmen = 0;
-            spearmen = 0;
-            mountedCalvalry = 0;
-            javelinmen = 0;
-            archer = 0;
-            crossbowmen = 0;
-            mountedArcher = 0;
-            siegeTower = 0;
-            catapult = 0;
-            ballista = 0;
-            trebuchet = 0;
-            mine = 0;
-            forge = 0;
-            lumberMill = 0;
-            deforestation = 0;
-            farm = 0;
-            plantation = 0;
-            school = 0;
-            college = 0;
-            mineResearched = false;
-            forgeResearched = false;
-            lumberMillResearched = false;
-            deforestationResearched = false;
-            farmResearched = false;
-            plantationResearched = false;
-            schoolResearched = false;
-            collegeResearched = false;
-            swordmenResearched = true;
-            shieldmenResearched = false;
-            spearmenResearched = false;
-            mountedCalvalryResearched = false;
-            javelinmenResearched = true;
-            archerResearched = false;
-            crossbowmenResearched = false;
-            mountedArcherResearched = false;
-            siegeTowerResearched = true;
-            catapultResearched = false;
-            ballistaResearched = false;
-            trebuchetResearched = false;
-        }
-
-        public void setActive(boolean status) {
-            currentStatus = status;
-        }
-
-        public boolean isActive() {
-            return currentStatus;
-        }
-
-        public void setResource(String unit, int change) {
-            if (unit == "metal") {
-                metal += change;
-            } else if (unit == "wood") {
-                wood += change;
-            } else if (unit == "food") {
-                food += change;
-            } else if (unit == "labor") {
-                labor += change;
-            } else if (unit == "education") {
-                education += change;
+                while (true) {
+                    Socket clientSocket = serverSocket.accept();
+                    PlayerHandler playerHandler = new PlayerHandler(clientSocket);
+                    new Thread(playerHandler).start();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-            backgroundDraw();
         }
 
-        public void setMilitary(String unit, int change) {
-            if (change > 0) {
-                if (unit == "Swordmen") {
-                    swordmen += change;
-                    metal -= 10 * change;
-                    food -= 10 * change;
-                    labor -= 10 * change;
-                } else if (unit == "Shieldmen") {
-                    shieldmen += change;
-                    metal -= 10 * change;
-                    food -= 10 * change;
-                    labor -= 20 * change;
-                } else if (unit == "Spearmen") {
-                    spearmen += change;
-                    metal -= 20 * change;
-                    food -= 10 * change;
-                    labor -= 10 * change;
-                } else if (unit == "Mounted Cavalry") {
-                    mountedCalvalry += change;
-                    metal -= 20 * change;
-                    food -= 10 * change;
-                    labor -= 20 * change;
-                } else if (unit == "Javelinmen") {
-                    javelinmen += change;
-                    metal -= 10 * change;
-                    food -= 10 * change;
-                    labor -= 10 * change;
-                } else if (unit == "Archer") {
-                    archer += change;
-                    food -= 10 * change;
-                    labor -= 10 * change;
-                } else if (unit == "Crossbowmen") {
-                    crossbowmen += change;
-                    metal -= 10 * change;
-                    wood -= 20 * change;
-                    food -= 10 * change;
-                    labor -= 10 * change;
-                } else if (unit == "Mounted Archer") {
-                    mountedArcher += change;
-                    metal -= 20 * change;
-                    wood -= 30 * change;
-                    food -= 10 * change;
-                    labor -= 10 * change;
-                } else if (unit == "Siege Tower") {
-                    siegeTower += change;
-                    food -= 50 * change;
-                    labor -= 25 * change;
-                } else if (unit == "Catapult") {
-                    catapult += change;
-                    metal -= 10 * change;
-                    wood -= 100 * change;
-                    food -= 10 * change;
-                    labor -= 50 * change;
-                } else if (unit == "Ballista") {
-                    ballista += change;
-                    food -= 100 * change;
-                    labor -= 100 * change;
-                }
-                else if (unit == "Trebuchet") {
-                    trebuchet += change;
-                    food -= 100 * change;
-                    labor -= 100 * change;
-                }
-            } else if (change < 0) {
-                if (unit == "Swordmen") {
-                    swordmen += change;
-                } else if (unit == "Shieldmen") {
-                    shieldmen += change;
-                } else if (unit == "Spearmen") {
-                    spearmen += change;
-                } else if (unit == "Mounted Cavalry") {
-                    mountedCalvalry += change;
-                } else if (unit == "Javelinmen") {
-                    javelinmen += change;
-                } else if (unit == "Archer") {
-                    archer += change;
-                } else if (unit == "Crossbowmen") {
-                    crossbowmen += change;
-                } else if (unit == "Mounted Archer") {
-                    mountedArcher += change;
-                } else if (unit == "Siege Tower") {
-                    siegeTower += change;
-                } else if (unit == "Catapult") {
-                    catapult += change;
-                } else if (unit == "Ballista") {
-                    ballista += change;
-                } else if (unit == "Trebuchet") {
-                    trebuchet += change;
+        public static synchronized void broadcast(String message, PlayerHandler sender) {
+            for (PlayerHandler player : players.values()) {
+                if (player != sender) {
+                    player.sendMessage(message);
                 }
             }
-            backgroundDraw();
         }
 
-        public void setBuilding(String unit, int change) {
-            if (unit == "mine") {
-                mine += change;
-                metal -= 10 * change;
-                wood -= 50 * change;
-                food -= 20 * change;
-                labor -= 20 * change;
-            } else if (unit == "forge") {
-                forge += change;
-                metal -= 50 * change;
-                wood -= 40 * change;
-                food -= 20 * change;
-                labor -= 40 * change;
-            } else if (unit == "lumberMill") {
-                lumberMill += change;
-                metal -= 50 * change;
-                wood -= 10 * change;
-                food -= 20 * change;
-                labor -= 20 * change;
-            } else if (unit == "deforestation") {
-                deforestation += change;
-                metal -= 20 * change;
-                wood -= 40 * change;
-                food -= 50 * change;
-                labor -= 40 * change;
-            } else if (unit == "farm") {
-                farm += change;
-                metal -= 20 * change;
-                wood -= 40 * change;
-                food -= 20 * change;
-                labor -= 20 * change;
-            } else if (unit == "plantation") {
-                plantation += change;
-                metal -= 40 * change;
-                wood -= 50 * change;
-                food -= 20 * change;
-                labor -= 40 * change;
-            } else if (unit == "school") {
-                school += change;
-                metal -= 40 * change;
-                wood -= 20 * change;
-                food -= 20 * change;
-                labor -= 20 * change;
-            } else if (unit == "college") {
-                college += change;
-                metal -= 40 * change;
-                wood -= 40 * change;
-                food -= 30 * change;
-                labor -= 40 * change;
-            }
-            backgroundDraw();
+        public static synchronized void updatePlayerMove(String playerName, String move) {
+            String message = "UPDATE: " + move;
+            broadcast(message, players.get(playerName));
         }
 
-        public void setResearch(String unit, boolean change) {
-            if (unit == "mine") {
-                mineResearched = change;
-                education -= 50;
-                labor -= 10;
-            } else if (unit == "forge") {
-                forgeResearched = change;
-                education -= 75;
-                labor -= 25;
-            } else if (unit == "lumberMill") {
-                lumberMillResearched = change;
-                education -= 50;
-                labor -= 10;
-            } else if (unit == "deforestation") {
-                deforestationResearched = change;
-                education -= 75;
-                labor -= 25;
-            } else if (unit == "farm") {
-                farmResearched = change;
-                education -= 50;
-                labor -= 10;
-            } else if (unit == "plantation") {
-                plantationResearched = change;
-                education -= 75;
-                labor -= 25;
-            } else if (unit == "school") {
-                schoolResearched = change;
-                education -= 50;
-                labor -= 10;
-            } else if (unit == "college") {
-                collegeResearched = change;
-                education -= 75;
-                labor -= 25;
-            } else if (unit == "swordmen") {
-                spearmenResearched = change;
-                education -= 50;
-                labor -= 10;
-            } else if (unit == "shieldmen") {
-                spearmenResearched = change;
-                education -= 50;
-                labor -= 10;
-            } else if (unit == "spearmen") {
-                spearmenResearched = change;
-                education -= 75;
-                labor -= 25;
-            } else if (unit == "mountedCalvalry") {
-                mountedCalvalryResearched = change;
-                education -= 100;
-                labor -= 50;
-            } else if (unit == "javelinmen") {
-                javelinmenResearched = change;
-                education -= 50;
-                labor -= 10;
-            } else if (unit == "archer") {
-                archerResearched = change;
-                education -= 50;
-                labor -= 10;
-            } else if (unit == "crossbowmen") {
-                crossbowmenResearched = change;
-                education -= 75;
-                labor -= 25;
-            } else if (unit == "mountedArcher") {
-                mountedArcherResearched = change;
-                education -= 100;
-                labor -= 50;
-            } else if (unit == "siegeTower") {
-                siegeTowerResearched = change;
-                education -= 50;
-                labor -= 10;
-            } else if (unit == "catapult") {
-                catapultResearched = change;
-                education -= 50;
-                labor -= 10;
-            } else if (unit == "ballista") {
-                education -= 75;
-                labor -= 25;
-            } else if (unit == "trebuchet") {
-                trebuchetResearched = change;
-                education -= 100;
-                labor -= 50;
-            }
-            backgroundDraw();
+        public static synchronized void sendBoard(String playerName, String move) {
+            String message = "BOARD" + move;
+            broadcast(message, players.get(playerName));
+        }
+
+        public static synchronized void addPlayer(String playerName, PlayerHandler playerHandler) {
+            players.put(playerName, playerHandler);
+        }
+
+        public static synchronized void removePlayer(String playerName) {
+            players.remove(playerName);
         }
     }
 
-    //  Potential class for handing military unit info?
-    private static class MilitaryUnit {
-        private String owner;
-        String unitName;
-        private enum unitType{melee, range, siege};
-        unitType type;
-        private int health;
-        private int melee;
-        private int range;
-        private int siege;
+    private static class PlayerHandler implements Runnable {
+        private Socket socket;
+        private PrintWriter out;
+        private BufferedReader in;
+        private String playerName;
 
-        public MilitaryUnit(String unitOwner, String unit) {
-            owner = unitOwner;
-            /*       Melee:              Range:            Siege:
-            Tier 1 - Swordmen            Javelinmen        Siege Tower
-            Tier 2 - Shieldmen           Javelinmen            Catapult
-            Tier 3 - Spearmen            Crossbowmen       Ballista
-            Tier 4 - Mounted Calvalry    Mounted Javelinmen    Trebuchet */
-            if (unit == "Swordmen") {
-                unitName = "Swordmen";
-                type = unitType.melee;
-                health = 5;
-                melee = 5;
-                range = 5;
-                siege = 0;
-            } else if (unit == "Shieldmen") {
-                unitName = "Shieldmen";
-                type = unitType.melee;
-                health = 10;
-                melee = 5;
-                range = 15;
-                siege = 0;
-            } else if (unit == "Spearmen") {
-                unitName = "Spearmen";
-                type = unitType.melee;
-                health = 15;
-                melee = 10;
-                range = 20;
-                siege = 0;
-            } else if (unit == "Mounted Calvalry") {
-                unitName = "Mounted Calvalry";
-                type = unitType.melee;
-                health = 20;
-                melee = 15;
-                range = 25;
-                siege = 0;
-            } else if (unit == "Javelinmen") {
-                unitName = "Javelinmen";
-                type = unitType.range;
-                health = 5;
-                melee = 0;
-                range = 5;
-                siege = 5;
-            } else if (unit == "Archer") {
-                unitName = "Archer";
-                type = unitType.range;
-                health = 10;
-                melee = 0;
-                range = 5;
-                siege = 15;
-            } else if (unit == "Crossbowmen") {
-                unitName = "Crossbowmen";
-                type = unitType.range;
-                health = 15;
-                melee = 0;
-                range = 10;
-                siege = 20;
-            } else if (unit == "Mounted Javelinmen") {
-                unitName = "Mounted Javelinmen";
-                type = unitType.range;
-                health = 20;
-                melee = 0;
-                range = 15;
-                siege = 25;
-            } else if (unit == "Siege Tower") {
-                unitName = "Siege Tower";
-                type = unitType.siege;
-                health = 5;
-                melee = 5;
-                range = 0;
-                siege = 5;
-            } else if (unit == "Catapult") {
-                unitName = "Catapult";
-                type = unitType.siege;
-                health = 10;
-                melee = 15;
-                range = 0;
-                siege = 5;
-            } else if (unit == "Ballista") {
-                unitName = "Ballista";
-                type = unitType.siege;
-                health = 15;
-                melee = 20;
-                range = 0;
-                siege = 10;
-            } else if (unit == "Trebuchet") {
-                unitName = "Trebuchet";
-                type = unitType.siege;
-                health = 20;
-                melee = 25;
-                range = 0;
-                siege = 15;
+        public PlayerHandler(Socket socket) {
+            this.socket = socket;
+        }
+
+        @Override
+        public void run() {
+            try {
+                in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                out = new PrintWriter(socket.getOutputStream(),true);
+
+                playerName = currentNation;
+
+                //Deal with moves here
+                String message;
+                while ((message = in.readLine()) != null) {
+                    if (message.startsWith("MOVE:")) {
+                        String move = message.substring(6);
+                        String[] parts = move.split("\\|");
+                        playerName = parts[0];
+                        System.out.println("Server: received move from " + playerName);
+                        ServerRunner.sendBoard(playerName,parts[1].substring(5));
+                    } else if (message.startsWith("JOIN:")) {
+                        playerName = message.substring(6);
+                        ServerRunner.addPlayer(playerName, this);
+                        System.out.println(playerName + " has joined the game.");
+                        if (!playerName.equals(currentNation)) {
+                            System.out.println("Server: Requesting board");
+                            ServerRunner.sendBoard(playerName,": Request");
+                            //ServerRunner.broadcast("BOARD: Request",ServerRunner.players.get(playerName));
+                        }
+                    } else if (message.startsWith("BOARD[")) {
+                        System.out.println("Server: Recieved board");
+                        ServerRunner.sendBoard(playerName,message.substring(5));
+                        //ServerRunner.broadcast(message,ServerRunner.players.get(playerName));
+                    }
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                try {
+                    ServerRunner.removePlayer(playerName);
+                    socket.close();
+                    System.out.println(playerName + " has left the game.");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
+
+        public void sendMessage(String message) {
+            out.println(message);
+        }
+    }
+
+    private static class ClientRunner implements Runnable {
+        public void run() {
+            try {
+                Socket socket;
+                if (ip == null) {
+                    socket = new Socket("localhost",12345);
+                } else {
+                    socket = new Socket(ip,12345);
+                }
+                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                PrintWriter out = new PrintWriter(socket.getOutputStream(),true);
+
+                new Thread(() -> {
+                    String serverMessage;
+                    try {
+                        while ((serverMessage = in.readLine()) != null) {
+                            if (serverMessage.startsWith("UPDATE:")) {
+                                String[] parts = serverMessage.split(",");
+                                System.out.println("Client: " + serverMessage);
+                            } else if (serverMessage.equals("BOARD: Request")) {
+                                System.out.println("Client: Sending board");
+                                out.println(getGameState());
+                            } else if (serverMessage.startsWith("BOARD[")) {
+                                System.out.println("Client: Received board");
+                                tiles = CreateBoard(serverMessage);
+                                actionsTaken = 0;
+                            }
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        appFrame.setVisible(false);
+                        openStartScreen();
+                    }
+                }).start();
+
+                String move = "";
+                String lastMove = "";
+                if (!joined) {
+                    move = "JOIN: " + currentNation;
+                    out.println(move);
+                    joined = true;
+                }
+                while (true) {
+                    try {
+                        Thread.sleep(300);
+                    } catch (InterruptedException ie) {}
+                    if (actionsTaken == maxActions && joined) {
+                        System.out.println("Client: Sending moves");
+                        actionsTaken = maxActions + 1;
+                        out.println("MOVE: " + currentNation + "|" + getGameState());
+                    } else if (attacking) {
+                        out.println("ATTACK");
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                appFrame.setVisible(false);
+                openStartScreen();
+            }
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //TODO: Path Code
+    private static class PathItem {
+        Tile node;
+        Vector<Tile> path;
+        int cost;
+        public PathItem(Tile node, Vector<Tile> path, int cost) {
+            this.node = node;
+            this.path = path;
+            this.cost = cost;
+        }
+    }
+
+    private static Vector<Tile> getPath(Tile a, Tile b) {
+        Line2D.Double straight = new Line2D.Double(a.getCenter(),b.getCenter());
+        Vector<Tile> explored = new Vector<>();
+        Comparator<PathItem> comp = new Comparator<PathItem>() {
+            @Override
+            public int compare(PathItem o1, PathItem o2) {
+                if (o1.node.getCenter().distance(b.getCenter()) + o1.cost > o2.node.getCenter().distance(b.getCenter()) + o2.cost) {
+                    return 1;
+                } else if (o1.node.getCenter().distance(b.getCenter()) + o1.cost < o2.node.getCenter().distance(b.getCenter()) + o2.cost) {
+                    return -1;
+                } else {
+                    return 0;
+                }
+            }
+        };
+        PriorityQueue<PathItem> fringe = new PriorityQueue<>(comp);
+        fringe.add(new PathItem(a,new Vector<Tile>(),0));
+        while(true) {
+            if (fringe.isEmpty()) return null;
+            PathItem current = fringe.remove();
+            Tile node = current.node;
+            Vector<Tile> path = current.path;
+//            System.out.println(fringe.size());
+            int totalCost = current.cost;
+            if (node.equals(b)) {
+                path.add(node);
+                return path;
+            }
+            if (!explored.contains(node)) {
+                explored.add(node);
+                for (int i = 0; i < node.neighbors.size(); i++) {
+                    Vector<Tile> newPath = new Vector<>(path);
+                    newPath.add(node);
+                    totalCost+=10;
+                    PathItem next = new PathItem(node.neighbors.get(i),newPath,totalCost);
+                    fringe.add(next);
+                }
+            }
+        }
+
+
+
+
+
+//        Tile current = a;
+//        while (!path.get(path.size()-1).equals(b.getCenter())) {
+//            Tile bestNext = current.neighbors.get(0);
+//            double bestDist = straight.ptLineDist(bestNext.getCenter());
+//            for (int i = 0; i < current.neighbors.size(); i++) {
+//                double dist = straight.ptLineDist(current.neighbors.get(i).getCenter());
+//                if (dist < bestDist) {
+//                    if (path.contains(current.neighbors.get(i).getCenter())) continue;
+//                    bestNext = current.neighbors.get(i);
+//                    bestDist = dist;
+//
+//                }
+//            }
+//            path.add(bestNext.getCenter());
+//        }
+//        return path;
+    }
+
+    private static void drawPath(Graphics2D g2d, Tile current) {
+        Vector<Tile> path = getPath(pathBeginning,current);
+        for (int i = 0; i < path.size()-1; i++) {
+            g2d.drawLine((int)path.get(i).getCenter().getX(),(int)path.get(i).getCenter().getY(),(int)path.get(i+1).getCenter().getX(),(int)path.get(i+1).getCenter().getY());
+        }
+    }
+
+//    private static Line2D.Double getPath(Tile a, Tile b) {
+//        Line2D.Double straight = new Line2D.Double(a.getCenter(),b.getCenter());
+//        return straight;
+//    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //TODO: Board Code
+    private static class Animate implements Runnable {
+        public void run() {
+            while (endgame == false) {
+                tileDraw();
+                try {
+                    Thread.sleep(32);
+                } catch (InterruptedException e) {
+                    if (!background_drawn) {
+                        backgroundDraw();
+                    }
+                }
+            }
+        }
+    }
+
+    //  Throws an image as the background and creates the resource labels on the MenuBar
+    private static void backgroundDraw() {
+        Graphics g = appFrame.getGraphics();
+        Graphics2D g2D = (Graphics2D) g;
+        g2D.drawImage(background, XOFFSET, YOFFSET + 25, null);
+        background_drawn = true;
+        if (Stark.isActive()) {
+            metalLabel.setText("    Metal: " + Stark.metal);
+            woodLabel.setText("    Wood: " + Stark.wood);
+            foodLabel.setText("    Food: " + Stark.food);
+            laborLabel.setText("    Labor: " + Stark.labor);
+            educationLabel.setText("    Education: " + Stark.education);
+        } else if (Lannister.isActive()) {
+            metalLabel.setText("    Metal: " + Lannister.metal);
+            woodLabel.setText("    Wood: " + Lannister.wood);
+            foodLabel.setText("    Food: " + Lannister.food);
+            laborLabel.setText("    Labor: " + Lannister.labor);
+            educationLabel.setText("    Education: " + Lannister.education);
+        } else if (Targaryen.isActive()) {
+            metalLabel.setText("    Metal: " + Targaryen.metal);
+            woodLabel.setText("    Wood: " + Targaryen.wood);
+            foodLabel.setText("    Food: " + Targaryen.food);
+            laborLabel.setText("    Labor: " + Targaryen.labor);
+            educationLabel.setText("    Education: " + Targaryen.education);
+        }
+        actionLabel.setText("    Actions: " + (maxActions-actionsTaken));
+    }
+
+    private static void tileDraw() {
+        Graphics g = appFrame.getGraphics();
+        Graphics2D g2d = (Graphics2D) g;
+        for (int i = 0; i < tiles.size(); i++) {
+            Tile current = tiles.get(i);
+            if (current.owner.equals(currentNation)) {
+                if (current.mouseHover) {
+//                    System.out.println((current.x + current.getWidth() / 2) + " " + (current.y - current.getHeight() / 2) + "\n" + board.mouseX + " " + board.mouseY);
+                    if (current.myBiome == biome.Flatland) {
+                        g2d.drawImage(rotateImageObject(current).filter(player_flat_tile, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                    } else if (current.myBiome == biome.Forest) {
+                        g2d.drawImage(rotateImageObject(current).filter(player_forest_tile, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                    } else if (current.myBiome == biome.Mountain) {
+                        g2d.drawImage(rotateImageObject(current).filter(player_mount_tile, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                    } else if (current.myBiome == biome.Desert) {
+                        g2d.drawImage(rotateImageObject(current).filter(player_desert_tile, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                    }
+//                    System.out.println(current.toString());
+                } else {
+                    if (current.myBiome == biome.Flatland) {
+                        g2d.drawImage(rotateImageObject(current).filter(player_flat_tile_small, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                    } else if (current.myBiome == biome.Forest) {
+                        g2d.drawImage(rotateImageObject(current).filter(player_forest_tile_small, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                    } else if (current.myBiome == biome.Mountain) {
+                        g2d.drawImage(rotateImageObject(current).filter(player_mount_tile_small, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                    } else if (current.myBiome == biome.Desert) {
+                        g2d.drawImage(rotateImageObject(current).filter(player_desert_tile_small, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                    }
+                }
+            } else if (current.owner.equals("")) {
+                if (current.mouseHover) {
+//                    System.out.println((current.x + current.getWidth() / 2) + " " + (current.y - current.getHeight() / 2) + "\n" + board.mouseX + " " + board.mouseY);
+                    if (!movingUnits.isEmpty()) {
+                        drawPath(g2d,current);
+                    }
+                    try {
+                        Thread.sleep(300);
+                    } catch (InterruptedException ie) {}
+                    if (current.myBiome == biome.Flatland) {
+                        g2d.drawImage(rotateImageObject(current).filter(flat_tile, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                    } else if (current.myBiome == biome.Forest) {
+                        g2d.drawImage(rotateImageObject(current).filter(forest_tile, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                    } else if (current.myBiome == biome.Mountain) {
+                        g2d.drawImage(rotateImageObject(current).filter(mount_tile, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                    } else if (current.myBiome == biome.Desert) {
+                        g2d.drawImage(rotateImageObject(current).filter(desert_tile, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                    }
+//                    System.out.println(current.toString());
+                } else {
+                    if (current.myBiome == biome.Flatland) {
+                        g2d.drawImage(rotateImageObject(current).filter(flat_tile_small, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                    } else if (current.myBiome == biome.Forest) {
+                        g2d.drawImage(rotateImageObject(current).filter(forest_tile_small, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                    } else if (current.myBiome == biome.Mountain) {
+                        g2d.drawImage(rotateImageObject(current).filter(mount_tile_small, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                    } else if (current.myBiome == biome.Desert) {
+                        g2d.drawImage(rotateImageObject(current).filter(desert_tile_small, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                    }
+                }
+            } else {
+                if (current.mouseHover) {
+//                    System.out.println((current.x + current.getWidth() / 2) + " " + (current.y - current.getHeight() / 2) + "\n" + board.mouseX + " " + board.mouseY);
+                    if (current.myBiome == biome.Flatland) {
+                        g2d.drawImage(rotateImageObject(current).filter(enemy_flat_tile, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                    } else if (current.myBiome == biome.Forest) {
+                        g2d.drawImage(rotateImageObject(current).filter(enemy_forest_tile, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                    } else if (current.myBiome == biome.Mountain) {
+                        g2d.drawImage(rotateImageObject(current).filter(enemy_mount_tile, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                    } else if (current.myBiome == biome.Desert) {
+                        g2d.drawImage(rotateImageObject(current).filter(enemy_desert_tile, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                    }
+//                    System.out.println(current.toString());
+                } else {
+                    if (current.myBiome == biome.Flatland) {
+                        g2d.drawImage(rotateImageObject(current).filter(enemy_flat_tile_small, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                    } else if (current.myBiome == biome.Forest) {
+                        g2d.drawImage(rotateImageObject(current).filter(enemy_forest_tile_small, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                    } else if (current.myBiome == biome.Mountain) {
+                        g2d.drawImage(rotateImageObject(current).filter(enemy_mount_tile_small, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                    } else if (current.myBiome == biome.Desert) {
+                        g2d.drawImage(rotateImageObject(current).filter(enemy_desert_tile_small, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                    }
+                }
+            }
+        }
+    }
+
+    private static String getGameState() {
+        String gameState = "BOARD[";
+        for (Tile tile: tiles) {
+            biome biomeEnum = tile.getBiome();
+            gameState = gameState + "(" + tile.owner + "," + tile.getX() + "," + tile.getY() + "," + biomeEnum.name() + "," + tile.mine + "," + tile.forge + "," + tile.lumberMill + "," + tile.deforestation + "," + tile.farm + "," + tile.plantation + "," + tile.school + "," + tile.college;
+            for (int i = 0; i < tile.occupyingUnits.size(); i++) {
+                gameState += "," + tile.occupyingUnits.get(i).unitName + "," + tile.occupyingUnits.get(i).owner;
+            }
+            gameState += ")";
+        }
+        gameState = gameState + "]";
+        return gameState;
+    }
+
+    private static Vector<Tile> CreateBoard(String board) {
+        Vector<Tile> tiles = new Vector<>();
+        board = board.substring(6);
+//        System.out.println(board);
+        String[] tileArr = board.split("\\(");
+        for (String tile: tileArr) {
+            if (tile.equals(tileArr[0])) continue;
+            String[] items = tile.split(",");
+            items[items.length-1] = items[items.length-1].substring(0,1);
+//            System.out.println(tileArr[1]);
+            Tile current = new Tile(items[0],Double.parseDouble(items[1]),Double.parseDouble(items[2]),tile_small.getWidth(),tile_small.getHeight(),0,items[3],Integer.parseInt(items[4]),Integer.parseInt(items[5]),Integer.parseInt(items[6]),Integer.parseInt(items[7]),Integer.parseInt(items[8]),Integer.parseInt(items[9]),Integer.parseInt(items[10]),Integer.parseInt(items[11]),Arrays.copyOfRange(items,12,items.length));
+            tiles.add(current);
+        }
+        for (Tile tile: tiles) {
+            tile.findNeighbors(tiles);
+            tile.isWaterSide();
+            tile.setResourceRates();
+            tile.addResources();
+        }
+        return tiles;
+    }
+
+    private static Vector<Tile> CreateBoard(int numTiles) {
+        Vector<Tile> tiles = new Vector<>();
+        Random rand = new Random(System.currentTimeMillis());
+        int loc;
+        int fails = 0;
+        tiles.addElement(new Tile(WINWIDTH/2,WINHEIGHT/2,tile_small.getWidth(),tile_small.getHeight(),0));
+        for (int i = 0; i < numTiles-1; i++) {
+            ImageObject current = tiles.get(i);
+            Point2D.Double checkPoint;
+            boolean createTile = true;
+            loc = rand.nextInt(6);
+            if (fails > 6) {
+                current = tiles.get(rand.nextInt(tiles.size()-1));
+            }
+            if (loc == 0) {
+                checkPoint = new Point2D.Double(current.getX(),(current.getY() - current.getHeight() - 2));
+            } else if (loc == 1) {
+                checkPoint = new Point2D.Double((current.getX() + (current.getWidth()*0.75) + Math.sqrt(2)),(current.getY() - (current.getHeight() * 0.5) - Math.sqrt(2)));
+            } else if (loc == 2) {
+                checkPoint = new Point2D.Double((current.getX() + (current.getWidth() * 0.75) + Math.sqrt(2)),(current.getY() + (current.getHeight() * 0.5) + Math.sqrt(2)));
+            } else if (loc == 3) {
+                checkPoint = new Point2D.Double(current.getX(),(current.getY() + current.getHeight() + 2));
+            } else if (loc == 4) {
+                checkPoint = new Point2D.Double((current.getX() - (current.getWidth() * 0.75) - Math.sqrt(2)),(current.getY() + (current.getHeight() * 0.5) + Math.sqrt(2)));
+            } else if (loc == 5) {
+                checkPoint = new Point2D.Double((current.getX() - (current.getWidth() * 0.75) - Math.sqrt(2)),(current.getY() - (current.getHeight() * 0.5) - Math.sqrt(2)));
+            } else {
+                checkPoint = new Point2D.Double();
+            }
+            for (int j = 0; j < tiles.size(); j++) {
+                if (checkPoint.getX() < 0 || checkPoint.getX() + tile_small.getWidth() > WINWIDTH || checkPoint.getY() > appFrame.getHeight() - YOFFSET - 25 || checkPoint.getY() - tile_small.getHeight() < 40 || isInside(checkPoint.getX() + (tile_small.getWidth() * 0.5),checkPoint.getY() - (tile_small.getHeight() * 0.5),tiles.get(j).getX(),tiles.get(j).getY(),tiles.get(j).getX()+tile_small.getWidth(),tiles.get(j).getY()-tile_small.getHeight())) {
+                    createTile = false;
+                    i--;
+                    fails++;
+                    break;
+                }
+            }
+            if (createTile) {
+                tiles.addElement(new Tile(checkPoint.getX(),checkPoint.getY(),tile_small.getWidth(),tile_small.getHeight(),0));
+                fails = 0;
+            }
+        }
+        for (int i = 0; i < tiles.size(); i++) {
+            tiles.get(i).findNeighbors(tiles);
+            tiles.get(i).generateBiome();
+            tiles.get(i).isWaterSide();
+            tiles.get(i).setResourceRates();
+            tiles.get(i).setOwner(i);
+            tiles.get(i).addResources();
+        }
+        return tiles;
+    }
+
+    private static class TileMover implements Runnable {
+        public void run() {
+            int off_tile = -1;
+            while (!endgame) {
+                for (int i = 0; i < tiles.size(); i++) {
+                    tiles.get(i).screenContain();
+                    if (off_tile == -1 && (tileFixX != 0 || tileFixY != 0)) {
+                        off_tile = i;
+                    }
+                }
+                if (off_tile != -1) {
+                    for (int i = 0; i < off_tile; i++) {
+                        tiles.get(i).screenContain();
+                    }
+                    off_tile = -1;
+                    tileFixY = 0;
+                    tileFixX = 0;
+                }
+            }
+        }
+    }
+
+    private static AffineTransformOp rotateImageObject(ImageObject obj) {
+        AffineTransform at = AffineTransform.getRotateInstance(-obj.getAngle(), obj.getWidth()/2.0, obj.getHeight()/2.0);
+        AffineTransformOp atop = new AffineTransformOp(at, AffineTransformOp.TYPE_BILINEAR);
+        return atop;
+    }
+
+    private static Boolean isInside(double p1x, double p1y, double p2x1, double p2y1, double p2x2, double p2y2) {
+        Boolean ret = false;
+        if (p1x > p2x1 && p1x < p2x2) {
+            if (p1y > p2y1 && p1y < p2y2) {
+                ret = true;
+            }
+            if (p1y > p2y2 && p1y < p2y1) {
+                ret = true;
+            }
+        }
+        if (p1x > p2x2 && p1x < p2x1) {
+            if (p1y > p2y1 && p1y < p2y2) {
+                ret = true;
+            }
+            if (p1y > p2y2 && p1y < p2y1) {
+                ret = true;
+            }
+        }
+        return ret;
+    }
+
+    public static class MouseTrackerPanel extends JPanel {
+
+        private double mouseX = 0;
+        private double mouseY = 0;
+        private Point lastPosition;
+        private double deltaX = 0;
+        private double deltaY = 0;
+
+        public MouseTrackerPanel() {
+            // Add the MouseMotionListener to track mouse movement
+            addMouseMotionListener(new MouseMotionListener() {
+                @Override
+                public void mouseMoved(MouseEvent e) {
+                    // Update the coordinates whenever the mouse moves
+                    mouseX = e.getX();
+                    mouseY = e.getY();
+                }
+
+                @Override
+                public void mouseDragged(MouseEvent e) {
+                    if (lastPosition != null) {
+                        mousePressed = false;
+                        deltaX = e.getX() - lastPosition.getX();
+                        deltaY = e.getY() - lastPosition.getY();
+                        if (deltaX != 0 || deltaY != 0) {
+                            for (int i = 0; i < tiles.size(); i++) {
+                                if (deltaX <= 0 && deltaY <= 0) {
+                                    tiles.get(i).move(Math.max(deltaX,-5),Math.max(deltaY,-5));
+                                } else if (deltaX <= 0 && deltaY >= 0) {
+                                    tiles.get(i).move(Math.max(deltaX,-5),Math.min(deltaY,5));
+                                } else if (deltaX >= 0 && deltaY <= 0) {
+                                    tiles.get(i).move(Math.min(deltaX,5),Math.max(deltaY,-5));
+                                } else {
+                                    tiles.get(i).move(Math.min(deltaX,5),Math.min(deltaY,5));
+                                }
+                            }
+                        }
+                        backgroundDraw();
+                        lastPosition = e.getPoint();
+                    }
+                }
+            });
+            addMouseListener(new MouseAdapter() {
+                @Override
+                public void mousePressed(MouseEvent e) {
+                    lastPosition = e.getPoint();
+                    mousePressed = true;
+                }
+
+                @Override
+                public void mouseReleased(MouseEvent e) {
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException ie) {}
+                    lastPosition = null;
+                    mousePressed = false;
+                    deltaX = 0;
+                    deltaY = 0;
+                }
+            });
+        }
+
+        public double getMouseX() {return mouseX;}
+        public double getMouseY() {return mouseY;}
+
     }
 
     private static class MouseOverChecker implements Runnable {
@@ -3026,27 +3489,6 @@ public class Main {
         }
     }
 
-    private static Boolean isInside(double p1x, double p1y, double p2x1, double p2y1, double p2x2, double p2y2) {
-        Boolean ret = false;
-        if (p1x > p2x1 && p1x < p2x2) {
-            if (p1y > p2y1 && p1y < p2y2) {
-                ret = true;
-            }
-            if (p1y > p2y2 && p1y < p2y1) {
-                ret = true;
-            }
-        }
-        if (p1x > p2x2 && p1x < p2x1) {
-            if (p1y > p2y1 && p1y < p2y2) {
-                ret = true;
-            }
-            if (p1y > p2y2 && p1y < p2y1) {
-                ret = true;
-            }
-        }
-        return ret;
-    }
-
     private static Boolean MouseOver(ImageObject p2) {
         Boolean ret = false;
         double p1x = board.getMouseX();
@@ -3059,475 +3501,49 @@ public class Main {
         return ret;
     }
 
-    private static AffineTransformOp rotateImageObject(ImageObject obj) {
-        AffineTransform at = AffineTransform.getRotateInstance(-obj.getAngle(), obj.getWidth()/2.0, obj.getHeight()/2.0);
-        AffineTransformOp atop = new AffineTransformOp(at, AffineTransformOp.TYPE_BILINEAR);
-        return atop;
-    }
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //TODO: Startup Code
+    public static void setup() {
+        appFrame = new JFrame("Capstone");
+        twoPi = 2.0 * 3.14159265358979;
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        XOFFSET = 0;
+        YOFFSET = 30; //30
+        WINWIDTH = (int)screenSize.getWidth(); //338
+        WINHEIGHT = (int)screenSize.getHeight() - 40; //271
+        endgame = false;
+        hosting = false;
 
-    private static class ImageObject {
-        protected double x;
-        protected double y;
-        protected double xwidth;
-        protected double yheight;
-        protected double angle;
-        protected double internalangle;
-        protected Vector<Double> coords;
-        protected Vector<Double> triangles;
-        protected double comX;
-        protected double comY;
-        protected boolean mouseHover;
-
-        public ImageObject() {}
-        public ImageObject(double xinput, double yinput, double xwidthinput, double yheightinput, double angleinput) {
-            x = xinput;
-            y = yinput;
-            xwidth = xwidthinput;
-            yheight = yheightinput;
-            angle = angleinput;
-            internalangle = 0.0;
-            coords = new Vector<Double>();
-            mouseHover = false;
-        }
-        public double getX() {
-            return x;
-        }
-        public double getY() {
-            return y;
-        }
-        public double getWidth() {
-            return xwidth;
-        }
-        public double getHeight() {
-            return yheight;
-        }
-        public double getAngle() {
-            return angle;
-        }
-        public double getInternalangle() {
-            return internalangle;
-        }
-        public void setAngle(double angleinput){
-            angle = angleinput;
-        }
-        public void setInternalangle(double internalangleinput) {
-            internalangle = internalangleinput;
-        }
-        public Vector<Double> getCoords() {
-            return coords;
-        }
-        public void setCoords(Vector<Double> coordsinput) {
-            coords =coordsinput;
-            generateTriangles();
-            //printTriangles();
-        }
-        public void generateTriangles() {
-            triangles = new Vector<Double>();
-            comX = getComX();
-            comY = getComY();
-            for (int i = 0; i < coords.size(); i = i + 2) {
-                triangles.addElement(coords.elementAt(i));
-                triangles.addElement(coords.elementAt(i+1));
-                triangles.addElement(coords.elementAt((i+2) % coords.size()));
-                triangles.addElement(coords.elementAt((i+3) % coords.size()));
-                triangles.addElement(comX);
-                triangles.addElement(comY);
-            }
-        }
-        public void printTrianlges() {
-            for (int i = 0; i < triangles.size(); i = i + 6) {
-                System.out.print("p0x: " + triangles.elementAt(i) + ", p0y: " + triangles.elementAt(i+1));
-                System.out.print(" p1x: " + triangles.elementAt(i+2) + ", p1y: " + triangles.elementAt(i+3));
-                System.out.print(" p2x: " + triangles.elementAt(i+4) + ", p2y: " + triangles.elementAt(i+5));
-            }
-        }
-        public double getComX() {
-            double ret = 0;
-            if (coords.size() > 0) {
-                for (int i = 0;  i < coords.size(); i = i+2) {
-                    ret = ret + coords.elementAt(i);
-                }
-                ret = ret / (coords.size() / 2.0);
-            }
-            return ret;
-        }
-        public double getComY() {
-            double ret = 0;
-            if (coords.size() > 0) {
-                for (int i = 1; i < coords.size(); i = i+2) {
-                    ret = ret + coords.elementAt(i);
-                }
-                ret = ret / (coords.size() / 2.0);
-            }
-            return ret;
-        }
-        public void move(double xinput, double yinput) {
-            x = x + xinput;
-            y = y + yinput;
-        }
-        public void moveto(double xinput, double yinput) {
-            x = xinput;
-            y = yinput;
-        }
-        public void rotate(double angleinput) {
-            angle = angle + angleinput;
-            while (angle > twoPi) {
-                angle = angle - twoPi;
-            }
-            while (angle < 0) {
-                angle = angle + twoPi;
-            }
-        }
-        public String toString() {
-            return "[" + x + "," + y + "]" + "  [" + xwidth + "," + yheight + "]";
-        }
-        public void screenContain() {
-            if (x + xwidth > appFrame.getWidth()) {
-                tileFixX = -((x+xwidth)-appFrame.getWidth());
-            }
-            if (x < 0) {
-                tileFixX = -x;
-            }
-            if (y > appFrame.getHeight() - YOFFSET - 25) {
-                tileFixY = -(y- appFrame.getHeight()+YOFFSET+25);
-            }
-            if (y - yheight < 0) {
-                tileFixY = -(y-yheight);
-            }
-            if (tileFixX != 0 || tileFixY != 0) {
-                move(tileFixX,tileFixY);
-            }
-        }
-    }
-
-    public static class Tile extends ImageObject {
-        private String owner;
-        private Vector<Tile> neighbors;
-        private Vector<Integer> resourceRates;
-        private biome myBiome;
-        private boolean waterSide;
-        private Vector<MilitaryUnit> occupyingUnits;
-        private int mine;
-        private int forge;
-        private int lumberMill;
-        private int deforestation;
-        private int farm;
-        private int plantation;
-        private int school;
-        private int college;
-
-        public Tile(double xinput, double yinput, double width, double height, double angle) {
-            super(xinput,yinput,width,height,angle);
-            neighbors = new Vector<>();
-            resourceRates = new Vector<>();
-            occupyingUnits = new Vector<>();
-            mine = 0;
-            forge = 0;
-            lumberMill = 0;
-            deforestation = 0;
-            farm = 0;
-            plantation = 0;
-            school = 0;
-            college = 0;
-        }
-
-        public Tile(String owner, double xinput, double yinput, double width, double height, double angle, String myBiome, int mine, int forge, int lumberMill, int deforestation, int farm, int plantation, int school, int college, String[] military) {
-            super(xinput,yinput,width,height,angle);
-            neighbors = new Vector<>();
-            resourceRates = new Vector<>();
-            occupyingUnits = new Vector<>();
-            this.owner = owner;
-            this.myBiome = biome.valueOf(myBiome);
-            if (this.myBiome == biome.Flatland) biomeCounts.set(0,biomeCounts.get(0)+1);
-            if (this.myBiome == biome.Flatland) biomeCounts.set(1,biomeCounts.get(1)+1);
-            if (this.myBiome == biome.Flatland) biomeCounts.set(2,biomeCounts.get(2)+1);
-            if (this.myBiome == biome.Flatland) biomeCounts.set(3,biomeCounts.get(3)+1);
-            this.mine = mine;
-            this.forge = forge;
-            this.lumberMill = lumberMill;
-            this.deforestation = deforestation;
-            this.farm = farm;
-            this.plantation = plantation;
-            this.school = school;
-            this.college = college;
-            for (int i = 0; i < military.length-1; i+=2) {
-                this.setMilitary(military[i],1,military[i+1]);
-            }
-        }
-        public String toString() {
-            return owner + "- Labor: " + resourceRates.get(0) + " Wood: " + resourceRates.get(1) + " Metal: " + resourceRates.get(2) + " Food: " + resourceRates.get(3) + " Research: " + resourceRates.get(4);
-        }
-        public boolean equals(Tile a) {
-            return x == a.x && y == a.y;
-        }
-        public void setOwner(int index) {
-            if (index == 0) {
-                owner = "Stark";
-            } else if (index == numTiles - 1) {
-                owner = "Lannister";
-            } else {
-                owner = "";
-            }
-        }
-        public biome getBiome() {
-            return myBiome;
-        }
-        public void isWaterSide() { waterSide = (neighbors.size() < 6); }
-        public Point2D.Double getCenter() {
-            return new Point2D.Double(x + (xwidth*0.5),y+(yheight*1.5));
-        }
-        public void setResourceRates() {
-            resourceRates.clear();
-            int labor, wood, metal, food, research;
-            Random rand = new Random(System.currentTimeMillis() + (int)x + (int)y);
-            if (myBiome == biome.Flatland) {
-                labor = rand.nextInt(20) + 20;
-                wood = rand.nextInt(5) + 5;
-                metal = rand.nextInt(5);
-                food = rand.nextInt(10) + 25;
-                research = rand.nextInt(5);
-            } else if (myBiome == biome.Forest) {
-                labor = rand.nextInt(5);
-                wood = rand.nextInt(20) + 30;
-                metal = rand.nextInt(5);
-                food = rand.nextInt(10) + 10;
-                research = rand.nextInt(5) + 10;
-            } else if (myBiome == biome.Mountain) {
-                labor = rand.nextInt(5);
-                wood = rand.nextInt(10);
-                metal = rand.nextInt(20) + 40;
-                food = rand.nextInt(5) + 5;
-                research = rand.nextInt(5) + 5;
-            } else {
-                labor = rand.nextInt(10) + 20;
-                wood = rand.nextInt(5) + 5;
-                metal = rand.nextInt(5);
-                food = rand.nextInt(5);
-                research = rand.nextInt(10) + 25;
-            }
-            if (waterSide) {
-                labor += rand.nextInt(10);
-                food += rand.nextInt(10);
-            }
-            wood += 5 * lumberMill + 10 * deforestation;
-            metal += 5 * mine + 10 * forge;
-            food += 5 * farm + 10 * plantation;
-            research += 5 * school  + 10 * college;
-            resourceRates.add(labor);
-            resourceRates.add(wood);
-            resourceRates.add(metal);
-            resourceRates.add(food);
-            resourceRates.add(research);
-        }
-        public void generateBiome() {
-            Vector<Integer> neighborBiomes = countNeighborBiomes();
-            int flat_count = neighborBiomes.get(0) * 12;
-            if (biomeCounts.get(0) > numTiles / 3) {
-                flat_count = -25;
-            }
-            int forest_count = neighborBiomes.get(1) * 12;
-            if (biomeCounts.get(1) > numTiles / 3) {
-                forest_count = -25;
-            }
-            int mountain_count = neighborBiomes.get(2) * 12;
-            if (biomeCounts.get(2) > numTiles / 3) {
-                mountain_count = -25;
-            }
-            int desert_count = neighborBiomes.get(3) * 12;
-            if (biomeCounts.get(3) > numTiles / 3) {
-                desert_count = -25;
-            }
-            int total = 100 + flat_count + forest_count + mountain_count + desert_count;
-            Random rand = new Random(System.currentTimeMillis());
-            int selector = rand.nextInt(total) + 1;
-            if (selector <= 25 + flat_count) {
-                myBiome = biome.Flatland;
-                biomeCounts.set(0,biomeCounts.get(0)+1);
-            } else if (selector <= 50 + flat_count + forest_count) {
-                myBiome = biome.Forest;
-                biomeCounts.set(1,biomeCounts.get(1)+1);
-            } else if (selector <= 75 + flat_count + forest_count + mountain_count) {
-                myBiome = biome.Mountain;
-                biomeCounts.set(2,biomeCounts.get(2)+1);
-            } else if (selector <= 100 + flat_count + forest_count + mountain_count + desert_count) {
-                myBiome = biome.Desert;
-                biomeCounts.set(3,biomeCounts.get(3)+1);
-            } else {
-                throw new IllegalArgumentException();
-            }
-        }
-        private Vector<Integer> countNeighborBiomes() {
-            Vector<Integer> biomeCount = new Vector<>();
-            biomeCount.add(0);
-            biomeCount.add(0);
-            biomeCount.add(0);
-            biomeCount.add(0);
-            for (int i = 0; i < neighbors.size(); i++) {
-                biome neighborBiome = neighbors.get(i).getBiome();
-                if (neighborBiome == biome.Flatland) {
-                    biomeCount.set(0,biomeCount.get(0)+1);
-                } else if (neighborBiome == biome.Forest) {
-                    biomeCount.set(1,biomeCount.get(1)+1);
-                } else if (neighborBiome == biome.Mountain) {
-                    biomeCount.set(2,biomeCount.get(2)+1);
-                } else if (neighborBiome == biome.Desert) {
-                    biomeCount.set(3,biomeCount.get(3)+1);
-                }
-            }
-            return biomeCount;
-        }
-        public void findNeighbors(Vector<Tile> tiles) {
-            Point2D.Double up = new Point2D.Double(x + (xwidth * 0.5),y - (yheight * 1.5));
-            Point2D.Double upRight = new Point2D.Double(x + (xwidth * 1.25),y - yheight);
-            Point2D.Double downRight = new Point2D.Double(x + (xwidth * 1.25),y);
-            Point2D.Double down = new Point2D.Double(x + (xwidth * 0.5),y + (yheight * 0.5));
-            Point2D.Double downLeft = new Point2D.Double(x- (xwidth * 0.25),y);
-            Point2D.Double upLeft = new Point2D.Double(x - (xwidth * 0.25),y - yheight);
-            for (int i = 0; i < tiles.size(); i++) {
-                Tile current = tiles.get(i);
-                if (!(current.getX() == x && current.getY() == y)) {
-                    if(isInside(up.getX(),up.getY(),current.getX(),current.getY(),current.getX() + current.getWidth(),current.getY() - current.getHeight())) {
-                        neighbors.add(current);
-                    }
-                    if(isInside(upRight.getX(),upRight.getY(),current.getX(),current.getY(),current.getX() + current.getWidth(),current.getY() - current.getHeight())) {
-                        neighbors.add(current);
-                    }
-                    if(isInside(downRight.getX(),downRight.getY(),current.getX(),current.getY(),current.getX() + current.getWidth(),current.getY() - current.getHeight())) {
-                        neighbors.add(current);
-                    }
-                    if(isInside(downLeft.getX(),downLeft.getY(),current.getX(),current.getY(),current.getX() + current.getWidth(),current.getY() - current.getHeight())) {
-                        neighbors.add(current);
-                    }
-                    if(isInside(down.getX(),down.getY(),current.getX(),current.getY(),current.getX() + current.getWidth(),current.getY() - current.getHeight())) {
-                        neighbors.add(current);
-                    }
-                    if(isInside(upLeft.getX(),upLeft.getY(),current.getX(),current.getY(),current.getX() + current.getWidth(),current.getY() - current.getHeight())) {
-                        neighbors.add(current);
-                    }
-                }
-            }
-        }
-
-        public void setMilitary(String unit, int change, String nation) {
-            if (nation == "Stark") {
-                if (change < 0) {
-                    for (int i = 0; i < occupyingUnits.size(); i++) {
-                        if (occupyingUnits.get(i).unitName == unit && occupyingUnits.get(i).owner == "Stark") {
-                            occupyingUnits.remove(i);
-                        }
-                    }
-                } else {
-                    occupyingUnits.add(0, new MilitaryUnit(nation, unit));
-                    Stark.setMilitary(unit, change);
-                }
-            } else if (nation == "Lannister") {
-                if (change < 0) {
-                    for (int i = 0; i < occupyingUnits.size(); i++) {
-                        if (occupyingUnits.get(i).unitName == unit && occupyingUnits.get(i).owner == "Lannister") {
-                            occupyingUnits.remove(i);
-                        }
-                    }
-                } else {
-                    occupyingUnits.add(0, new MilitaryUnit(nation, unit));
-                    Lannister.setMilitary(unit, change);
-                }
-            } else if (nation == "Targaryen") {
-                if (change < 0) {
-                    for (int i = 0; i < occupyingUnits.size(); i++) {
-                        if (occupyingUnits.get(i).unitName == unit && occupyingUnits.get(i).owner == "Targaryen") {
-                            occupyingUnits.remove(i);
-                        }
-                    }
-                } else {
-                    occupyingUnits.add(0, new MilitaryUnit(nation, unit));
-                    Targaryen.setMilitary(unit, change);
-                }
-            }
-            backgroundDraw();
-        }
-
-        public void setBuilding(String unit, int change) {
-            if (owner == "Stark") {
-                if (unit == "mine") {
-                    mine += change;
-                } else if (unit == "forge") {
-                    forge += change;
-                } else if (unit == "lumberMill") {
-                    lumberMill += change;
-                } else if (unit == "deforestation") {
-                    deforestation += change;
-                } else if (unit == "farm") {
-                    farm += change;
-                } else if (unit == "plantation") {
-                    plantation += change;
-                } else if (unit == "school") {
-                    school += change;
-                } else if (unit == "college") {
-                    college += change;
-                }
-                Stark.setBuilding(unit, change);
-            } else if (owner == "Lannister") {
-                if (unit == "mine") {
-                    mine += change;
-                } else if (unit == "forge") {
-                    forge += change;
-                } else if (unit == "lumberMill") {
-                    lumberMill += change;
-                } else if (unit == "deforestation") {
-                    deforestation += change;
-                } else if (unit == "farm") {
-                    farm += change;
-                } else if (unit == "plantation") {
-                    plantation += change;
-                } else if (unit == "school") {
-                    school += change;
-                } else if (unit == "college") {
-                    college += change;
-                }
-                Lannister.setBuilding(unit, change);
-            } else if (owner == "Targaryen") {
-                if (unit == "mine") {
-                    mine += change;
-                } else if (unit == "forge") {
-                    forge += change;
-                } else if (unit == "lumberMill") {
-                    lumberMill += change;
-                } else if (unit == "deforestation") {
-                    deforestation += change;
-                } else if (unit == "farm") {
-                    farm += change;
-                } else if (unit == "plantation") {
-                    plantation += change;
-                } else if (unit == "school") {
-                    school += change;
-                } else if (unit == "college") {
-                    college += change;
-                }
-                Targaryen.setBuilding(unit, change);
-            }
-            backgroundDraw();
-        }
-        public void addResources() {
-            if (owner.equals("Stark")) {
-                Stark.setResource("labor",resourceRates.get(0));
-                Stark.setResource("wood",resourceRates.get(1));
-                Stark.setResource("metal",resourceRates.get(2));
-                Stark.setResource("food",resourceRates.get(3));
-                Stark.setResource("education",resourceRates.get(4));
-            } else if (owner.equals("Lannister")) {
-                Lannister.setResource("labor",resourceRates.get(0));
-                Lannister.setResource("wood",resourceRates.get(1));
-                Lannister.setResource("metal",resourceRates.get(2));
-                Lannister.setResource("food",resourceRates.get(3));
-                Lannister.setResource("education",resourceRates.get(4));
-            } else if (owner.equals("Targaryen")) {
-                Targaryen.setResource("labor",resourceRates.get(0));
-                Targaryen.setResource("wood",resourceRates.get(1));
-                Targaryen.setResource("metal",resourceRates.get(2));
-                Targaryen.setResource("food",resourceRates.get(3));
-                Targaryen.setResource("education",resourceRates.get(4));
-            }
-        }
+        try {
+            background = ImageIO.read(new File("images\\ocean.png"));
+            scrollBackground = ImageIO.read(new File("images\\file.png"));
+            tile = ImageIO.read(new File("images\\tile.png"));
+            tile_small = ImageIO.read(new File("images\\tile_small.png"));
+            flat_tile = ImageIO.read(new File("images\\flatland_tile.png"));
+            flat_tile_small = ImageIO.read(new File("images\\flatland_tile_small.png"));
+            forest_tile = ImageIO.read(new File("images\\forest_tile.png"));
+            forest_tile_small = ImageIO.read(new File("images\\forest_tile_small.png"));
+            mount_tile = ImageIO.read(new File("images\\mountain_tile.png"));
+            mount_tile_small = ImageIO.read(new File("images\\mountain_tile_small.png"));
+            desert_tile = ImageIO.read(new File("images\\desert_tile.png"));
+            desert_tile_small = ImageIO.read(new File("images\\desert_tile_small.png"));
+            player_flat_tile = ImageIO.read(new File("images\\player_flatland_tile.png"));
+            enemy_flat_tile = ImageIO.read(new File("images\\enemy_flatland_tile.png"));
+            player_flat_tile_small = ImageIO.read(new File("images\\player_flatland_tile_small.png"));
+            enemy_flat_tile_small = ImageIO.read(new File("images\\enemy_flatland_tile_small.png"));
+            player_forest_tile = ImageIO.read(new File("images\\player_forest_tile.png"));
+            enemy_forest_tile = ImageIO.read(new File("images\\enemy_forest_tile.png"));
+            player_forest_tile_small = ImageIO.read(new File("images\\player_forest_tile_small.png"));
+            enemy_forest_tile_small = ImageIO.read(new File("images\\enemy_forest_tile_small.png"));
+            player_mount_tile = ImageIO.read(new File("images\\player_mountain_tile.png"));
+            enemy_mount_tile = ImageIO.read(new File("images\\enemy_mountain_tile.png"));
+            player_mount_tile_small = ImageIO.read(new File("images\\player_mountain_tile_small.png"));
+            enemy_mount_tile_small = ImageIO.read(new File("images\\enemy_mountain_tile_small.png"));
+            player_desert_tile = ImageIO.read(new File("images\\player_desert_tile.png"));
+            enemy_desert_tile = ImageIO.read(new File("images\\enemy_desert_tile.png"));
+            player_desert_tile_small = ImageIO.read(new File("images\\player_desert_tile_small.png"));
+            enemy_desert_tile_small = ImageIO.read(new File("images\\enemy_desert_tile_small.png"));
+        } catch (IOException ioe) { }
     }
 
     public static void main(String[] args) {

@@ -91,6 +91,7 @@ public class Main {
     private static int maxActions = 10;
     private static boolean attacking = false;
     private static Tile pathBeginning;
+    private static Vector<Integer> startingResources = new Vector<>();
 
     //TODO://///////////////////////////////////////////////////////////////////////////////////////////////////////////
     //     Custom Classes
@@ -1163,6 +1164,11 @@ public class Main {
                 Targaryen.setResource("food", Integer.parseInt(foodT.getText()));
                 Targaryen.setResource("labor", Integer.parseInt(laborT.getText()));
                 Targaryen.setResource("education", Integer.parseInt(educationT.getText()));
+                startingResources.add(Integer.parseInt(metalT.getText()));
+                startingResources.add(Integer.parseInt(woodT.getText()));
+                startingResources.add(Integer.parseInt(foodT.getText()));
+                startingResources.add(Integer.parseInt(laborT.getText()));
+                startingResources.add(Integer.parseInt(educationT.getText()));
                 endgame = false;
                 Thread t1 = new Thread(new Animate());
                 Thread t2 = new Thread(new TileMover());
@@ -1226,16 +1232,16 @@ public class Main {
         JComboBox nationComboBox = new JComboBox<>(nations);
         JLabel ipL = new JLabel("IP:");
         JTextField ipT = new JTextField(24);
-//        JLabel metalL = new JLabel("Metal:");
-//        JTextField metalT = new JTextField(8);
-//        JLabel woodL = new JLabel("Wood:");
-//        JTextField woodT = new JTextField(8);
-//        JLabel foodL = new JLabel("Food:");
-//        JTextField foodT = new JTextField(8);
-//        JLabel laborL = new JLabel("Labor:");
-//        JTextField laborT = new JTextField(8);
-//        JLabel educationL = new JLabel("Education:");
-//        JTextField educationT = new JTextField(8);
+        JLabel metalL = new JLabel("Metal:");
+        JTextField metalT = new JTextField(8);
+        JLabel woodL = new JLabel("Wood:");
+        JTextField woodT = new JTextField(8);
+        JLabel foodL = new JLabel("Food:");
+        JTextField foodT = new JTextField(8);
+        JLabel laborL = new JLabel("Labor:");
+        JTextField laborT = new JTextField(8);
+        JLabel educationL = new JLabel("Education:");
+        JTextField educationT = new JTextField(8);
         JButton startButton = new JButton("Start");
         startButton.addActionListener(new ActionListener() {
             @Override
@@ -1264,29 +1270,29 @@ public class Main {
                     Stark.setActive(true);
                     Lannister.setActive(false);
                     Targaryen.setActive(false);
-//                    Stark.setResource("metal", Integer.parseInt(metalT.getText()));
-//                    Stark.setResource("wood", Integer.parseInt(woodT.getText()));
-//                    Stark.setResource("food", Integer.parseInt(foodT.getText()));
-//                    Stark.setResource("labor", Integer.parseInt(laborT.getText()));
-//                    Stark.setResource("education", Integer.parseInt(educationT.getText()));
+                    Stark.setResource("metal", Integer.parseInt(metalT.getText()));
+                    Stark.setResource("wood", Integer.parseInt(woodT.getText()));
+                    Stark.setResource("food", Integer.parseInt(foodT.getText()));
+                    Stark.setResource("labor", Integer.parseInt(laborT.getText()));
+                    Stark.setResource("education", Integer.parseInt(educationT.getText()));
                 } else if (currentNation == "Lannister") {
                     Stark.setActive(false);
                     Lannister.setActive(true);
                     Targaryen.setActive(false);
-//                    Lannister.setResource("metal", Integer.parseInt(metalT.getText()));
-//                    Lannister.setResource("wood", Integer.parseInt(woodT.getText()));
-//                    Lannister.setResource("food", Integer.parseInt(foodT.getText()));
-//                    Lannister.setResource("labor", Integer.parseInt(laborT.getText()));
-//                    Lannister.setResource("education", Integer.parseInt(educationT.getText()));
+                    Lannister.setResource("metal", Integer.parseInt(metalT.getText()));
+                    Lannister.setResource("wood", Integer.parseInt(woodT.getText()));
+                    Lannister.setResource("food", Integer.parseInt(foodT.getText()));
+                    Lannister.setResource("labor", Integer.parseInt(laborT.getText()));
+                    Lannister.setResource("education", Integer.parseInt(educationT.getText()));
                 } else if (currentNation == "Targaryen") {
                     Stark.setActive(false);
                     Lannister.setActive(false);
                     Targaryen.setActive(true);
-//                    Targaryen.setResource("metal", Integer.parseInt(metalT.getText()));
-//                    Targaryen.setResource("wood", Integer.parseInt(woodT.getText()));
-//                    Targaryen.setResource("food", Integer.parseInt(foodT.getText()));
-//                    Targaryen.setResource("labor", Integer.parseInt(laborT.getText()));
-//                    Targaryen.setResource("education", Integer.parseInt(educationT.getText()));
+                    Targaryen.setResource("metal", Integer.parseInt(metalT.getText()));
+                    Targaryen.setResource("wood", Integer.parseInt(woodT.getText()));
+                    Targaryen.setResource("food", Integer.parseInt(foodT.getText()));
+                    Targaryen.setResource("labor", Integer.parseInt(laborT.getText()));
+                    Targaryen.setResource("education", Integer.parseInt(educationT.getText()));
                 }
                 endgame = false;
                 Thread t1 = new Thread(new Animate());
@@ -1317,11 +1323,11 @@ public class Main {
         jPanel.setBackground(colorBackground);
         ipT.setBackground(colorButton);
         nationComboBox.setBackground(colorButton);
-//        metalT.setBackground(colorButton);
-//        woodT.setBackground(colorButton);
-//        foodT.setBackground(colorButton);
-//        laborT.setBackground(colorButton);
-//        educationT.setBackground(colorButton);
+        metalT.setBackground(colorButton);
+        woodT.setBackground(colorButton);
+        foodT.setBackground(colorButton);
+        laborT.setBackground(colorButton);
+        educationT.setBackground(colorButton);
         backButton.setBackground(colorButton);
         startButton.setBackground(colorButton);
         frame.setBackground(colorBackground);
@@ -1329,16 +1335,16 @@ public class Main {
         jPanel.add(ipT);
         jPanel.add(nationL);
         jPanel.add(nationComboBox);
-//        jPanel.add(metalL);
-//        jPanel.add(metalT);
-//        jPanel.add(woodL);
-//        jPanel.add(woodT);
-//        jPanel.add(foodL);
-//        jPanel.add(foodT);
-//        jPanel.add(laborL);
-//        jPanel.add(laborT);
-//        jPanel.add(educationL);
-//        jPanel.add(educationT);
+        jPanel.add(metalL);
+        jPanel.add(metalT);
+        jPanel.add(woodL);
+        jPanel.add(woodT);
+        jPanel.add(foodL);
+        jPanel.add(foodT);
+        jPanel.add(laborL);
+        jPanel.add(laborT);
+        jPanel.add(educationL);
+        jPanel.add(educationT);
         jPanel.add(backButton);
         jPanel.add(startButton);
         frame.add(jPanel);
@@ -2958,6 +2964,10 @@ public class Main {
                         System.out.println("Server: Recieved board");
                         ServerRunner.sendBoard(playerName,message.substring(5));
                         //ServerRunner.broadcast(message,ServerRunner.players.get(playerName));
+                    } else if (message.startsWith("INITIALIZE:")){
+                        String values = message.substring(11);
+                        String[] parts = values.split(",");
+                        ServerRunner.broadcast(message,ServerRunner.players.get(parts[0]));
                     }
                 }
 
@@ -3000,11 +3010,18 @@ public class Main {
                                 System.out.println("Client: " + serverMessage);
                             } else if (serverMessage.equals("BOARD: Request")) {
                                 System.out.println("Client: Sending board");
+                                out.println("INITIALIZE:" + currentNation + "," + startingResources.get(0) + "," + startingResources.get(1) + "," + startingResources.get(2) + "," + startingResources.get(3) + "," + startingResources.get(4));
+                                try {
+                                    Thread.sleep(500);
+                                } catch (InterruptedException ie) {}
                                 out.println(getGameState());
                             } else if (serverMessage.startsWith("BOARD[")) {
                                 System.out.println("Client: Received board");
                                 tiles = CreateBoard(serverMessage);
                                 actionsTaken = 0;
+                            } else if (serverMessage.startsWith("INITIALIZE:")) {
+                                String initilizeStr = serverMessage.substring(11);
+                                Initialize(initilizeStr);
                             }
                         }
                     } catch (IOException e) {
@@ -3257,6 +3274,31 @@ public class Main {
                     }
                 }
             }
+        }
+    }
+
+    private static void Initialize(String resources) {
+        String parts[] = resources.split(",");
+        if (currentNation.equals("Stark")) {
+            Stark.setResource("metal", Integer.parseInt(parts[1]));
+            Stark.setResource("wood", Integer.parseInt(parts[2]));
+            Stark.setResource("food", Integer.parseInt(parts[3]));
+            Stark.setResource("labor", Integer.parseInt(parts[4]));
+            Stark.setResource("education", Integer.parseInt(parts[5]));
+        }
+        if (currentNation.equals("Lannister")) {
+            Lannister.setResource("metal", Integer.parseInt(parts[1]));
+            Lannister.setResource("wood", Integer.parseInt(parts[2]));
+            Lannister.setResource("food", Integer.parseInt(parts[3]));
+            Lannister.setResource("labor", Integer.parseInt(parts[4]));
+            Lannister.setResource("education", Integer.parseInt(parts[5]));
+        }
+        if (currentNation.equals("Targaryen")) {
+            Targaryen.setResource("metal", Integer.parseInt(parts[1]));
+            Targaryen.setResource("wood", Integer.parseInt(parts[2]));
+            Targaryen.setResource("food", Integer.parseInt(parts[3]));
+            Targaryen.setResource("labor", Integer.parseInt(parts[4]));
+            Targaryen.setResource("education", Integer.parseInt(parts[5]));
         }
     }
 

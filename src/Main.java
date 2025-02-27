@@ -3010,13 +3010,11 @@ public class Main {
                                 System.out.println("Client: " + serverMessage);
                             } else if (serverMessage.equals("BOARD: Request")) {
                                 System.out.println("Client: Sending board");
-                                out.println("INITIALIZE:" + currentNation + "," + startingResources.get(0) + "," + startingResources.get(1) + "," + startingResources.get(2) + "," + startingResources.get(3) + "," + startingResources.get(4));
-                                try {
-                                    Thread.sleep(500);
-                                } catch (InterruptedException ie) {}
                                 out.println(getGameState());
+                                out.println("INITIALIZE:" + currentNation + "," + startingResources.get(0) + "," + startingResources.get(1) + "," + startingResources.get(2) + "," + startingResources.get(3) + "," + startingResources.get(4));
+
                             } else if (serverMessage.startsWith("BOARD[")) {
-                                System.out.println("Client: Received board");
+                                System.out.println("Client: Received board\n" + serverMessage);
                                 tiles = CreateBoard(serverMessage);
                                 actionsTaken = 0;
                             } else if (serverMessage.startsWith("INITIALIZE:")) {
@@ -3278,6 +3276,7 @@ public class Main {
     }
 
     private static void Initialize(String resources) {
+        actionsTaken = 11;
         String parts[] = resources.split(",");
         if (currentNation.equals("Stark")) {
             Stark.setResource("metal", Integer.parseInt(parts[1]));

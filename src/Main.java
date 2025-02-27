@@ -88,7 +88,7 @@ public class Main {
     private static Color colorBackground = Color.decode("#dec590");
     private static Color colorButton = Color.decode("#bda46f");
     private static Vector<MilitaryUnit> movingUnits = new Vector<>();
-    private static int maxActions = 10;
+    private static int maxActions = 100;
     private static boolean attacking = false;
     private static Tile pathBeginning;
     private static Vector<Integer> startingResources = new Vector<>();
@@ -441,16 +441,10 @@ public class Main {
         public void setMilitary(String unit, int change, String nation) {
             if (nation == "Stark") {
                 if (change < 0) {
-                    int index = -1;
                     for (int i = 0; i < occupyingUnits.size(); i++) {
                         if (occupyingUnits.get(i).unitName == unit && occupyingUnits.get(i).owner == "Stark") {
-                            index = i;
-                            System.out.println("\t" + index);
-//                            occupyingUnits.remove(i);
+                            occupyingUnits.remove(i);
                         }
-                    }
-                    if (index >= 0) {
-                        occupyingUnits.remove(index);
                     }
                 } else {
                     occupyingUnits.add(0, new MilitaryUnit(nation, unit));
@@ -1080,7 +1074,7 @@ public class Main {
         });
 
         JPanel jPanel = new JPanel();
-        jPanel.setLayout(new GridLayout(3, 1));
+        jPanel.setLayout(new GridLayout(4, 1));
         jPanel.setBackground(colorBackground);
         newGameButton.setBackground(colorButton);
         joinGameButton.setBackground(colorButton);
@@ -1193,7 +1187,7 @@ public class Main {
         });
 
         JPanel jPanel = new JPanel();
-        jPanel.setLayout(new GridLayout(8, 2));
+        jPanel.setLayout(new GridLayout(7, 2));
         jPanel.setBackground(colorBackground);
         nationComboBox.setBackground(colorButton);
         metalT.setBackground(colorButton);
@@ -1319,7 +1313,7 @@ public class Main {
         });
 
         JPanel jPanel = new JPanel();
-        jPanel.setLayout(new GridLayout(9, 2));
+        jPanel.setLayout(new GridLayout(3, 2));
         jPanel.setBackground(colorBackground);
         ipT.setBackground(colorButton);
         nationComboBox.setBackground(colorButton);
@@ -1335,16 +1329,16 @@ public class Main {
         jPanel.add(ipT);
         jPanel.add(nationL);
         jPanel.add(nationComboBox);
-        jPanel.add(metalL);
-        jPanel.add(metalT);
-        jPanel.add(woodL);
-        jPanel.add(woodT);
-        jPanel.add(foodL);
-        jPanel.add(foodT);
-        jPanel.add(laborL);
-        jPanel.add(laborT);
-        jPanel.add(educationL);
-        jPanel.add(educationT);
+//        jPanel.add(metalL);
+//        jPanel.add(metalT);
+//        jPanel.add(woodL);
+//        jPanel.add(woodT);
+//        jPanel.add(foodL);
+//        jPanel.add(foodT);
+//        jPanel.add(laborL);
+//        jPanel.add(laborT);
+//        jPanel.add(educationL);
+//        jPanel.add(educationT);
         jPanel.add(backButton);
         jPanel.add(startButton);
         frame.add(jPanel);
@@ -1451,7 +1445,7 @@ public class Main {
                                 {"Javelinmen", Stark.javelinmen, Stark.javelinmenResearched, "Farm", Stark.farm, Stark.farmResearched},
                                 {"Archer", Stark.archer, Stark.archerResearched, "Plantation", Stark.plantation, Stark.plantationResearched},
                                 {"Crossbowmen", Stark.crossbowmen, Stark.crossbowmenResearched, "School", Stark.school, Stark.schoolResearched},
-                                {"Mounted Archer", Stark.mountedArcher, Stark.mountedArcher, "College", Stark.college, Stark.collegeResearched},
+                                {"Mounted Archer", Stark.mountedArcher, Stark.mountedArcherResearched, "College", Stark.college, Stark.collegeResearched},
                                 {"Siege Tower", Stark.siegeTower, Stark.siegeTowerResearched, "", "", ""},
                                 {"Catapult", Stark.catapult, Stark.catapultResearched, "", "", ""},
                                 {"Ballista", Stark.ballista, Stark.ballistaResearched, "", "", ""},
@@ -2198,8 +2192,7 @@ public class Main {
         frame.setLocation(300, 200);
 
         DefaultTableModel dm1 = new DefaultTableModel();
-        dm1.setDataVector(null,
-                new Object[]{"Unit", "Owner", "Move"});
+        dm1.setDataVector(null, new Object[]{"Ally", "Owner", "Move"});
         for (int i = 0; i < tile.occupyingUnits.size(); i++) {
             if (tile.occupyingUnits.get(i).owner == currentNation) {
                 dm1.addRow(new Object[]{tile.occupyingUnits.get(i).unitName, tile.occupyingUnits.get(i).owner, false});
@@ -2223,7 +2216,7 @@ public class Main {
         allyTable.getModel().addTableModelListener(new TableModelListener() {
             @Override
             public void tableChanged(TableModelEvent e) {
-                if (actionsTaken < 10) {
+                if (actionsTaken < maxActions) {
                     String temp = "<html>";
                     movingUnitsTemp.clear();
                     for(int i = 0; i < allyTable.getModel().getRowCount(); i++) {
@@ -2240,8 +2233,7 @@ public class Main {
 
         Boolean hasEnemies = false;
         DefaultTableModel dm2 = new DefaultTableModel();
-        dm2.setDataVector(null,
-                new Object[]{"Unit", "Owner", "Move"});
+        dm2.setDataVector(null, new Object[]{"Enemy", "Owner", "Move"});
         for (int i = 0; i < tile.occupyingUnits.size(); i++) {
             if (tile.occupyingUnits.get(i).owner != currentNation) {
                 dm2.addRow(new Object[]{tile.occupyingUnits.get(i).unitName, tile.occupyingUnits.get(i).owner, ""});
@@ -2274,26 +2266,47 @@ public class Main {
             }
         });
 
+        allyTable.getTableHeader().setBackground(colorButton);
+        JScrollPane scroll1 = new JScrollPane(allyTable);
+        allyTable.setPreferredScrollableViewportSize(allyTable.getPreferredSize());
+        JPanel temp1 = new JPanel();
+        temp1.setBackground(colorBackground);
+        scroll1.setCorner(JScrollPane.UPPER_RIGHT_CORNER, temp1);
+        scroll1.getVerticalScrollBar().setBackground(colorBackground);
+
+        enemyTable.getTableHeader().setBackground(colorButton);
+        JScrollPane scroll2 = new JScrollPane(enemyTable);
+        enemyTable.setPreferredScrollableViewportSize(enemyTable.getPreferredSize());
+        JPanel temp2 = new JPanel();
+        temp2.setBackground(colorBackground);
+        scroll2.setCorner(JScrollPane.UPPER_RIGHT_CORNER, temp2);
+        scroll2.getVerticalScrollBar().setBackground(colorBackground);
+
+        JLabel allyL = new JLabel("Ally Units");
+        JLabel enemyL = new JLabel("Enemy Units");
+
         JPanel jPanel = new JPanel();
-        jPanel.setLayout(new BoxLayout(jPanel, BoxLayout.Y_AXIS));
+        jPanel.setLayout(new GridLayout(2, 2));
         jPanel.setBackground(colorBackground);
         allyTable.setBackground(colorBackground);
         enemyTable.setBackground(colorBackground);
         moveButton.setBackground(colorButton);
         attackButton.setBackground(colorButton);
         frame.setBackground(colorBackground);
-        jPanel.add(allyTable);
-        jPanel.add(enemyTable);
-        jPanel.add(selectedUnits);
+//        jPanel.add(allyL);
+//        jPanel.add(enemyL);
+        jPanel.add(scroll1);
+        jPanel.add(scroll2);
+//        jPanel.add(selectedUnits);
+        if (actionsTaken < maxActions) {
+            jPanel.add(moveButton);
+        }
         if (hasEnemies) {
             jPanel.add(attackButton);
         }
-        if (actionsTaken < 10) {
-            jPanel.add(moveButton);
-        }
 
         frame.add(jPanel);
-        frame.setSize(300, 300);
+        frame.setSize(600, 300);
         frame.setVisible(true);
     }
 
@@ -2315,6 +2328,11 @@ public class Main {
             }
         }
 
+        DefaultTableModel dmStark = new DefaultTableModel();
+        dmStark.setDataVector(null, new Object[]{"Unit", "Owner", "Melee", "Range", "Siege", "Health", "Status"});
+        DefaultTableModel dmLannister = new DefaultTableModel();
+        dmLannister.setDataVector(null, new Object[]{"Unit", "Owner", "Melee", "Range", "Siege", "Health", "Status"});
+
         double starkMeleePower = 0;
         double starkRangePower = 0;
         double starkSiegePower = 0;
@@ -2329,12 +2347,6 @@ public class Main {
         double lannisterRangeHealth = 0;
         double lannisterSiegeHealth = 0;
 
-//        int targaryenMeleePower = 0;
-//        int targaryenRangePower = 0;
-//        int targaryenAirPower = 0;
-//        int targaryenMeleeHealth = 0;
-//        int targaryenRangeHealth = 0;
-//        int targaryenAirHealth = 0;
         for (int i = 0; i < starkUnits.size(); i++) {
             starkMeleePower += starkUnits.get(i).melee;
             starkRangePower += starkUnits.get(i).range;
@@ -2346,10 +2358,11 @@ public class Main {
             } else if (starkUnits.get(i).type == MilitaryUnit.unitType.siege) {
                 starkSiegeHealth += starkUnits.get(i).health;
             }
+            dmStark.addRow(new Object[]{starkUnits.get(i).unitName, starkUnits.get(i).owner, starkUnits.get(i).melee, starkUnits.get(i).range, starkUnits.get(i).siege, starkUnits.get(i).health, "Alive"});
         }
         for (int i = 0; i < lannisterUnits.size(); i++) {
-            lannisterMeleePower += starkUnits.get(i).melee;
-            lannisterRangePower += starkUnits.get(i).range;
+            lannisterMeleePower += lannisterUnits.get(i).melee;
+            lannisterRangePower += lannisterUnits.get(i).range;
             lannisterSiegePower += lannisterUnits.get(i).siege;
             if (lannisterUnits.get(i).type == MilitaryUnit.unitType.melee) {
                 lannisterMeleeHealth += lannisterUnits.get(i).health;
@@ -2358,19 +2371,8 @@ public class Main {
             } else if (lannisterUnits.get(i).type == MilitaryUnit.unitType.siege) {
                 lannisterSiegeHealth += lannisterUnits.get(i).health;
             }
+            dmLannister.addRow(new Object[]{lannisterUnits.get(i).unitName, lannisterUnits.get(i).owner, lannisterUnits.get(i).melee, lannisterUnits.get(i).range, lannisterUnits.get(i).siege, lannisterUnits.get(i).health, "Alive"});
         }
-//        for (int i = 0; i < targaryenUnits.size(); i++) {
-//            targaryenMeleePower += starkUnits.get(i).melee;
-//            targaryenRangePower += starkUnits.get(i).range;
-//            targaryenAirPower += targaryenUnits.get(i).air;
-//            if (targaryenUnits.get(i).type == MilitaryUnit.unitType.melee) {
-//                targaryenMeleeHealth += targaryenUnits.get(i).health;
-//            } else if (targaryenUnits.get(i).type == MilitaryUnit.unitType.range) {
-//                targaryenRangeHealth += targaryenUnits.get(i).health;
-//            } else if (targaryenUnits.get(i).type == MilitaryUnit.unitType.air) {
-//                targaryenAirHealth += targaryenUnits.get(i).health;
-//            }
-//        }
 
         starkMeleeHealth -= (lannisterMeleePower * 0.5) + (lannisterRangePower * 0.25) + (lannisterSiegePower * 1.0);
         starkRangeHealth -= (lannisterMeleePower * 1.0) + (lannisterRangePower * 0.5) + (lannisterSiegePower * 0.25);
@@ -2387,25 +2389,49 @@ public class Main {
             for (int i = 0; i < lannisterUnits.size(); i++) {
                 tile.setMilitary(lannisterUnits.get(i).unitName, -1, "Lannister");
                 Lannister.setMilitary(lannisterUnits.get(i).unitName, -1);
+                dmLannister.setValueAt("Dead", i, 6);
             }
         } else if (lannisterHealth > starkHealth) {
             winner = "Lannister Wins";
             for (int i = 0; i < starkUnits.size(); i++) {
                 tile.setMilitary(starkUnits.get(i).unitName, -1, "Stark");
                 Stark.setMilitary(starkUnits.get(i).unitName, -1);
+                dmStark.setValueAt("Dead", i, 6);
             }
         }
+        JTable starkT = new JTable(dmStark);
+        starkT.getTableHeader().setBackground(colorButton);
+        JScrollPane scroll1 = new JScrollPane(starkT);
+        starkT.setPreferredScrollableViewportSize(starkT.getPreferredSize());
+        JPanel temp1 = new JPanel();
+        temp1.setBackground(colorBackground);
+        scroll1.setCorner(JScrollPane.UPPER_RIGHT_CORNER, temp1);
+        scroll1.getVerticalScrollBar().setBackground(colorBackground);
+
+        JTable lannisterT = new JTable(dmLannister);
+        lannisterT.getTableHeader().setBackground(colorButton);
+        JScrollPane scroll2 = new JScrollPane(lannisterT);
+        lannisterT.setPreferredScrollableViewportSize(lannisterT.getPreferredSize());
+        JPanel temp2 = new JPanel();
+        temp2.setBackground(colorBackground);
+        scroll2.setCorner(JScrollPane.UPPER_RIGHT_CORNER, temp2);
+        scroll2.getVerticalScrollBar().setBackground(colorBackground);
+
         JLabel starkL = new JLabel("[STARK] Melee: " + starkMeleePower + " Range: " + starkRangePower + " Siege: " + starkSiegePower + " Health: " + starkHealth);
         JLabel lannisterL = new JLabel("[LANNISTER] Melee: " + lannisterMeleePower + " Range: " + lannisterRangePower + " Siege: " + lannisterSiegePower + " Health: " + lannisterHealth);
         JLabel winnerL = new JLabel(winner);
 
         JPanel jPanel = new JPanel();
-        jPanel.setLayout(new BoxLayout(jPanel, BoxLayout.Y_AXIS));
+        jPanel.setLayout(new GridLayout(2, 2));
         jPanel.setBackground(colorBackground);
+        starkT.setBackground(colorBackground);
+        lannisterT.setBackground(colorBackground);
         frame.setBackground(colorBackground);
         jPanel.add(starkL);
         jPanel.add(lannisterL);
-        jPanel.add(winnerL);
+        jPanel.add(scroll1);
+        jPanel.add(scroll2);
+//        jPanel.add(winnerL);
 
         frame.add(jPanel);
         frame.setSize(1000, 300);
@@ -2591,7 +2617,7 @@ public class Main {
                             Stark.setResearch("javelinmen", true);
                             JOptionPane.showMessageDialog(button, "Javelinmen Researched");
                         } else if (label == "Buy Train Archer" && Stark.education >= 50 && Stark.labor >= 10) {
-                            Stark.setResearch("crcher", true);
+                            Stark.setResearch("archer", true);
                             JOptionPane.showMessageDialog(button, "Archer Researched");
                         } else if (label == "Buy Train Crossbowmen" && Stark.education >= 75 && Stark.labor >= 25) {
                             Stark.setResearch("crossbowmen", true);

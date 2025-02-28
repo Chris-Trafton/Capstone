@@ -17,6 +17,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
@@ -2074,9 +2076,12 @@ public class Main {
         });
 
         Boolean hasAllies = false;
+        Boolean hasEnemies = false;
         for (int i = 0; i < tile.occupyingUnits.size(); i++) {
             if (tile.occupyingUnits.get(i).owner == currentNation) {
                 hasAllies = true;
+            } else {
+                hasEnemies = true;
             }
         }
 
@@ -2092,11 +2097,13 @@ public class Main {
         jPanel.add(table);
         if (tile.owner.equals("") && hasAllies) {
             jPanel.add(claimTile);
+        } else if (!tile.owner.equals(currentNation) && hasAllies & !hasEnemies) {
+            jPanel.add(claimTile);
         } else if (tile.owner.equals(currentNation)) {
             jPanel.add(buildButton);
             jPanel.add(trainButton);
         }
-        if (hasAllies) {
+        if ((tile.owner.equals(currentNation) && hasEnemies) || hasAllies) {
             jPanel.add(commandButton);
         }
         frame.add(jPanel);
@@ -2260,7 +2267,8 @@ public class Main {
         attackButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                OpenAttackMenu(tile);
+                OpenAttackAnimation(tile);
+//                OpenAttackMenu(tile);
                 attacking = true;
                 frame.dispose();
             }
@@ -2269,6 +2277,7 @@ public class Main {
         allyTable.getTableHeader().setBackground(colorButton);
         JScrollPane scroll1 = new JScrollPane(allyTable);
         allyTable.setPreferredScrollableViewportSize(allyTable.getPreferredSize());
+        scroll1.getViewport().setBackground(colorBackground);
         JPanel temp1 = new JPanel();
         temp1.setBackground(colorBackground);
         scroll1.setCorner(JScrollPane.UPPER_RIGHT_CORNER, temp1);
@@ -2277,6 +2286,7 @@ public class Main {
         enemyTable.getTableHeader().setBackground(colorButton);
         JScrollPane scroll2 = new JScrollPane(enemyTable);
         enemyTable.setPreferredScrollableViewportSize(enemyTable.getPreferredSize());
+        scroll2.getViewport().setBackground(colorBackground);
         JPanel temp2 = new JPanel();
         temp2.setBackground(colorBackground);
         scroll2.setCorner(JScrollPane.UPPER_RIGHT_CORNER, temp2);
@@ -2307,6 +2317,19 @@ public class Main {
 
         frame.add(jPanel);
         frame.setSize(600, 300);
+        frame.setVisible(true);
+    }
+
+    public static void OpenAttackAnimation(Tile tile) {
+        AttackFrame frame = new AttackFrame(80, 40);
+        frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+        frame.setLocation(300, 200);
+
+        frame.add(30, Lannister.class);
+        frame.add(30, Stark.class);
+
+        frame.start();
+
         frame.setVisible(true);
     }
 
@@ -2403,6 +2426,7 @@ public class Main {
         starkT.getTableHeader().setBackground(colorButton);
         JScrollPane scroll1 = new JScrollPane(starkT);
         starkT.setPreferredScrollableViewportSize(starkT.getPreferredSize());
+        scroll1.getViewport().setBackground(colorBackground);
         JPanel temp1 = new JPanel();
         temp1.setBackground(colorBackground);
         scroll1.setCorner(JScrollPane.UPPER_RIGHT_CORNER, temp1);
@@ -2412,6 +2436,7 @@ public class Main {
         lannisterT.getTableHeader().setBackground(colorButton);
         JScrollPane scroll2 = new JScrollPane(lannisterT);
         lannisterT.setPreferredScrollableViewportSize(lannisterT.getPreferredSize());
+        scroll2.getViewport().setBackground(colorBackground);
         JPanel temp2 = new JPanel();
         temp2.setBackground(colorBackground);
         scroll2.setCorner(JScrollPane.UPPER_RIGHT_CORNER, temp2);
@@ -3569,6 +3594,158 @@ public class Main {
     }
 
     //TODO://///////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //     Attack Animation Code
+    public static class AttackFrame extends JFrame {
+        private CritterModel myModel;
+        private AttackPanel myPicture;
+        private javax.swing.Timer myTimer;
+        private JButton[] counts;
+        private JButton countButton;
+        private boolean started;
+        private static boolean created;
+
+        public AttackFrame(int width, int height) {
+            // this prevents someone from trying to create their own copy of
+            // the GUI components
+            if (created)
+                throw new RuntimeException("Only one world allowed");
+            created = true;
+
+            // create frame and model
+            setTitle("EGR222 critter simulation");
+            setDefaultCloseOperation(EXIT_ON_CLOSE);
+            myModel = new CritterModel(width, height);
+
+            // set up critter picture panel
+            myPicture = new AttackPanel(myModel);
+            add(myPicture, BorderLayout.CENTER);
+
+            addTimer();
+
+            constructSouth();
+
+            // initially it has not started
+            started = false;
+        }
+
+        // construct the controls and label for the southern panel
+        private void constructSouth() {
+            // add timer controls to the south
+            JPanel p = new JPanel();
+
+            final JSlider slider = new JSlider();
+            slider.addChangeListener(new ChangeListener() {
+                public void stateChanged(ChangeEvent e) {
+                    double ratio = 1000.0 / (1 + Math.pow(slider.getValue(), 0.3));
+                    myTimer.setDelay((int) (ratio - 180));
+                }
+            });
+            slider.setValue(20);
+            p.add(new JLabel("slow"));
+            p.add(slider);
+            p.add(new JLabel("fast"));
+
+            JButton b1 = new JButton("start");
+            b1.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    myTimer.start();
+                }
+            });
+            p.add(b1);
+            add(p, BorderLayout.SOUTH);
+        }
+
+        // starts the simulation...assumes all critters have already been added
+        public void start() {
+            // don't let anyone start a second time and remember if we have started
+            if (started) {
+                return;
+            }
+            // if they didn't add any critters, then nothing to do
+            if (myModel.getCounts().isEmpty()) {
+                System.out.println("nothing to simulate--no critters");
+                return;
+            }
+            started = true;
+            myModel.updateColorString();
+            pack();
+            setVisible(true);
+        }
+
+        // add a certain number of critters of a particular class to the simulation
+        public void add(int number, Class<? extends Critter> c) {
+            // don't let anyone add critters after simulation starts
+            if (started) {
+                return;
+            }
+            // temporarily turning on started flag prevents critter constructors
+            // from calling add
+            started = true;
+            myModel.add(number, c);
+            started = false;
+        }
+
+        // post: creates a timer that calls the model's update
+        //       method and repaints the display
+        private void addTimer() {
+            ActionListener updater = new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    doOneStep();
+                }
+            };
+            myTimer = new javax.swing.Timer(0, updater);
+            myTimer.setCoalesce(true);
+        }
+
+        // one step of the simulation
+        private void doOneStep() {
+            myModel.update();
+            myPicture.repaint();
+        }
+    }
+
+    public static class AttackPanel extends JPanel {
+        private CritterModel myModel;
+        private Font myFont;
+        private static boolean created;
+
+        public static final int FONT_SIZE = 12;
+
+        public AttackPanel(CritterModel model) {
+            // this prevents someone from trying to create their own copy of
+            // the GUI components
+            if (created)
+                throw new RuntimeException("Only one world allowed");
+            created = true;
+
+            myModel = model;
+            // construct font and compute char width once in constructor
+            // for efficiency
+            myFont = new Font("Monospaced", Font.BOLD, FONT_SIZE + 4);
+            setBackground(colorBackground);
+            setPreferredSize(new Dimension(FONT_SIZE * model.getWidth() + 20,
+                    FONT_SIZE * model.getHeight() + 20));
+        }
+
+        public void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            g.setFont(myFont);
+            Iterator<Critter> i = myModel.iterator();
+            while (i.hasNext()) {
+                Critter next = i.next();
+                Point p = myModel.getPoint(next);
+                String appearance = myModel.getAppearance(next);
+                g.setColor(Color.BLACK);
+                g.drawString("" + appearance, p.x * FONT_SIZE + 11,
+                        p.y * FONT_SIZE + 21);
+                g.setColor(myModel.getColor(next));
+                g.drawString("" + appearance, p.x * FONT_SIZE + 10,
+                        p.y * FONT_SIZE + 20);
+            }
+        }
+    }
+
+    //TODO://///////////////////////////////////////////////////////////////////////////////////////////////////////////
     //     Startup Code
     public static void setup() {
         appFrame = new JFrame("Capstone");
@@ -3634,6 +3811,13 @@ public class Main {
         mailButton.addActionListener(new OpenMailMenu());
         JButton tradeButton = new JButton("Trade");
         tradeButton.addActionListener(new OpenTradeMenu());
+        JButton endTurnButton = new JButton("End Turn");
+        endTurnButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                actionsTaken = maxActions;
+            }
+        });
 
         pauseButton.setBackground(colorButton);
         nationButton.setBackground(colorButton);
@@ -3641,6 +3825,7 @@ public class Main {
         infoButton.setBackground(colorButton);
         mailButton.setBackground(colorButton);
         tradeButton.setBackground(colorButton);
+        endTurnButton.setBackground(colorButton);
         jMenuBar.setBackground(colorBackground);
         appFrame.setBackground(colorBackground);
 
@@ -3651,6 +3836,7 @@ public class Main {
         jMenuBar.add(infoButton);
         jMenuBar.add(mailButton);
         jMenuBar.add(tradeButton);
+        jMenuBar.add(endTurnButton);
         jMenuBar.add(metalLabel);
         jMenuBar.add(woodLabel);
         jMenuBar.add(foodLabel);

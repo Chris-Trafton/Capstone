@@ -90,7 +90,7 @@ public class Main {
     private static Color colorBackground = Color.decode("#dec590");
     private static Color colorButton = Color.decode("#bda46f");
     private static Vector<MilitaryUnit> movingUnits = new Vector<>();
-    private static int maxActions = 100;
+    private static int maxActions = 10;
     private static boolean attacking = false;
     private static Tile pathBeginning;
     private static Vector<Integer> startingResources = new Vector<>();
@@ -282,7 +282,8 @@ public class Main {
             this.plantation = plantation;
             this.school = school;
             this.college = college;
-            for (int i = 0; i < military.length-1; i+=2) {
+            for (int i = 0; i <= military.length-1; i+=2) {
+                System.out.println(military[i] + " " + military[i+1]);
                 this.setMilitary(military[i],1,military[i+1]);
             }
         }
@@ -450,6 +451,7 @@ public class Main {
                     }
                 } else {
                     occupyingUnits.add(0, new MilitaryUnit(nation, unit));
+                    System.out.println("New occupying unit: " + occupyingUnits.get(0));
                     Stark.setMilitary(unit, change);
                 }
             } else if (nation == "Lannister") {
@@ -461,6 +463,7 @@ public class Main {
                     }
                 } else {
                     occupyingUnits.add(0, new MilitaryUnit(nation, unit));
+                    System.out.println("New occupying unit: " + occupyingUnits.get(0));
                     Lannister.setMilitary(unit, change);
                 }
             } else if (nation == "Targaryen") {
@@ -472,6 +475,7 @@ public class Main {
                     }
                 } else {
                     occupyingUnits.add(0, new MilitaryUnit(nation, unit));
+                    System.out.println("New occupying unit: " + occupyingUnits.get(0));
                     Targaryen.setMilitary(unit, change);
                 }
             }
@@ -2283,7 +2287,7 @@ public class Main {
         attackButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-//                OpenAttackAnimation(tile);
+                //OpenAttackAnimation(tile);
                 OpenAttackMenu(tile);
                 attacking = true;
                 frame.dispose();
@@ -3330,7 +3334,7 @@ public class Main {
                         drawPath(g2d,current);
                     }
                     try {
-                        Thread.sleep(300);
+                        Thread.sleep(10);
                     } catch (InterruptedException ie) {}
                     if (current.myBiome == biome.Flatland) {
                         g2d.drawImage(rotateImageObject(current).filter(flat_tile, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
@@ -3427,9 +3431,10 @@ public class Main {
 //        System.out.println(board);
         String[] tileArr = board.split("\\(");
         for (String tile: tileArr) {
+            tile = tile.replace("]","");
             if (tile.equals(tileArr[0])) continue;
             String[] items = tile.split(",");
-            items[items.length-1] = items[items.length-1].substring(0,1);
+            items[items.length-1] = items[items.length-1].replace(")","");
 //            System.out.println(tileArr[1]);
             Tile current = new Tile(items[0],Double.parseDouble(items[1]),Double.parseDouble(items[2]),tile_small.getWidth(),tile_small.getHeight(),0,items[3],Integer.parseInt(items[4]),Integer.parseInt(items[5]),Integer.parseInt(items[6]),Integer.parseInt(items[7]),Integer.parseInt(items[8]),Integer.parseInt(items[9]),Integer.parseInt(items[10]),Integer.parseInt(items[11]),Arrays.copyOfRange(items,12,items.length));
             tiles.add(current);

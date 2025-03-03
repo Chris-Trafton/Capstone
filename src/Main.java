@@ -1636,13 +1636,16 @@ public class Main {
             frame.setLocation(300, 200);
 
             JMenuBar jMenuBar = new JMenuBar();
+            jMenuBar.setBackground(colorBackground);
             frame.setJMenuBar(jMenuBar);
             JButton newMail = new JButton("New");
             newMail.addActionListener(new NewMailMenu());
+            newMail.setBackground(colorButton);
             jMenuBar.add(newMail);
 
             //  Throws all the tabs into the JTabbedPane
             JTabbedPane tabPanel = new JTabbedPane();
+            tabPanel.setBackground(colorBackground);
             if (Stark.isActive()) {
                 tabPanel.addTab("Inbox", Stark.inboxTabs);
                 tabPanel.addTab("Sent", Stark.sentTabs);
@@ -1695,6 +1698,7 @@ public class Main {
 
                     JPanel sendMail = new JPanel();
                     sendMail.setLayout(new BoxLayout(sendMail, BoxLayout.Y_AXIS));
+                    sendMail.setBackground(colorBackground);
                     sendMail.add(mailTo1);
                     sendMail.add(mailFrom1);
                     sendMail.add(mailTime1);
@@ -1702,6 +1706,7 @@ public class Main {
                     sendMail.add(mailBody1);
                     JPanel inboxMail = new JPanel();
                     inboxMail.setLayout(new BoxLayout(inboxMail, BoxLayout.Y_AXIS));
+                    inboxMail.setBackground(colorBackground);
                     inboxMail.add(mailTo2);
                     inboxMail.add(mailFrom2);
                     inboxMail.add(mailTime2);
@@ -1728,12 +1733,17 @@ public class Main {
             //  Makes a JPanel to combine the message Label and TextArea together
             JPanel centerPanel = new JPanel();
             centerPanel.setLayout(new BorderLayout());
+            centerPanel.setBackground(colorBackground);
+            messageT.setBackground(colorButton);
             centerPanel.add(messageL, BorderLayout.WEST);
             centerPanel.add(messageT, BorderLayout.CENTER);
 
             //  Throws everything into the JPanel
             JPanel jPanel = new JPanel();
             jPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+            jPanel.setBackground(colorBackground);
+            nationComboBox.setBackground(colorButton);
+            sendButton.setBackground(colorButton);
             jPanel.add(nationComboBox);
             jPanel.add(centerPanel);
             jPanel.add(sendButton);
@@ -1950,6 +1960,8 @@ public class Main {
             //  Makes a JPanel to combine the message Label and TextArea together
             JPanel centerPanel = new JPanel();
             centerPanel.setLayout(new BorderLayout());
+            centerPanel.setBackground(colorBackground);
+            messageT.setBackground(colorButton);
             centerPanel.add(space1, BorderLayout.NORTH);
             centerPanel.add(messageL, BorderLayout.WEST);
             centerPanel.add(messageT, BorderLayout.CENTER);
@@ -1957,6 +1969,17 @@ public class Main {
             //  Throws everything into the JPanel
             JPanel jPanel = new JPanel();
             jPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+            jPanel.setBackground(colorBackground);
+            nationComboBox.setBackground(colorButton);
+            giveRadioButton.setBackground(colorBackground);
+            requestRadioButton.setBackground(colorBackground);
+            metalT.setBackground(colorButton);
+            woodT.setBackground(colorButton);
+            foodT.setBackground(colorButton);
+            laborT.setBackground(colorButton);
+            educationT.setBackground(colorButton);
+            sendButton.setBackground(colorButton);
+            frame.setBackground(colorBackground);
             jPanel.add(nationComboBox);
             jPanel.add(space2);
             jPanel.add(giveRadioButton);
@@ -1984,13 +2007,6 @@ public class Main {
         JFrame frame = new JFrame("Tile Menu");
         frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
         frame.setLocation((int)(tile.getX() + tile.getWidth()),(int)tile.getY());
-
-        if (movingUnits.size() > 0) {
-            for (int i = 0; i < movingUnits.size(); i++) {
-                tile.setMilitary(movingUnits.get(i).unitName, 0, currentNation);
-            }
-            movingUnits.clear();
-        }
 
         JPanel jPanel = new JPanel();
         jPanel.setLayout(new BoxLayout(jPanel, BoxLayout.Y_AXIS));
@@ -2267,8 +2283,8 @@ public class Main {
         attackButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                OpenAttackAnimation(tile);
-//                OpenAttackMenu(tile);
+//                OpenAttackAnimation(tile);
+                OpenAttackMenu(tile);
                 attacking = true;
                 frame.dispose();
             }
@@ -2330,6 +2346,45 @@ public class Main {
 
         frame.start();
 
+        frame.setVisible(true);
+    }
+
+    public static void OpenConfirmMovementMenu(Tile tile) {
+        JFrame frame = new JFrame("");
+        frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+        frame.setLocation((int)(tile.getX() + tile.getWidth()),(int)tile.getY());
+
+        int price = movingUnits.size() * (getPath(pathBeginning, tile).size() - 1);
+        JLabel costL = new JLabel("Pay " + price + " Labor");
+        JButton confirmButton = new JButton("Confirm");
+        confirmButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (Stark.isActive()) {
+                    Stark.setResource("labor", -1 * price);
+                } else if (Lannister.isActive()) {
+                    Lannister.setResource("labor", -1 * price);
+                } else if (Targaryen.isActive()) {
+                    Targaryen.setResource("labor", -1 * price);
+                }
+                for (int i = 0; i < movingUnits.size(); i++) {
+                    tile.setMilitary(movingUnits.get(i).unitName, 0, currentNation);
+                }
+                movingUnits.clear();
+                frame.dispose();
+            }
+        });
+
+        JPanel jPanel = new JPanel();
+        jPanel.setLayout(new GridLayout(2, 1));
+        jPanel.setBackground(colorBackground);
+        confirmButton.setBackground(colorButton);
+        frame.setBackground(colorBackground);
+        jPanel.add(costL);
+        jPanel.add(confirmButton);
+
+        frame.add(jPanel);
+        frame.setSize(300, 100);
         frame.setVisible(true);
     }
 
@@ -3568,7 +3623,11 @@ public class Main {
 //                            System.out.println(tiles.get(i).toString());
                             if (mousePressed) {
                                 mousePressed = false;
-                                OpenTileMenu(tiles.get(i));
+                                if (movingUnits.isEmpty()) {
+                                    OpenTileMenu(tiles.get(i));
+                                } else {
+                                    OpenConfirmMovementMenu(tiles.get(i));
+                                }
                             }
 
                         } else if (tiles.get(i).mouseHover){

@@ -442,7 +442,7 @@ public class Main {
         }
 
         public void setMilitary(String unit, int change, String nation) {
-            if (nation == "Stark") {
+            if (nation.equals("Stark")) {
                 if (change < 0) {
                     for (int i = 0; i < occupyingUnits.size(); i++) {
                         if (occupyingUnits.get(i).unitName == unit && occupyingUnits.get(i).owner == "Stark") {
@@ -454,7 +454,7 @@ public class Main {
                     System.out.println("New occupying unit: " + occupyingUnits.get(0));
                     Stark.setMilitary(unit, change);
                 }
-            } else if (nation == "Lannister") {
+            } else if (nation.equals("Lannister")) {
                 if (change < 0) {
                     for (int i = 0; i < occupyingUnits.size(); i++) {
                         if (occupyingUnits.get(i).unitName == unit && occupyingUnits.get(i).owner == "Lannister") {
@@ -466,7 +466,7 @@ public class Main {
                     System.out.println("New occupying unit: " + occupyingUnits.get(0));
                     Lannister.setMilitary(unit, change);
                 }
-            } else if (nation == "Targaryen") {
+            } else if (nation.equals("Targaryen")) {
                 if (change < 0) {
                     for (int i = 0; i < occupyingUnits.size(); i++) {
                         if (occupyingUnits.get(i).unitName == unit && occupyingUnits.get(i).owner == "Targaryen") {
@@ -1270,29 +1270,29 @@ public class Main {
                     Stark.setActive(true);
                     Lannister.setActive(false);
                     Targaryen.setActive(false);
-                    Stark.setResource("metal", Integer.parseInt(metalT.getText()));
-                    Stark.setResource("wood", Integer.parseInt(woodT.getText()));
-                    Stark.setResource("food", Integer.parseInt(foodT.getText()));
-                    Stark.setResource("labor", Integer.parseInt(laborT.getText()));
-                    Stark.setResource("education", Integer.parseInt(educationT.getText()));
+//                    Stark.setResource("metal", Integer.parseInt(metalT.getText()));
+//                    Stark.setResource("wood", Integer.parseInt(woodT.getText()));
+//                    Stark.setResource("food", Integer.parseInt(foodT.getText()));
+//                    Stark.setResource("labor", Integer.parseInt(laborT.getText()));
+//                    Stark.setResource("education", Integer.parseInt(educationT.getText()));
                 } else if (currentNation == "Lannister") {
                     Stark.setActive(false);
                     Lannister.setActive(true);
                     Targaryen.setActive(false);
-                    Lannister.setResource("metal", Integer.parseInt(metalT.getText()));
-                    Lannister.setResource("wood", Integer.parseInt(woodT.getText()));
-                    Lannister.setResource("food", Integer.parseInt(foodT.getText()));
-                    Lannister.setResource("labor", Integer.parseInt(laborT.getText()));
-                    Lannister.setResource("education", Integer.parseInt(educationT.getText()));
+//                    Lannister.setResource("metal", Integer.parseInt(metalT.getText()));
+//                    Lannister.setResource("wood", Integer.parseInt(woodT.getText()));
+//                    Lannister.setResource("food", Integer.parseInt(foodT.getText()));
+//                    Lannister.setResource("labor", Integer.parseInt(laborT.getText()));
+//                    Lannister.setResource("education", Integer.parseInt(educationT.getText()));
                 } else if (currentNation == "Targaryen") {
                     Stark.setActive(false);
                     Lannister.setActive(false);
                     Targaryen.setActive(true);
-                    Targaryen.setResource("metal", Integer.parseInt(metalT.getText()));
-                    Targaryen.setResource("wood", Integer.parseInt(woodT.getText()));
-                    Targaryen.setResource("food", Integer.parseInt(foodT.getText()));
-                    Targaryen.setResource("labor", Integer.parseInt(laborT.getText()));
-                    Targaryen.setResource("education", Integer.parseInt(educationT.getText()));
+//                    Targaryen.setResource("metal", Integer.parseInt(metalT.getText()));
+//                    Targaryen.setResource("wood", Integer.parseInt(woodT.getText()));
+//                    Targaryen.setResource("food", Integer.parseInt(foodT.getText()));
+//                    Targaryen.setResource("labor", Integer.parseInt(laborT.getText()));
+//                    Targaryen.setResource("education", Integer.parseInt(educationT.getText()));
                 }
                 endgame = false;
                 Thread t1 = new Thread(new Animate());

@@ -91,6 +91,8 @@ public class Main {
     private static boolean attacking = false;
     private static Tile pathBeginning;
     private static Vector<Integer> startingResources = new Vector<>();
+    private static String sendWinner;
+    private static int highlightTile;
 
     //TODO://///////////////////////////////////////////////////////////////////////////////////////////////////////////
     //     Custom Classes
@@ -2478,6 +2480,7 @@ public class Main {
                 dmStark.setValueAt("Dead", i, 6);
             }
         }
+        sendWinner = "" + tiles.indexOf(tile) + ", " + winner.replace(" Wins","");
         JTable starkT = new JTable(dmStark);
         starkT.getTableHeader().setBackground(colorButton);
         JScrollPane scroll1 = new JScrollPane(starkT);
@@ -3075,6 +3078,11 @@ public class Main {
                         String values = message.substring(11);
                         String[] parts = values.split(",");
                         ServerRunner.broadcast(message,ServerRunner.players.get(parts[0]));
+                    } else if (message.startsWith("ATTACK: ")) {
+                        String attackMsg = message.substring(8);
+                        String[] parts = attackMsg.split(",");
+                        highlightTile = Integer.parseInt(parts[1]);
+                        ServerRunner.broadcast(parts[2],ServerRunner.players.get(parts[0]));
                     }
                 }
 
@@ -3127,6 +3135,8 @@ public class Main {
                             } else if (serverMessage.startsWith("INITIALIZE:")) {
                                 String initilizeStr = serverMessage.substring(11);
                                 Initialize(initilizeStr);
+                            } else if (serverMessage.startsWith("You")) {
+                                JOptionPane.showConfirmDialog(appFrame,serverMessage);
                             }
                         }
                     } catch (IOException e) {
@@ -3151,8 +3161,17 @@ public class Main {
                         System.out.println("Client: Sending moves");
                         actionsTaken = maxActions + 1;
                         out.println("MOVE: " + currentNation + "|" + getGameState());
-                    } else if (attacking) {
-                        out.println("ATTACK");
+                    } else if (!sendWinner.equals("")) {
+                        String[] parts = sendWinner.split(",");
+                        String attackedTile = parts[0];
+                        String attacker = parts[1];
+                        String iWin;
+                        if (sendWinner.equals(currentNation)) {
+                            iWin = "won!";
+                        } else {
+                            iWin = "lost!";
+                        }
+                        out.println("ATTACK: " + currentNation + "," + attackedTile + ",You were attacked by " + attacker + " and " + iWin);
                     }
                 }
             } catch (IOException e) {

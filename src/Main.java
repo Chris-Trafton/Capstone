@@ -2095,7 +2095,7 @@ public class Main {
         Boolean hasAllies = false;
         Boolean hasEnemies = false;
         for (int i = 0; i < tile.occupyingUnits.size(); i++) {
-            if (tile.occupyingUnits.get(i).owner == currentNation) {
+            if (tile.occupyingUnits.get(i).owner.equals(currentNation)) {
                 hasAllies = true;
             } else {
                 hasEnemies = true;

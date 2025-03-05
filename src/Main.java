@@ -2218,7 +2218,7 @@ public class Main {
         DefaultTableModel dm1 = new DefaultTableModel();
         dm1.setDataVector(null, new Object[]{"Ally", "Owner", "Move"});
         for (int i = 0; i < tile.occupyingUnits.size(); i++) {
-            if (tile.occupyingUnits.get(i).owner == currentNation) {
+            if (tile.occupyingUnits.get(i).owner.equals(currentNation)) {
                 dm1.addRow(new Object[]{tile.occupyingUnits.get(i).unitName, tile.occupyingUnits.get(i).owner, false});
             }
         }
@@ -2259,7 +2259,7 @@ public class Main {
         DefaultTableModel dm2 = new DefaultTableModel();
         dm2.setDataVector(null, new Object[]{"Enemy", "Owner", "Move"});
         for (int i = 0; i < tile.occupyingUnits.size(); i++) {
-            if (tile.occupyingUnits.get(i).owner != currentNation) {
+            if (!tile.occupyingUnits.get(i).owner.equals(currentNation)) {
                 dm2.addRow(new Object[]{tile.occupyingUnits.get(i).unitName, tile.occupyingUnits.get(i).owner, ""});
                 hasEnemies = true;
             }

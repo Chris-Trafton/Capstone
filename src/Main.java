@@ -3136,7 +3136,8 @@ public class Main {
                                 String initilizeStr = serverMessage.substring(11);
                                 Initialize(initilizeStr);
                             } else if (serverMessage.startsWith("You")) {
-                                JOptionPane.showConfirmDialog(appFrame,serverMessage);
+                                JOptionPane.showConfirmDialog(appFrame,serverMessage,"Press \"Ok\" to aknowledge", JOptionPane.OK_CANCEL_OPTION);
+                                //JOptionPane.showOptionDialog(appFrame,serverMessage,"Press Ok to Acknowledge",3,0,null,new String[]{"Ok"},"Ok");
                             }
                         }
                     } catch (IOException e) {

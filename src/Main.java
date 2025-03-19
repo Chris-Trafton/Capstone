@@ -52,6 +52,14 @@ public class Main {
     private static BufferedImage enemy_desert_tile;
     private static BufferedImage player_desert_tile_small;
     private static BufferedImage enemy_desert_tile_small;
+    private static BufferedImage hl_flat_tile;
+    private static BufferedImage hl_flat_tile_small;
+    private static BufferedImage hl_forest_tile;
+    private static BufferedImage hl_forest_tile_small;
+    private static BufferedImage hl_mount_tile;
+    private static BufferedImage hl_mount_tile_small;
+    private static BufferedImage hl_desert_tile;
+    private static BufferedImage hl_desert_tile_small;
     private static Vector<Tile> tiles;
     private static double twoPi;
     private static double tileFixX;
@@ -87,11 +95,11 @@ public class Main {
     private static Color colorBackground = Color.decode("#dec590");
     private static Color colorButton = Color.decode("#bda46f");
     private static Vector<MilitaryUnit> movingUnits = new Vector<>();
-    private static int maxActions = 10;
+    private static int maxActions = 100;
     private static boolean attacking = false;
     private static Tile pathBeginning;
     private static Vector<Integer> startingResources = new Vector<>();
-    private static String sendWinner;
+    private static String sendWinner = "";
     private static int highlightTile;
 
     //TODO://///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1135,6 +1143,7 @@ public class Main {
                 background_drawn = false;
                 currentNation = (String) nationComboBox.getSelectedItem();
                 actionsTaken = 0;
+                highlightTile = -1;
                 if (currentNation.equals("Stark")) {
                     Stark.setActive(true);
                     Lannister.setActive(false);
@@ -3081,8 +3090,7 @@ public class Main {
                     } else if (message.startsWith("ATTACK: ")) {
                         String attackMsg = message.substring(8);
                         String[] parts = attackMsg.split(",");
-                        highlightTile = Integer.parseInt(parts[1]);
-                        ServerRunner.broadcast(parts[2],ServerRunner.players.get(parts[0]));
+                        ServerRunner.broadcast(parts[2] + "," + parts[1],ServerRunner.players.get(parts[0]));
                     }
                 }
 
@@ -3136,7 +3144,9 @@ public class Main {
                                 String initilizeStr = serverMessage.substring(11);
                                 Initialize(initilizeStr);
                             } else if (serverMessage.startsWith("You")) {
-                                JOptionPane.showConfirmDialog(appFrame,serverMessage,"Press \"Ok\" to aknowledge", JOptionPane.OK_CANCEL_OPTION);
+                                String[] parts = serverMessage.split(",");
+                                highlightTile = Integer.parseInt(parts[1]);
+                                JOptionPane.showConfirmDialog(appFrame,parts[0],"Press \"Ok\" to aknowledge", JOptionPane.OK_CANCEL_OPTION);
                                 //JOptionPane.showOptionDialog(appFrame,serverMessage,"Press Ok to Acknowledge",3,0,null,new String[]{"Ok"},"Ok");
                             }
                         }
@@ -3320,7 +3330,32 @@ public class Main {
         Graphics2D g2d = (Graphics2D) g;
         for (int i = 0; i < tiles.size(); i++) {
             Tile current = tiles.get(i);
-            if (current.owner.equals(currentNation)) {
+            if (highlightTile >= 0 && current.equals(tiles.get(highlightTile))) {
+                if (current.mouseHover) {
+//                    System.out.println((current.x + current.getWidth() / 2) + " " + (current.y - current.getHeight() / 2) + "\n" + board.mouseX + " " + board.mouseY);
+                    if (current.myBiome == biome.Flatland) {
+                        g2d.drawImage(rotateImageObject(current).filter(hl_flat_tile, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                    } else if (current.myBiome == biome.Forest) {
+                        g2d.drawImage(rotateImageObject(current).filter(hl_forest_tile, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                    } else if (current.myBiome == biome.Mountain) {
+                        g2d.drawImage(rotateImageObject(current).filter(hl_mount_tile, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                    } else if (current.myBiome == biome.Desert) {
+                        g2d.drawImage(rotateImageObject(current).filter(hl_desert_tile, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                    }
+//                    System.out.println(current.toString());
+                } else {
+                    if (current.myBiome == biome.Flatland) {
+                        g2d.drawImage(rotateImageObject(current).filter(hl_flat_tile_small, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                    } else if (current.myBiome == biome.Forest) {
+                        g2d.drawImage(rotateImageObject(current).filter(hl_forest_tile_small, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                    } else if (current.myBiome == biome.Mountain) {
+                        g2d.drawImage(rotateImageObject(current).filter(hl_mount_tile_small, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                    } else if (current.myBiome == biome.Desert) {
+                        g2d.drawImage(rotateImageObject(current).filter(hl_desert_tile_small, null), (int)(current.getX() + XOFFSET + 0.5), (int)(current.getY() + YOFFSET + 0.5), null);
+                    }
+                }
+            }
+            else if (current.owner.equals(currentNation)) {
                 if (current.mouseHover) {
 //                    System.out.println((current.x + current.getWidth() / 2) + " " + (current.y - current.getHeight() / 2) + "\n" + board.mouseX + " " + board.mouseY);
                     if (current.myBiome == biome.Flatland) {
@@ -3868,6 +3903,14 @@ public class Main {
             enemy_desert_tile = ImageIO.read(new File("images\\enemy_desert_tile.png"));
             player_desert_tile_small = ImageIO.read(new File("images\\player_desert_tile_small.png"));
             enemy_desert_tile_small = ImageIO.read(new File("images\\enemy_desert_tile_small.png"));
+            hl_flat_tile = ImageIO.read(new File("images\\hl_flatland_tile.png"));
+            hl_flat_tile_small = ImageIO.read(new File("images\\hl_flatland_tile_small.png"));
+            hl_forest_tile = ImageIO.read(new File("images\\hl_forest_tile.png"));
+            hl_forest_tile_small = ImageIO.read(new File("images\\hl_forest_tile_small.png"));
+            hl_mount_tile = ImageIO.read(new File("images\\hl_mountain_tile.png"));
+            hl_mount_tile_small = ImageIO.read(new File("images\\hl_mountain_tile_small.png"));
+            hl_desert_tile = ImageIO.read(new File("images\\hl_desert_tile.png"));
+            hl_desert_tile_small = ImageIO.read(new File("images\\hl_desert_tile_small.png"));
         } catch (IOException ioe) { }
     }
 

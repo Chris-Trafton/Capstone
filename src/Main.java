@@ -20,6 +20,9 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
 
 public class Main {
     //TODO://///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -101,6 +104,13 @@ public class Main {
     private static Vector<Integer> startingResources = new Vector<>();
     private static String sendWinner = "";
     private static int highlightTile;
+    private static Clip clip1;
+    private static Clip clip2;
+    private static Clip clip3;
+    private static Clip clip4;
+    private static Clip clip5;
+    private static Clip clip6;
+    private static Clip clip7;
 
     //TODO://///////////////////////////////////////////////////////////////////////////////////////////////////////////
     //     Custom Classes
@@ -1047,11 +1057,13 @@ public class Main {
         JFrame frame = new JFrame("Start Screen");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocation(300, 200);
+        playAudio("menu");
 
         JButton newGameButton = new JButton("New Game");
         newGameButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                playAudio("button1");
                 OpenSetupMenu();
                 frame.dispose();
             }
@@ -1061,6 +1073,7 @@ public class Main {
         joinGameButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                playAudio("button1");
                 OpenJoinMenu();
                 frame.dispose();
             }
@@ -1070,6 +1083,7 @@ public class Main {
         loadGameButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                playAudio("button1");
                 OpenLoadMenu();
                 frame.dispose();
             }
@@ -1078,6 +1092,7 @@ public class Main {
         quitGameButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                playAudio("button1");
                 endgame = true;
                 frame.setVisible(false);
                 appFrame.setVisible(false);
@@ -1189,6 +1204,7 @@ public class Main {
                 t4.start();
                 t5.start();
                 frame.dispose();
+                playAudio("notification1");
             }
         });
         JButton backButton = new JButton("Back");
@@ -1254,7 +1270,7 @@ public class Main {
         startButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-
+                playAudio("button1");
                 appFrame.setVisible(true);
                 board.revalidate();
                 board.repaint();
@@ -1377,6 +1393,7 @@ public class Main {
             JFrame frame = new JFrame("Pause Menu");
             frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
             frame.setLocation(300, 200);
+            playAudio("menu");
 
             JComboBox nationComboBox = new JComboBox<>(nations);
 
@@ -1437,6 +1454,7 @@ public class Main {
             JFrame frame = new JFrame("Nation Menu");
             frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
             frame.setLocation(300, 200);
+            playAudio("menu");
 
             JLabel nationName = new JLabel("Nation: " + currentNation);
             JLabel nationTeam = new JLabel("Team: ");
@@ -1522,6 +1540,7 @@ public class Main {
             JFrame frame = new JFrame("Research Menu");
             frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
             frame.setLocation(300, 200);
+            playAudio("menu");
 
             DefaultTableModel dm = new DefaultTableModel();
             dm.setDataVector(new Object[][]{{"Build Mines", "Unlocks construction of Mines.", "E:50  L:10", "Buy Build Mines"},
@@ -1575,6 +1594,7 @@ public class Main {
             JFrame frame = new JFrame("Info Menu");
             frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
             frame.setLocation(300, 200);
+            playAudio("menu");
 
             DefaultTableModel dm = new DefaultTableModel();
             if (Stark.isActive()) {
@@ -1646,6 +1666,7 @@ public class Main {
             JFrame frame = new JFrame("Mail Menu");
             frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
             frame.setLocation(300, 200);
+            playAudio("menu");
 
             JMenuBar jMenuBar = new JMenuBar();
             jMenuBar.setBackground(colorBackground);
@@ -1770,6 +1791,7 @@ public class Main {
             JFrame frame = new JFrame("Trade Menu");
             frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
             frame.setLocation(300, 200);
+            playAudio("menu");
 
             //  Makes the ComboBox for choosing a nation
             JComboBox nationComboBox = new JComboBox<>(nations);
@@ -2019,6 +2041,7 @@ public class Main {
         JFrame frame = new JFrame("Tile Menu");
         frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
         frame.setLocation((int)(tile.getX() + tile.getWidth()),(int)tile.getY());
+        playAudio("button2");
 
         JPanel jPanel = new JPanel();
         jPanel.setLayout(new BoxLayout(jPanel, BoxLayout.Y_AXIS));
@@ -2040,6 +2063,7 @@ public class Main {
         claimTile.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                playAudio("notification2");
                 frame.setVisible(false);
                 actionsTaken+=5;
                 if (actionsTaken > maxActions) {
@@ -2143,6 +2167,7 @@ public class Main {
         JFrame frame = new JFrame("Construction Menu");
         frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
         frame.setLocation(300, 200);
+        playAudio("menu");
 
         DefaultTableModel dm = new DefaultTableModel();
         dm.setDataVector(new Object[][]{{"Mine", "Mine to boost metal production.", "M:10  W:50  F:20  L:20", "Buy Mine"},
@@ -2182,6 +2207,7 @@ public class Main {
         JFrame frame = new JFrame("Military Menu");
         frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
         frame.setLocation(300, 200);
+        playAudio("menu");
 
         DefaultTableModel dm = new DefaultTableModel();
         dm.setDataVector(new Object[][]{{"Swordmen", "Tier 1 melee unit", "M:10  W:10  F:0  L:10", "Buy Swordmen"},
@@ -2225,6 +2251,7 @@ public class Main {
         JFrame frame = new JFrame("Command Menu");
         frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
         frame.setLocation(300, 200);
+        playAudio("menu");
 
         DefaultTableModel dm1 = new DefaultTableModel();
         dm1.setDataVector(null, new Object[]{"Ally", "Owner", "Move"});
@@ -2281,6 +2308,7 @@ public class Main {
         moveButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                playAudio("button1");
                 pathBeginning = tile;
                 movingUnits.clear();
                 for (int i = 0; i < movingUnitsTemp.size(); i++) {
@@ -2361,6 +2389,36 @@ public class Main {
         frame.setVisible(true);
     }
 
+    public static void OpenConfirmPurchaseMenu(Tile tile) {
+        JFrame frame = new JFrame("");
+        frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+        frame.setLocation((int)(tile.getX() + tile.getWidth()),(int)tile.getY());
+
+        JLabel quantityL = new JLabel("Quantity:");
+        JTextField quantityT = new JTextField(8);
+        JButton confirmButton = new JButton("Confirm");
+        confirmButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+                frame.dispose();
+            }
+        });
+
+        JPanel jPanel = new JPanel();
+        jPanel.setLayout(new GridLayout(2, 1));
+        jPanel.setBackground(colorBackground);
+        confirmButton.setBackground(colorButton);
+        frame.setBackground(colorBackground);
+        jPanel.add(quantityL);
+        jPanel.add(quantityT);
+        jPanel.add(confirmButton);
+
+        frame.add(jPanel);
+        frame.setSize(300, 100);
+        frame.setVisible(true);
+    }
+
     public static void OpenConfirmMovementMenu(Tile tile) {
         JFrame frame = new JFrame("");
         frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
@@ -2372,6 +2430,7 @@ public class Main {
         confirmButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                playAudio("notification3");
                 if (Stark.isActive()) {
                     Stark.setResource("labor", -1 * price);
                 } else if (Lannister.isActive()) {
@@ -2481,12 +2540,22 @@ public class Main {
                 Lannister.setMilitary(lannisterUnits.get(i).unitName, -1);
                 dmLannister.setValueAt("Dead", i, 6);
             }
+            if (currentNation.equals("Stark")) {
+                playAudio("win");
+            } else {
+                playAudio("loss");
+            }
         } else if (lannisterHealth > starkHealth) {
             winner = "Lannister Wins";
             for (int i = 0; i < starkUnits.size(); i++) {
                 tile.setMilitary(starkUnits.get(i).unitName, -1, "Stark");
                 Stark.setMilitary(starkUnits.get(i).unitName, -1);
                 dmStark.setValueAt("Dead", i, 6);
+            }
+            if (currentNation.equals("Lannister")) {
+                playAudio("win");
+            } else {
+                playAudio("loss");
             }
         }
         sendWinner = "" + tiles.indexOf(tile) + ", " + winner.replace(" Wins","");
@@ -2609,6 +2678,7 @@ public class Main {
                     actionsTaken--;
                     JOptionPane.showMessageDialog(button,"It is not your turn");
                 } else {
+                    playAudio("button1");
                     if (Stark.isActive()) {
                         if (label.equals("Buy Swordmen") && Stark.swordmenResearched && Stark.metal >= 10 && Stark.wood >= 10 && Stark.food >= 0 && Stark.labor >= 10) {
                             selectedTile.setMilitary("Swordmen", 1, "Stark");
@@ -3858,6 +3928,56 @@ public class Main {
                 g.drawString("" + appearance, p.x * FONT_SIZE + 10,
                         p.y * FONT_SIZE + 20);
             }
+        }
+    }
+
+    //TODO://///////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //     Audio Code
+    private static void playAudio(String audioSound) {
+        try {
+            if (audioSound.equals("button1")) {
+                AudioInputStream ais = AudioSystem.getAudioInputStream(new File("audio\\button1.wav").getAbsoluteFile());
+                clip1 = AudioSystem.getClip();
+                clip1.open(ais);
+                clip1.start();
+            } else if (audioSound.equals("button2")) {
+                AudioInputStream ais = AudioSystem.getAudioInputStream(new File("audio\\button2.wav").getAbsoluteFile());
+                clip2 = AudioSystem.getClip();
+                clip2.open(ais);
+                clip2.start();
+            } else if (audioSound.equals("loss")) {
+                AudioInputStream ais = AudioSystem.getAudioInputStream(new File("audio\\loss.wav").getAbsoluteFile());
+                clip3 = AudioSystem.getClip();
+                clip3.open(ais);
+                clip3.start();
+            } else if (audioSound.equals("menu")) {
+                AudioInputStream ais = AudioSystem.getAudioInputStream(new File("audio\\menu.wav").getAbsoluteFile());
+                clip4 = AudioSystem.getClip();
+                clip4.open(ais);
+                clip4.start();
+            } else if (audioSound.equals("notification1")) {
+                AudioInputStream ais = AudioSystem.getAudioInputStream(new File("audio\\notification1.wav").getAbsoluteFile());
+                clip5 = AudioSystem.getClip();
+                clip5.open(ais);
+                clip5.start();
+            } else if (audioSound.equals("notification2")) {
+                AudioInputStream ais = AudioSystem.getAudioInputStream(new File("audio\\notification2.wav").getAbsoluteFile());
+                clip6 = AudioSystem.getClip();
+                clip6.open(ais);
+                clip6.start();
+            } else if (audioSound.equals("notification3")) {
+                AudioInputStream ais = AudioSystem.getAudioInputStream(new File("audio\\notification3.wav").getAbsoluteFile());
+                clip7 = AudioSystem.getClip();
+                clip7.open(ais);
+                clip7.start();
+            } else if (audioSound.equals("win")) {
+                AudioInputStream ais = AudioSystem.getAudioInputStream(new File("audio\\win.wav").getAbsoluteFile());
+                clip7 = AudioSystem.getClip();
+                clip7.open(ais);
+                clip7.start();
+            }
+        } catch (Exception e) {
+            // NOP
         }
     }
 

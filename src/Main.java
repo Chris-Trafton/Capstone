@@ -98,7 +98,7 @@ public class Main {
     private static Color colorBackground = Color.decode("#dec590");
     private static Color colorButton = Color.decode("#bda46f");
     private static Vector<MilitaryUnit> movingUnits = new Vector<>();
-    private static int maxActions = 100;
+    private static int maxActions = 10;
     private static boolean attacking = false;
     private static Tile pathBeginning;
     private static Vector<Integer> startingResources = new Vector<>();
@@ -3216,7 +3216,11 @@ public class Main {
                             } else if (serverMessage.startsWith("You")) {
                                 String[] parts = serverMessage.split(",");
                                 highlightTile = Integer.parseInt(parts[1]);
-                                JOptionPane.showConfirmDialog(appFrame,parts[0],"Press \"Ok\" to aknowledge", JOptionPane.OK_CANCEL_OPTION);
+                                int choice = JOptionPane.showConfirmDialog(appFrame,parts[0],"Press \"Ok\" to aknowledge", JOptionPane.OK_CANCEL_OPTION);
+                                System.out.println(choice);
+                                if (choice == 0 || choice == -1 || choice == 2) {
+                                    highlightTile = -1;
+                                }
                                 //JOptionPane.showOptionDialog(appFrame,serverMessage,"Press Ok to Acknowledge",3,0,null,new String[]{"Ok"},"Ok");
                             }
                         }
@@ -3253,6 +3257,7 @@ public class Main {
                             iWin = "lost!";
                         }
                         out.println("ATTACK: " + currentNation + "," + attackedTile + ",You were attacked by " + attacker + " and " + iWin);
+                        sendWinner = "";
                     }
                 }
             } catch (IOException e) {

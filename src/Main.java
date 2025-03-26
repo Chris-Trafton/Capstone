@@ -3249,14 +3249,14 @@ public class Main {
                     } else if (!sendWinner.equals("")) {
                         String[] parts = sendWinner.split(",");
                         String attackedTile = parts[0];
-                        String attacker = parts[1];
+                        String winner = parts[1];
                         String iWin;
-                        if (sendWinner.equals(currentNation)) {
-                            iWin = "won!";
-                        } else {
+                        if (winner.equals(currentNation)) {
                             iWin = "lost!";
+                        } else {
+                            iWin = "win!";
                         }
-                        out.println("ATTACK: " + currentNation + "," + attackedTile + ",You were attacked by " + attacker + " and " + iWin);
+                        out.println("ATTACK: " + currentNation + "," + attackedTile + ",You were attacked by " + currentNation + " and " + iWin);
                         sendWinner = "";
                     }
                 }

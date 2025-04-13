@@ -1589,7 +1589,7 @@ public class Main {
 
     private static class OpenInfoMenu implements ActionListener {
         public void actionPerformed(ActionEvent e) {
-            JFrame frame = new JFrame("Info Menu");
+            JFrame frame = new JFrame("Military Info Menu");
             frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
             frame.setLocation(300, 200);
             playAudio("menu");
@@ -1655,6 +1655,77 @@ public class Main {
             table.setRowHeight(25);
             frame.setSize(700, 300);
             frame.add(scroll);
+            frame.setVisible(true);
+        }
+    }
+
+    private static class OpenRulebookMenu implements ActionListener {
+        public void actionPerformed(ActionEvent e) {
+            JFrame frame = new JFrame("Rulebook Menu");
+            frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+            frame.setLocation(300, 200);
+            playAudio("menu");
+
+            JLabel researchL = new JLabel("Research:");
+            JTextArea researchT = new JTextArea("Research buildings or military units to unlock them for purchase.");
+            researchT.setLineWrap(true);
+            researchT.setWrapStyleWord(true);
+            researchT.setBackground(colorBackground);
+            JLabel constructionL = new JLabel("Construction:");
+            JTextArea constructionT = new JTextArea("Construct buildings which increase the resource yields of a selected tile. Buildings are tied to the tile they are built on, and will only benefit that tile.");
+            constructionT.setLineWrap(true);
+            constructionT.setWrapStyleWord(true);
+            constructionT.setBackground(colorBackground);
+            JLabel trainingL = new JLabel("Training:");
+            JTextArea trainingT = new JTextArea("Train military units to use for defending or attacking tiles.");
+            trainingT.setLineWrap(true);
+            trainingT.setWrapStyleWord(true);
+            trainingT.setBackground(colorBackground);
+            JLabel attackingL = new JLabel("Attacking:");
+            JTextArea attackingT = new JTextArea("Use military units to attack an opponents units on a tile. You can attack from the command menu if both players have units on the same tile. The winner will be decided upon who has the most unit health and attack power. Power will vary in effectiveness depending upon what units are used. Depending upon enemy units, you may lose units even if you win the attack.");
+            attackingT.setLineWrap(true);
+            attackingT.setWrapStyleWord(true);
+            attackingT.setBackground(colorBackground);
+            JLabel movingUnitsL = new JLabel("Moving Units:");
+            JTextArea movingUnitsT = new JTextArea("Move military Units from one tile to another. You can use the command menu by clicking on a tile that already has units on it. Then select the units and move them to another tile, a labor cost will be applied depending upon how many units you are moving and how far they are going.");
+            movingUnitsT.setLineWrap(true);
+            movingUnitsT.setWrapStyleWord(true);
+            movingUnitsT.setBackground(colorBackground);
+            JLabel claimingTilesL = new JLabel("Claiming Tiles:");
+            JTextArea claimingTilesT = new JTextArea("Use military units to claim a tile and begin collecting resources from it. You can claim a tile by moving units to it and clicking claim. If there are enemy units on the tile you will need to attack them before you can claim it.");
+            claimingTilesT.setLineWrap(true);
+            claimingTilesT.setWrapStyleWord(true);
+            claimingTilesT.setBackground(colorBackground);
+            JLabel unitTypesL = new JLabel("Unit Types:");
+            JTextArea unitTypesT = new JTextArea("All military units are broken up into three different unit types: Melee, Range, and Siege. Melee is best against range, and weak to siege. Range is best against Siege, and weak to melee. Siege is best against melee, and weak to range. All units are also divided into four different tiers which determine how much health and attack power they have, along with how much they cost.");
+            unitTypesT.setLineWrap(true);
+            unitTypesT.setWrapStyleWord(true);
+            unitTypesT.setBackground(colorBackground);
+            unitTypesT.setSize(100, unitTypesT.getPreferredSize().height);
+
+            JPanel jPanel = new JPanel();
+            jPanel.setLayout(new BoxLayout(jPanel, BoxLayout.Y_AXIS));
+            jPanel.setBackground(colorBackground);
+            frame.setBackground(colorBackground);
+
+            jPanel.add(researchL);
+            jPanel.add(researchT);
+            jPanel.add(constructionL);
+            jPanel.add(constructionT);
+            jPanel.add(trainingL);
+            jPanel.add(trainingT);
+            jPanel.add(attackingL);
+            jPanel.add(attackingT);
+            jPanel.add(movingUnitsL);
+            jPanel.add(movingUnitsT);
+            jPanel.add(claimingTilesL);
+            jPanel.add(claimingTilesT);
+            jPanel.add(unitTypesL);
+            jPanel.add(unitTypesT);
+
+            JScrollPane scroll = new JScrollPane(jPanel);
+            frame.add(scroll);
+            frame.setSize(700, 300);
             frame.setVisible(true);
         }
     }
@@ -2374,36 +2445,6 @@ public class Main {
         frame.setVisible(true);
     }
 
-    public static void OpenConfirmPurchaseMenu(Tile tile) {
-        JFrame frame = new JFrame("");
-        frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-        frame.setLocation((int)(tile.getX() + tile.getWidth()),(int)tile.getY());
-
-        JLabel quantityL = new JLabel("Quantity:");
-        JTextField quantityT = new JTextField(8);
-        JButton confirmButton = new JButton("Confirm");
-        confirmButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-
-                frame.dispose();
-            }
-        });
-
-        JPanel jPanel = new JPanel();
-        jPanel.setLayout(new GridLayout(2, 1));
-        jPanel.setBackground(colorBackground);
-        confirmButton.setBackground(colorButton);
-        frame.setBackground(colorBackground);
-        jPanel.add(quantityL);
-        jPanel.add(quantityT);
-        jPanel.add(confirmButton);
-
-        frame.add(jPanel);
-        frame.setSize(300, 100);
-        frame.setVisible(true);
-    }
-
     public static void OpenConfirmMovementMenu(Tile tile) {
         JFrame frame = new JFrame("");
         frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
@@ -2518,24 +2559,34 @@ public class Main {
         double lannisterHealth = lannisterMeleeHealth + lannisterRangeHealth + lannisterSiegeHealth;
 
         String winner = "";
-        if (starkHealth > lannisterHealth) {
+        if (starkHealth > lannisterHealth || (starkHealth == lannisterHealth && tile.owner.equals("Stark")) || (starkHealth == lannisterHealth && tile.owner.equals("") && currentNation.equals("Stark"))) {
             winner = "Stark Wins";
             for (int i = 0; i < lannisterUnits.size(); i++) {
                 tile.setMilitary(lannisterUnits.get(i).unitName, -1, "Lannister");
                 Lannister.setMilitary(lannisterUnits.get(i).unitName, -1);
                 dmLannister.setValueAt("Dead", i, 6);
             }
+            for (int i = (int) (lannisterHealth / starkHealth); i < starkUnits.size(); i++) {
+                tile.setMilitary(starkUnits.get(i).unitName, -1, "Stark");
+                Stark.setMilitary(starkUnits.get(i).unitName, -1);
+                dmStark.setValueAt("Dead", i, 6);
+            }
             if (currentNation.equals("Stark")) {
                 playAudio("win");
             } else {
                 playAudio("loss");
             }
-        } else if (lannisterHealth > starkHealth) {
+        } else if (lannisterHealth > starkHealth || (starkHealth == lannisterHealth && tile.owner.equals("Lannister")) || (starkHealth == lannisterHealth && tile.owner.equals("") && currentNation.equals("Lannister"))) {
             winner = "Lannister Wins";
             for (int i = 0; i < starkUnits.size(); i++) {
                 tile.setMilitary(starkUnits.get(i).unitName, -1, "Stark");
                 Stark.setMilitary(starkUnits.get(i).unitName, -1);
                 dmStark.setValueAt("Dead", i, 6);
+            }
+            for (int i = (int) (starkHealth / lannisterHealth); i < lannisterUnits.size(); i++) {
+                tile.setMilitary(lannisterUnits.get(i).unitName, -1, "Lannister");
+                Lannister.setMilitary(lannisterUnits.get(i).unitName, -1);
+                dmLannister.setValueAt("Dead", i, 6);
             }
             if (currentNation.equals("Lannister")) {
                 playAudio("win");
@@ -2543,6 +2594,7 @@ public class Main {
                 playAudio("loss");
             }
         }
+
         sendWinner = "" + tiles.indexOf(tile) + ", " + winner.replace(" Wins","");
         JTable starkT = new JTable(dmStark);
         starkT.getTableHeader().setBackground(colorButton);
@@ -3882,8 +3934,10 @@ public class Main {
         nationButton.addActionListener(new OpenNationMenu());
         JButton researchButton = new JButton("Research");
         researchButton.addActionListener(new OpenResearchMenu());
-        JButton infoButton = new JButton("Info");
+        JButton infoButton = new JButton("Military Info");
         infoButton.addActionListener(new OpenInfoMenu());
+        JButton rulebookButton = new JButton("Rulebook");
+        rulebookButton.addActionListener(new OpenRulebookMenu());
 //        JButton mailButton = new JButton("Mail");
 //        mailButton.addActionListener(new OpenMailMenu());
 //        JButton tradeButton = new JButton("Trade");
@@ -3900,6 +3954,7 @@ public class Main {
         nationButton.setBackground(colorButton);
         researchButton.setBackground(colorButton);
         infoButton.setBackground(colorButton);
+        rulebookButton.setBackground(colorButton);
 //        mailButton.setBackground(colorButton);
 //        tradeButton.setBackground(colorButton);
         endTurnButton.setBackground(colorButton);
@@ -3911,6 +3966,7 @@ public class Main {
         jMenuBar.add(nationButton);
         jMenuBar.add(researchButton);
         jMenuBar.add(infoButton);
+        jMenuBar.add(rulebookButton);
 //        jMenuBar.add(mailButton);
 //        jMenuBar.add(tradeButton);
         jMenuBar.add(endTurnButton);

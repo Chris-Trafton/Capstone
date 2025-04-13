@@ -14,8 +14,6 @@ import javax.swing.*;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.util.concurrent.ConcurrentHashMap;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
@@ -90,7 +88,7 @@ public class Main {
     private static JLabel educationLabel = new JLabel();
     private static JLabel actionLabel = new JLabel();
     private static final int IFW = JComponent.WHEN_IN_FOCUSED_WINDOW;
-    private static String[] nations = new String[]{"Stark", "Lannister", "Targaryen"};
+    private static String[] nations = new String[]{"Stark", "Lannister"}; // , "Targaryen"
     private static String currentNation;
     private static Nation Stark = new Nation();
     private static Nation Lannister = new Nation();
@@ -689,7 +687,6 @@ public class Main {
     }
 
     private static class Nation {
-        private String nationName;
         private boolean currentStatus;
         private JTabbedPane inboxTabs = new JTabbedPane();
         private JTabbedPane sentTabs = new JTabbedPane();
@@ -1102,7 +1099,7 @@ public class Main {
         });
 
         JPanel jPanel = new JPanel();
-        jPanel.setLayout(new GridLayout(4, 1));
+        jPanel.setLayout(new GridLayout(3, 1));
         jPanel.setBackground(colorBackground);
         newGameButton.setBackground(colorButton);
         joinGameButton.setBackground(colorButton);
@@ -1111,7 +1108,7 @@ public class Main {
         frame.setBackground(colorBackground);
         jPanel.add(newGameButton);
         jPanel.add(joinGameButton);
-        jPanel.add(loadGameButton);
+//        jPanel.add(loadGameButton); // Swap GridLayout rows to 4
         jPanel.add(quitGameButton);
         frame.add(jPanel);
         frame.setSize(700, 300);
@@ -1290,6 +1287,7 @@ public class Main {
                 currentNation = (String) nationComboBox.getSelectedItem();
                 ip = ipT.getText();
                 actionsTaken = 11;
+                highlightTile = -1;
                 if (currentNation.equals("Stark")) {
                     Stark.setActive(true);
                     Lannister.setActive(false);
@@ -2376,19 +2374,6 @@ public class Main {
         frame.setVisible(true);
     }
 
-    public static void OpenAttackAnimation(Tile tile) {
-        AttackFrame frame = new AttackFrame(80, 40);
-        frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-        frame.setLocation(300, 200);
-
-        frame.add(30, Lannister.class);
-        frame.add(30, Stark.class);
-
-        frame.start();
-
-        frame.setVisible(true);
-    }
-
     public static void OpenConfirmPurchaseMenu(Tile tile) {
         JFrame frame = new JFrame("");
         frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
@@ -3249,7 +3234,7 @@ public class Main {
                     } else if (!sendWinner.equals("")) {
                         String[] parts = sendWinner.split(",");
                         String attackedTile = parts[0];
-                        String winner = parts[1];
+                        String winner = parts[1].substring(1);
                         String iWin;
                         if (winner.equals(currentNation)) {
                             iWin = "lost!";
@@ -3349,11 +3334,6 @@ public class Main {
             g2d.drawLine((int)path.get(i).getCenter().getX(),(int)path.get(i).getCenter().getY(),(int)path.get(i+1).getCenter().getX(),(int)path.get(i+1).getCenter().getY());
         }
     }
-
-//    private static Line2D.Double getPath(Tile a, Tile b) {
-//        Line2D.Double straight = new Line2D.Double(a.getCenter(),b.getCenter());
-//        return straight;
-//    }
 
     //TODO://///////////////////////////////////////////////////////////////////////////////////////////////////////////
     //     Board Code
@@ -3785,158 +3765,6 @@ public class Main {
     }
 
     //TODO://///////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //     Attack Animation Code
-    public static class AttackFrame extends JFrame {
-        private CritterModel myModel;
-        private AttackPanel myPicture;
-        private javax.swing.Timer myTimer;
-        private JButton[] counts;
-        private JButton countButton;
-        private boolean started;
-        private static boolean created;
-
-        public AttackFrame(int width, int height) {
-            // this prevents someone from trying to create their own copy of
-            // the GUI components
-            if (created)
-                throw new RuntimeException("Only one world allowed");
-            created = true;
-
-            // create frame and model
-            setTitle("EGR222 critter simulation");
-            setDefaultCloseOperation(EXIT_ON_CLOSE);
-            myModel = new CritterModel(width, height);
-
-            // set up critter picture panel
-            myPicture = new AttackPanel(myModel);
-            add(myPicture, BorderLayout.CENTER);
-
-            addTimer();
-
-            constructSouth();
-
-            // initially it has not started
-            started = false;
-        }
-
-        // construct the controls and label for the southern panel
-        private void constructSouth() {
-            // add timer controls to the south
-            JPanel p = new JPanel();
-
-            final JSlider slider = new JSlider();
-            slider.addChangeListener(new ChangeListener() {
-                public void stateChanged(ChangeEvent e) {
-                    double ratio = 1000.0 / (1 + Math.pow(slider.getValue(), 0.3));
-                    myTimer.setDelay((int) (ratio - 180));
-                }
-            });
-            slider.setValue(20);
-            p.add(new JLabel("slow"));
-            p.add(slider);
-            p.add(new JLabel("fast"));
-
-            JButton b1 = new JButton("start");
-            b1.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    myTimer.start();
-                }
-            });
-            p.add(b1);
-            add(p, BorderLayout.SOUTH);
-        }
-
-        // starts the simulation...assumes all critters have already been added
-        public void start() {
-            // don't let anyone start a second time and remember if we have started
-            if (started) {
-                return;
-            }
-            // if they didn't add any critters, then nothing to do
-            if (myModel.getCounts().isEmpty()) {
-                System.out.println("nothing to simulate--no critters");
-                return;
-            }
-            started = true;
-            myModel.updateColorString();
-            pack();
-            setVisible(true);
-        }
-
-        // add a certain number of critters of a particular class to the simulation
-        public void add(int number, Class<? extends Critter> c) {
-            // don't let anyone add critters after simulation starts
-            if (started) {
-                return;
-            }
-            // temporarily turning on started flag prevents critter constructors
-            // from calling add
-            started = true;
-            myModel.add(number, c);
-            started = false;
-        }
-
-        // post: creates a timer that calls the model's update
-        //       method and repaints the display
-        private void addTimer() {
-            ActionListener updater = new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    doOneStep();
-                }
-            };
-            myTimer = new javax.swing.Timer(0, updater);
-            myTimer.setCoalesce(true);
-        }
-
-        // one step of the simulation
-        private void doOneStep() {
-            myModel.update();
-            myPicture.repaint();
-        }
-    }
-
-    public static class AttackPanel extends JPanel {
-        private CritterModel myModel;
-        private Font myFont;
-        private static boolean created;
-
-        public static final int FONT_SIZE = 12;
-
-        public AttackPanel(CritterModel model) {
-            // this prevents someone from trying to create their own copy of
-            // the GUI components
-            if (created)
-                throw new RuntimeException("Only one world allowed");
-            created = true;
-
-            myModel = model;
-            // construct font and compute char width once in constructor
-            // for efficiency
-            myFont = new Font("Monospaced", Font.BOLD, FONT_SIZE + 4);
-            setBackground(colorBackground);
-            setPreferredSize(new Dimension(FONT_SIZE * model.getWidth() + 20,
-                    FONT_SIZE * model.getHeight() + 20));
-        }
-
-        public void paintComponent(Graphics g) {
-            super.paintComponent(g);
-            g.setFont(myFont);
-            Iterator<Critter> i = myModel.iterator();
-            while (i.hasNext()) {
-                Critter next = i.next();
-                Point p = myModel.getPoint(next);
-                String appearance = myModel.getAppearance(next);
-                g.setColor(Color.BLACK);
-                g.drawString("" + appearance, p.x * FONT_SIZE + 11,
-                        p.y * FONT_SIZE + 21);
-                g.setColor(myModel.getColor(next));
-                g.drawString("" + appearance, p.x * FONT_SIZE + 10,
-                        p.y * FONT_SIZE + 20);
-            }
-        }
-    }
-
-    //TODO://///////////////////////////////////////////////////////////////////////////////////////////////////////////
     //     Audio Code
     private static void playAudio(String audioSound) {
         try {
@@ -4056,10 +3884,10 @@ public class Main {
         researchButton.addActionListener(new OpenResearchMenu());
         JButton infoButton = new JButton("Info");
         infoButton.addActionListener(new OpenInfoMenu());
-        JButton mailButton = new JButton("Mail");
-        mailButton.addActionListener(new OpenMailMenu());
-        JButton tradeButton = new JButton("Trade");
-        tradeButton.addActionListener(new OpenTradeMenu());
+//        JButton mailButton = new JButton("Mail");
+//        mailButton.addActionListener(new OpenMailMenu());
+//        JButton tradeButton = new JButton("Trade");
+//        tradeButton.addActionListener(new OpenTradeMenu());
         JButton endTurnButton = new JButton("End Turn");
         endTurnButton.addActionListener(new ActionListener() {
             @Override
@@ -4072,8 +3900,8 @@ public class Main {
         nationButton.setBackground(colorButton);
         researchButton.setBackground(colorButton);
         infoButton.setBackground(colorButton);
-        mailButton.setBackground(colorButton);
-        tradeButton.setBackground(colorButton);
+//        mailButton.setBackground(colorButton);
+//        tradeButton.setBackground(colorButton);
         endTurnButton.setBackground(colorButton);
         jMenuBar.setBackground(colorBackground);
         appFrame.setBackground(colorBackground);
@@ -4083,8 +3911,8 @@ public class Main {
         jMenuBar.add(nationButton);
         jMenuBar.add(researchButton);
         jMenuBar.add(infoButton);
-        jMenuBar.add(mailButton);
-        jMenuBar.add(tradeButton);
+//        jMenuBar.add(mailButton);
+//        jMenuBar.add(tradeButton);
         jMenuBar.add(endTurnButton);
         jMenuBar.add(metalLabel);
         jMenuBar.add(woodLabel);

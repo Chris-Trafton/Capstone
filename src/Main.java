@@ -1195,11 +1195,13 @@ public class Main {
                 Thread t3 = new Thread(new MouseOverChecker());
                 Thread t4 = new Thread(new ServerRunner());
                 Thread t5 = new Thread(new ClientRunner());
+                Thread t6 = new Thread(new WinChecker());
                 t1.start();
                 t2.start();
                 t3.start();
                 t4.start();
                 t5.start();
+                t6.start();
                 frame.dispose();
                 playAudio("notification1");
             }
@@ -1321,6 +1323,7 @@ public class Main {
                 Thread t2 = new Thread(new TileMover());
                 Thread t3 = new Thread(new MouseOverChecker());
                 Thread t4 = new Thread(new ClientRunner());
+                Thread t5 = new Thread(new WinChecker());
                 t4.start();
                 while (tiles.isEmpty()) {
 //                    System.out.println("Loading...");
@@ -1328,6 +1331,7 @@ public class Main {
                 t1.start();
                 t2.start();
                 t3.start();
+                t5.start();
                 frame.dispose();
             }
         });
@@ -1399,7 +1403,6 @@ public class Main {
             startButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    endgame = true;
                     background_drawn = false;
                     currentNation = (String) nationComboBox.getSelectedItem();
                     if (currentNation.equals("Stark")) {
@@ -3279,7 +3282,7 @@ public class Main {
                     try {
                         Thread.sleep(300);
                     } catch (InterruptedException ie) {}
-                    if (actionsTaken == maxActions && joined) {
+                    if (actionsTaken == maxActions && joined || endgame) {
                         System.out.println("Client: Sending moves");
                         actionsTaken = maxActions + 1;
                         out.println("MOVE: " + currentNation + "|" + getGameState());
@@ -3543,6 +3546,40 @@ public class Main {
             }
         }
     }
+
+    private static class WinChecker implements Runnable {
+        public void run() {
+            while (endgame == false) {
+                if (tiles.size() == numTiles) {
+                    int myCounter = 0;
+                    int enemyCounter = 0;
+                    for (Tile tile : tiles) {
+                        if (tile.owner.equals(currentNation)) myCounter++;
+                        else if (!tile.owner.equals("")) enemyCounter++;
+                    }
+//                    System.out.println("Me: " + myCounter);
+//                    System.out.println("Enemy" + enemyCounter);
+                    if (myCounter == 0) {
+                        JOptionPane.showMessageDialog(appFrame, "You have lost control of your tiles.\nYou lose!");
+                        try {
+                            Thread.sleep(5000);
+                        } catch (InterruptedException e) {}
+                        endgame = true;
+                        appFrame.dispose();
+                    } else if (enemyCounter == 0) {
+                        JOptionPane.showMessageDialog(appFrame, "You Win!");
+                        try {
+                            Thread.sleep(5000);
+                        } catch (InterruptedException e) {}
+                        endgame = true;
+                        appFrame.dispose();
+                    }
+                }
+            }
+            System.exit(0);
+        }
+    }
+
 
     private static void Initialize(String resources) {
         actionsTaken = 11;

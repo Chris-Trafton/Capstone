@@ -1123,15 +1123,15 @@ public class Main {
         JLabel nationL = new JLabel("Nation:");
         JComboBox nationComboBox = new JComboBox<>(nations);
         JLabel metalL = new JLabel("Metal:");
-        JTextField metalT = new JTextField(8);
+        JTextField metalT = new JTextField("50");
         JLabel woodL = new JLabel("Wood:");
-        JTextField woodT = new JTextField(8);
+        JTextField woodT = new JTextField("50");
         JLabel foodL = new JLabel("Food:");
-        JTextField foodT = new JTextField(8);
+        JTextField foodT = new JTextField("50");
         JLabel laborL = new JLabel("Labor:");
-        JTextField laborT = new JTextField(8);
+        JTextField laborT = new JTextField("50");
         JLabel educationL = new JLabel("Education:");
-        JTextField educationT = new JTextField(8);
+        JTextField educationT = new JTextField("50");
         JButton startButton = new JButton("Start");
         startButton.addActionListener(new ActionListener() {
             @Override
@@ -3977,8 +3977,8 @@ public class Main {
         rulebookButton.addActionListener(new OpenRulebookMenu());
 //        JButton mailButton = new JButton("Mail");
 //        mailButton.addActionListener(new OpenMailMenu());
-//        JButton tradeButton = new JButton("Trade");
-//        tradeButton.addActionListener(new OpenTradeMenu());
+        JButton tradeButton = new JButton("Trade");
+        tradeButton.addActionListener(new OpenTradeMenu());
         JButton endTurnButton = new JButton("End Turn");
         endTurnButton.addActionListener(new ActionListener() {
             @Override
@@ -3993,7 +3993,7 @@ public class Main {
         infoButton.setBackground(colorButton);
         rulebookButton.setBackground(colorButton);
 //        mailButton.setBackground(colorButton);
-//        tradeButton.setBackground(colorButton);
+        tradeButton.setBackground(colorButton);
         endTurnButton.setBackground(colorButton);
         jMenuBar.setBackground(colorBackground);
         appFrame.setBackground(colorBackground);
@@ -4005,7 +4005,7 @@ public class Main {
         jMenuBar.add(infoButton);
         jMenuBar.add(rulebookButton);
 //        jMenuBar.add(mailButton);
-//        jMenuBar.add(tradeButton);
+        jMenuBar.add(tradeButton);
         jMenuBar.add(endTurnButton);
         jMenuBar.add(metalLabel);
         jMenuBar.add(woodLabel);

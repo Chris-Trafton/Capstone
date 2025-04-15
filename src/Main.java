@@ -3286,6 +3286,10 @@ public class Main {
                         System.out.println("Client: Sending moves");
                         actionsTaken = maxActions + 1;
                         out.println("MOVE: " + currentNation + "|" + getGameState());
+                        try {
+                            Thread.sleep(5000);
+                        } catch (InterruptedException e) {}
+                        if (endgame) System.exit(0);
                     } else if (!sendWinner.equals("")) {
                         String[] parts = sendWinner.split(",");
                         String attackedTile = parts[0];
@@ -3563,20 +3567,21 @@ public class Main {
                         JOptionPane.showMessageDialog(appFrame, "You have lost control of your tiles.\nYou lose!");
                         try {
                             Thread.sleep(5000);
-                        } catch (InterruptedException e) {}
+                        } catch (InterruptedException e) {
+                        }
                         endgame = true;
                         appFrame.dispose();
                     } else if (enemyCounter == 0) {
                         JOptionPane.showMessageDialog(appFrame, "You Win!");
                         try {
                             Thread.sleep(5000);
-                        } catch (InterruptedException e) {}
+                        } catch (InterruptedException e) {
+                        }
                         endgame = true;
                         appFrame.dispose();
                     }
                 }
             }
-            System.exit(0);
         }
     }
 
